@@ -1,0 +1,105 @@
+    body {
+        width: 100vw;
+        height: 100vh;
+        background-color: #A90021;
+        display: grid;
+        gap: 1%;
+        grid-template-rows: 98vh;
+        grid-template-columns: 14vw 80vw;
+        justify-content: center;
+    }
+    
+    #Tabs {
+        grid-column: 1;
+        position: sticky;
+        text-align: center;
+        background: #d5e4e6;
+    }
+    
+    img {
+        width: 4vw;
+    }
+    
+    #Scroll {
+        position: sticky;
+        width: 100%;
+        height: 100%;
+        overflow-y: scroll;
+        text-align: center;
+        scroll-snap-type: y mandatory;
+    }
+    
+    #Scroll div {
+        grid-column: 2;
+        grid-row: 1;
+        width: 100%;
+        height: 100%;
+        scroll-snap-align: start;
+        background: #d5e4e6;
+        width: 100%;
+        height: 100%;
+    }
+    
+    #Visualization {
+        overflow-y: scroll;
+    }
+    
+    #Side-view {
+        overflow-y: scroll;
+    }
+    
+    #PercentVsTime {
+        overflow-y: scroll;
+    }
+    
+    #CountVsTime {
+        overflow-y: scroll;
+    }
+    
+    .line {
+        fill: none;
+        stroke: #000;
+        stroke-width: 1.5px;
+    }
+    
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: #bdc3c7;
+        shape-rendering: crispEdges;
+    }
+    
+    .slidecontainer {
+        width: 95%;
+    }
+    
+    .slider {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 25px;
+        background: #d3d3d3;
+        outline: none;
+        opacity: 0.3;
+        -webkit-transition: .2s;
+        transition: opacity .2s;
+    }
+    
+    .slider:hover {
+        opacity: 1;
+    }
+    
+    .slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 25px;
+        height: 25px;
+        background: #4CAF50;
+        cursor: pointer;
+    }
+    
+    .slider::-moz-range-thumb {
+        width: 25px;
+        height: 25px;
+        background: #4CAF50;
+        cursor: pointer;
+    }

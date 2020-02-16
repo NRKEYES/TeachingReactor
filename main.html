@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<link rel="icon" href="icon.png">
+
+<title>NRKinetic Reactor</title>
+
+<link rel="stylesheet" type="text/css" href="CSS/Scroller.css">
+
+<head>
+    <!-- Import Foriegn scripts here -->
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+
+    <!-- D3 dependencies-->
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://d3js.org/d3-scale-chromatic.v0.3.min.js" charset="utf-8"></script>
+
+    <!-- Threes dependencies -->
+    <script src="JS/three/build/three.js"></script>
+
+    <!-- Local Scripts here-->
+    <script type=module src="/JS/Manager.js"></script>
+</head>
+
+
+<body>
+
+    <div id="Tabs">
+        <a href='#Visualization'><img src="Images/sci/png/atoms.png" alt="3d Visualization"></a>
+
+        <a href="#PercentVsTime"> <img src="Images/sci/png/statistics-bars-graphic-hanging-of-a-nail.png" alt=""></a>
+
+        <a href="#CountVsTime"> <img src="Images/sci/png/science-experiment.png" alt=""></a>
+
+        <a href="#SideView"> <img src="Images/sci/png/computer-analysis.png" alt="Kinetics Graph"></a>
+
+
+
+        <a href="#tab_six"> <img src="Images/sci/png/heating-a-flask-with-testing-liquid-on-fire-flames.png" alt=""></a>
+        <a href="#tab_seven"> <img src="Images/sci/png/scientific-test-tubes-with-liquids.png" alt=""></a>
+        <a href="#tab_eight"> <img src="Images/sci/png/science-graphic-on-a-note.png" alt=""></a>
+        <a href="#tab_nine"> <img src="Images/sci/png/flask-container-outline.png" alt=""></a>
+
+
+        <a href="#threeD"> <img src="Images/sci/png/microscope.png" alt=""></a>
+
+
+
+        <div id='controls'>
+
+            <h2>Controls:</h2>
+            <p>Number of Particles (Orders of Magnitude):
+                <div class="slidecontainer">
+                    <input type="range" min="1" max="10" value="1" class="slider" id="orders_of_magnitude">
+                </div>
+            </p>
+
+            <p>Initial ratio of P/R:
+                <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
+            </p>
+
+            <p>Forward Reaction Rate: <input type="text" name="frate"></p>
+
+            <p>Backwards Reaction Rate: <input type="text" name="brate"></p>
+
+            <input type="button" id="run_simulation" value='Restart Simulation'>
+
+        </div>
+    </div>
+
+    <div id="Scroll">
+        <div id='Visualization' class='render'></div>
+
+        <div id='PercentVsTime'></div>
+
+
+
+        <div id='CountVsTime'></div>
+        <div id='SideView'></div>
+
+        <div id='Barchart'></div>
+
+
+        <div id='tab_six'></div>
+        <div id='tab_seven'></div>
+        <div id='tab_eight'></div>
+        <div id='tab_nine'></div>
+
+        <div id='threeD' class='render'> </div>
+
+    </div>
+
+
+</body>
