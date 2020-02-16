@@ -43,6 +43,7 @@ var atom_radius = { // Van der walls from wiki https://en.wikipedia.org/wiki/Van
 
 let structures = {};
 
+// Values in nm
 structures['Reactant'] = [
     ['N', new THREE.Vector3(0, 0, 0)],
     ['O', new THREE.Vector3(-.07, .12, 0)],
@@ -88,7 +89,7 @@ class Visualization {
         };
 
         // Simulation variables  -- PROBABLY need to move
-        this.molecules = [];
+        this.molecules = this.data.instances;
         this.chamber = null;
         this.chamber_edge_length = 100 // Planning on this being equivalent to ---1 nm---
 
@@ -265,7 +266,7 @@ class Visualization {
     add_molecule() {
         // This will turn into a many molecule method
 
-        let temp = new Molecule('Reactant', this.species['Reactant'].geom, this.species['Reactant'].material);
+        let temp = new Molecule(this.species['Reactant'].geom, this.species['Reactant'].material);
         this.molecules.push(temp);
         this.scene.add(temp.mesh)
         this.selectedObjects.push(temp.mesh)
@@ -315,17 +316,12 @@ class Visualization {
 
 
     onWindowResize() {
-
         this.height_for_3d = document.getElementById("Visualization").clientHeight;
         this.width_for_3d = document.getElementById("Visualization").clientWidth;
-
         this.camera.aspect = this.width_for_3d / this.height_for_3d;
         this.camera.updateProjectionMatrix();
-
         this.renderer.setSize(this.width_for_3d, this.height_for_3d);
-
     }
-
 }
 
 

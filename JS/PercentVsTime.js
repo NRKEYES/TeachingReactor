@@ -41,7 +41,7 @@ class PercentVsTime {
             .style("stroke", 'orange')
             .style("fill", "none")
             .style("stroke-width", 4)
-            .attr("d", (d) => this.line(d.value)); // call line function on the value element - should be an array
+            .attr("d", (d) => this.line(d.percent)); // call line function on the value element - should be an array
 
 
 
@@ -96,7 +96,7 @@ class PercentVsTime {
     tick() {
         this.paths.transition().duration(1000)
             .ease(d3.easeLinear)
-            .attr("d", (d) => this.line(d.value))
+            .attr("d", (d) => this.line(d.percent))
             .style("stroke", () =>
                 '#' + Math.floor(Math.random() * 16777215).toString(16)
             );

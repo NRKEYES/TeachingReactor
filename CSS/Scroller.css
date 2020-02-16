@@ -5,7 +5,7 @@
         display: grid;
         gap: 1%;
         grid-template-rows: 98vh;
-        grid-template-columns: 14vw 80vw;
+        grid-template-columns: 14vw 84vw;
         justify-content: center;
     }
     
@@ -32,8 +32,6 @@
     #Scroll div {
         grid-column: 2;
         grid-row: 1;
-        width: 100%;
-        height: 100%;
         scroll-snap-align: start;
         background: #d5e4e6;
         width: 100%;

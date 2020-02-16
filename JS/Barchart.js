@@ -34,7 +34,7 @@ class Barchart {
             .attr("height", this.y.bandwidth())
             .attr("fill", "steelblue")
             .attr("y", (d) => this.y(d.name))
-            .attr("width", (d) => this.x(d.value.slice(-1)[0]) - this.margin.left)
+            .attr("width", (d) => this.x(d.count.slice(-1)[0]) - this.margin.left)
 
 
         // AXES 
@@ -71,7 +71,7 @@ class Barchart {
         this.bars.transition().duration(1000)
             .ease(d3.easeLinear)
             .attr("fill", "red")
-            .attr("width", (d) => this.x(d.value.slice(-1)[0]) - this.margin.left);
+            .attr("width", (d) => this.x(d.count.slice(-1)[0]) - this.margin.left);
 
     }
 }

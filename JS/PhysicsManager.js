@@ -1,57 +1,145 @@
-class PhysicsManager {
-    constructor(incoming_data, scaling_factor) {
+import Visualization from '/JS/Visualization.js'
+import PercentVsTime from '/JS/PercentVsTime.js';
+import CountVsTime from '/JS/CountVsTime.js';
+import Barchart from '/JS/Barchart.js';
+import SideView from '/JS/SideView.js';
 
-        this.data = incoming_data;
 
-        // reaction deets
-        // K = .005
-        // = k_fwd/k_rev
-        // https://kinetics.nist.gov/kinetics/ReactionSearch?r0=10102440&r1=10102440&r2=0&r3=0&r4=0&p0=10544726&p1=0&p2=0&p3=0&p4=0&expandResults=true&
-        //   k_fwd = 1.00E-12
+let population_1 = [75];
+let population_2 = [25];
+let orders_of_magnitude = 1;
 
-        this.K = 0.005;
-        this.k_fwd = 0.0000000000012 / scaling_factor; // cm3/molecule s
-        this.k_rev = this.k_fwd / this.K;
-        this.stoich_coef = .5;
-        this.t_step = 100;
+
+let starting_amount = Math.pow(10, orders_of_magnitude);
+let scaling_factor = .0000001
+
+let species = [{
+        'name': 'Reactants',
+        'percent': [100],
+        'count': [starting_amount],
+        'instances': []
+    },
+    {
+        'name': 'Products',
+        'percent': [0],
+        'count': [0],
+        'instances': []
     }
-
-    init() {
-        console.log("Physics Spinning up.")
-    }
-
-    tick() {
-
-        // Actually move the particles around.
-        //simulation()
-
-        // d[A]/dt= k_f[A] + k_b[B]
-        // d[A]= k_f[A]*dt + k_b[B]*dt
-
-        let A = this.data[0].count.slice(-1)[0];
-        let B = this.data[1].count.slice(-1)[0];
-
-        let delta_A = (-1 * d3.randomNormal(1.0)(0.1) * this.k_fwd * A * A + this.k_rev * B) * this.t_step;
-
-        A = A + delta_A;
-        B = B - this.stoich_coef * (delta_A);
-        let percent_product = B / (A + B);
+];
 
 
-        // let conc_reactants = starting_amount / (1 + k_fwd * starting_amount * t * t_step);
-        // let conc_products = stoich_coef * (starting_amount - conc_reactants);
-        // let percent_product = (conc_products / (conc_products + conc_reactants));
 
-        //let current_pop = species[0].value.slice(-1)[0]
+let visualizer = new Visualization(species);
+let sideview = new SideView();
+let count_v_time = new CountVsTime(species);
+let percent_v_time = new PercentVsTime(species);
+let percent_bar = new Barchart(species);
 
-        this.data[0].value.push(1 - percent_product);
-        this.data[1].value.push(percent_product);
-        this.data[0].count.push(A);
-        this.data[1].count.push(B);
 
-        //console.log(this.data)
-    }
 
+
+
+
+function start_simulation(orders_of_magnitude) {
+    console.log(orders_of_magnitude)
+    starting_amount = Math.pow(10, orders_of_magnitude);
+    scaling_factor = .0000001
+
+    visualizer.init(starting_amount);
+    sideview.init();
+    count_v_time.init();
+    percent_v_time.init();
+    percent_bar.init();
+    setInterval(update_all, 1000);
 }
 
-export default PhysicsManager;
+let t = 0;
+
+function update_all() {
+    t++;
+
+    if (t < 100) {
+        tick();
+        //visualizer.tick(); // Will add after render look?
+        count_v_time.tick();
+        percent_v_time.tick();
+        percent_bar.tick();
+
+    }
+}
+
+
+
+
+
+
+
+// reaction deets
+// K = .005
+// = k_fwd/k_rev
+// https://kinetics.nist.gov/kinetics/ReactionSearch?r0=10102440&r1=10102440&r2=0&r3=0&r4=0&p0=10544726&p1=0&p2=0&p3=0&p4=0&expandResults=true&
+//   k_fwd = 1.00E-12
+
+let K = 0.005;
+let k_fwd = 0.0000000000012 / scaling_factor; // cm3/molecule s
+let k_rev = k_fwd / K;
+let stoich_coef = .5;
+let t_step = 100;
+
+
+
+function tick() {
+
+    // Actually move the particles around.
+    //simulation()
+
+    // d[A]/dt= k_f[A] + k_b[B]
+    // d[A]= k_f[A]*dt + k_b[B]*dt
+
+    let A = species[0].count.slice(-1)[0];
+    let B = species[1].count.slice(-1)[0];
+
+    let delta_A = (-1 * d3.randomNormal(1.0)(0.1) * k_fwd * A * A + k_rev * B) * t_step;
+
+    A = A + delta_A;
+    B = B - stoich_coef * (delta_A);
+
+    let percent_product = B / (A + B);
+
+
+    // let conc_reactants = starting_amount / (1 + k_fwd * starting_amount * t * t_step);
+    // let conc_products = stoich_coef * (starting_amount - conc_reactants);
+    // let percent_product = (conc_products / (conc_products + conc_reactants));
+
+    //let current_pop = species[0].value.slice(-1)[0]
+
+    species[0].percent.push(1 - percent_product);
+    species[1].percent.push(percent_product);
+    species[0].count.push(A);
+    species[1].count.push(B);
+}
+
+
+
+
+// Add monitors the the main.html page as needed
+d3.select("#orders_of_magnitude").on("input", function() {
+    orders_of_magnitude =
+        this.value;
+    console.log(this.value)
+});
+
+
+window.addEventListener('load', () => {
+    console.log('Page is fully loaded');
+    start_simulation(orders_of_magnitude);
+});
+
+document.querySelector('#run_simulation').addEventListener('click', () => {
+    starting_amount = Math.pow(10, orders_of_magnitude);
+    visualizer.clean_all();
+
+    visualizer.init(starting_amount);
+});
+
+window.addEventListener('resize', () => visualizer.onWindowResize(), false);
