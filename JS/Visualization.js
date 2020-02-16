@@ -283,7 +283,7 @@ class Visualization {
             roughness: .1,
             alphaMap: texture2,
             alphaTest: 0.33,
-            envMap: texture2,
+            envMap: texture1,
             envMapIntensity: .9,
             depthTest: true,
             transparency: .75,
