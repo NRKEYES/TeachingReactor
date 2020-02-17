@@ -10,7 +10,10 @@ class Molecule {
 
         this.mesh = new THREE.Mesh(geometry, material);
 
-        this.mesh.position.set(0, 0, 0);
+        this.mesh.position.set(
+            d3.randomNormal(0.0)(.1),
+            d3.randomNormal(0.0)(.1),
+            d3.randomNormal(0.0)(.1));
 
         // this.mesh.updateMatrixWorld();
         // this.mesh.updateMatrix();
@@ -42,9 +45,7 @@ class Molecule {
 
 
     update() {
-        console.log('update')
-            //add velocity to current position.
-            //this.velocity = new THREE.Vector3()
+        //console.log('update')
 
         // Movement
         // if (this.molecule.x) {

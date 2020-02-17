@@ -13,12 +13,7 @@ import { BufferGeometryUtils } from '/JS/three/examples/jsm/utils/BufferGeometry
 import Molecule from '/JS/Molecule.js'
 
 
-
-
-
-var scale_for_angs = 1;
-
-let sphere_quality = 10;
+let sphere_quality = 6;
 
 var COLORS = {
     "H": 0xC0C0C0,
@@ -134,7 +129,7 @@ class Visualization {
 
     }
 
-    init(chamber_edge_length) {
+    init(chamber_edge_length, ) {
 
         this.chamber_edge_length = chamber_edge_length;
         // Create Reaction Chamber element
@@ -169,7 +164,6 @@ class Visualization {
         for (name in this.data) {
 
             while (this.data[name].instances.length > 0) {
-
 
                 let temp = this.data[name].instances.pop();
                 //console.log(temp)
@@ -230,7 +224,6 @@ class Visualization {
             let sphereGeometry = new THREE.SphereBufferGeometry(atom_radius[geometry[i][0]], sphere_quality, sphere_quality);
 
             sphereGeometry.translate(geometry[i][1].x, geometry[i][1].y, geometry[i][1].z);
-            //this.mesh.updateMatrix()
 
             mergedGeometry.push(sphereGeometry)
 
@@ -264,7 +257,7 @@ class Visualization {
         this.scene.add(temp.mesh);
 
 
-        this.selectedObjects.push(temp.mesh)
+        //this.selectedObjects.push(temp.mesh)
     }
 
     add_reaction_chamber(chamber_edge_length) {

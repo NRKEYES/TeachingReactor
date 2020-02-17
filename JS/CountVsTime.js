@@ -20,8 +20,8 @@ class CountVsTime {
 
 
         this.y = d3.scaleLinear()
-            .domain([d3.max(this.data, (d) => { return d.count; }), 0])
-            .range([this.margin.top, this.height - this.margin.bottom])
+            .domain([0, d3.max(this.data, (d) => { return d.count; })])
+            .range([0 + this.margin.top, this.height])
 
         // LINES PATHS etc.
         this.line = d3.line()
@@ -29,30 +29,16 @@ class CountVsTime {
             .y((d) => this.y(d)) // set the y values for the line generator 
             .curve(d3.curveMonotoneX) // apply smoothing to the line
 
-
-        this.paths = this.svg.append("g").selectAll('.path')
-            .data(this.data).enter().append("path") // for each population in data add a line
-            .attr("class", "line")
-            .style("stroke", 'orange')
-            .style("fill", "none")
-            .style("stroke-width", 4)
-            .attr("d", (d) => this.line(d.count)); // call line function on the value element - should be an array
-
-
-
         // AXES 
-        this.svg.append("g")
-            .attr("class", "x axis")
+        this.xAxes = this.svg
+            .append("g").attr("class", "x axis")
             .attr("transform", "translate(0," + this.height + ")")
             .call(d3.axisBottom().scale(this.x))
 
-        this.svg.append("g")
-            .attr("class", "y axis")
+        this.yAxes = this.svg
+            .append("g").attr("class", "y axis")
             .attr("transform", "translate(" + this.margin.left + ",0 )")
             .call(d3.axisLeft().scale(this.y));
-
-
-
 
         // var legendEnter = svg.append("g")
         //     .attr("class", "legend")
@@ -70,19 +56,44 @@ class CountVsTime {
     }
 
 
-    init() {
+    init(incoming_data) {
+        this.data = incoming_data;
         console.log("CountVsTime populating")
+        this.svg.selectAll(".line").remove();
+
+        console.log(d3.max(this.data, (d) => { return d.count; })[0])
+        this.y.domain([d3.max(this.data, (d) => { return d.count; })[0], 0])
 
     }
 
 
-    tick() {
-        this.paths.transition().duration(1000)
-            .ease(d3.easeLinear)
+    tick(incoming_data) {
+        this.y.domain([d3.max(this.data, (d) => { return d.count; })[0], 0])
+
+        this.yAxes.transition().duration(1000).call(d3.axisLeft().scale(this.y));
+
+        // generate line paths
+        var lines = this.svg.selectAll(".line").data(incoming_data).attr("class", "line");
+
+        // transition from previous paths to new paths
+        lines.transition().duration(1000)
             .attr("d", (d) => this.line(d.count))
-            .style("stroke", () =>
-                '#' + Math.floor(Math.random() * 16777215).toString(16)
-            );
+            .style("stroke", function() {
+                return '#' + Math.floor(Math.random() * 16777215).toString(16);
+            });
+
+        // enter any new data
+        lines.enter()
+            .append("path")
+            .attr("class", "line")
+            .attr("d", (d) => this.line(d.count))
+            .style("stroke", function() {
+                return '#' + Math.floor(Math.random() * 16777215).toString(16);
+            });
+
+        // exit
+        lines.exit()
+            .remove();
 
     }
 }
