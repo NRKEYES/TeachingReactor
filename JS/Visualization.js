@@ -47,7 +47,7 @@ class Visualization {
 
     constructor(incoming_data, chamber_edge_length) {
         this.data = incoming_data;
-        this.chamber_edge_length = chamber_edge_length;
+        this.chamber_edge_length = chamber_edge_length * 2;
 
         this.camera_displacement = chamber_edge_length;
 
@@ -96,8 +96,9 @@ class Visualization {
         this.scene.position.x = 0;
         this.scene.position.y = 0;
         this.scene.position.z = 0;
+        //this.scene.overrideMaterial = { color: 0xffff00 };
 
-        this.camera = new THREE.PerspectiveCamera(60, this.width_for_3d / this.height_for_3d, .01, 1000);
+        this.camera = new THREE.PerspectiveCamera(30, this.width_for_3d / this.height_for_3d, 1, 2000);
         this.camera.position.z = this.camera_displacement; //camera.lookAt(scene.position)
         this.camera.position.x = this.camera_displacement; //camera.lookAt(scene.position)
         this.camera.position.y = this.camera_displacement; //camera.lookAt(scene.position)
@@ -128,7 +129,7 @@ class Visualization {
         this.controls.dampingFactor = 0.25;
         this.controls.screenSpacePanning = false;
         this.controls.minDistance = 1;
-        this.controls.maxDistance = this.camera_displacement * 2;
+        this.controls.maxDistance = this.camera_displacement * 4;
         this.controls.maxPolarAngle = Math.PI;
 
     }
@@ -136,6 +137,14 @@ class Visualization {
     init(chamber_edge_length) {
 
         this.chamber_edge_length = chamber_edge_length;
+        // Create Reaction Chamber element
+        if (this.chamber == null) {
+            this.add_reaction_chamber(this.chamber_edge_length); // in nm
+        }
+
+        this.chamber.position.set(0, 0, 0)
+
+
         for (name in this.data) {
             this.generate_species(name)
             for (let i = 0; i < this.data[name].count.slice(-1)[0]; i++) {
@@ -149,7 +158,7 @@ class Visualization {
             this.add_reaction_chamber(this.chamber_edge_length); // in nm
         }
 
-
+        this.chamber.position.set(0, 0, 0)
         console.log(this.scene);
         this.animate();
     }
@@ -219,15 +228,19 @@ class Visualization {
 
             // for atom I create the correct geometry
             let sphereGeometry = new THREE.SphereBufferGeometry(atom_radius[geometry[i][0]], sphere_quality, sphere_quality);
+
             sphereGeometry.translate(geometry[i][1].x, geometry[i][1].y, geometry[i][1].z);
+            //this.mesh.updateMatrix()
+
             mergedGeometry.push(sphereGeometry)
 
         };
 
         // This information is now stored in the main data structure.
+
         console.log(mergedGeometry)
 
-        this.data[name]['graphics'] = { 'geom': BufferGeometryUtils.mergeBufferGeometries(mergedGeometry), 'material': materials }
+        this.data[name]['graphics'] = { 'geom': BufferGeometryUtils.mergeBufferGeometries(mergedGeometry, true), 'material': materials }
 
 
         // mergedGeometry.dispose();
@@ -245,10 +258,13 @@ class Visualization {
 
         this.data[name].instances.push(temp);
 
+
+        // console.log(this.data[name].instances.slice(-1)[0].mesh);
+        // this.scene.add(this.data[name].instances.slice(-1)[0].mesh);
         this.scene.add(temp.mesh);
 
-        console.log(this.scene)
-            //this.selectedObjects.push(temp.mesh)
+
+        this.selectedObjects.push(temp.mesh)
     }
 
     add_reaction_chamber(chamber_edge_length) {
@@ -273,6 +289,7 @@ class Visualization {
 
         let geometry = new THREE.BoxBufferGeometry(chamber_edge_length, chamber_edge_length, chamber_edge_length);
         this.chamber = new THREE.Mesh(geometry, material);
+        this.chamber.position.set(0, 0, 0);
         this.scene.add(this.chamber);
 
         geometry.dispose();
@@ -284,8 +301,10 @@ class Visualization {
         requestAnimationFrame(this.animate.bind(this));
 
         for (name in this.data) {
-            for (let i = 0; i < this.data[name].length; i++) {
-                this.data[name].instances.update();
+            //console.log(this.data[name]);
+            for (let i = 0; i < this.data[name].instances.length; i++) {
+                //console.log(this.data[name].instances[i]);
+                this.data[name].instances[i].update();
             }
         }
 

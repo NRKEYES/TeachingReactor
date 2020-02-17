@@ -10,7 +10,7 @@ let population_2 = [25];
 let orders_of_magnitude = 1;
 let amount_chaos = 50;
 let starting_ratio;
-let chamber_edge_length = 5 // Planning on this being equivalent to ---5 nm---
+let chamber_edge_length = 5 // this should be in nm
 
 let starting_amount = Math.pow(10, orders_of_magnitude);
 let scaling_factor = .0000001
