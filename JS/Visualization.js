@@ -7,6 +7,7 @@ import { RenderPass } from '/JS/three/examples/jsm/postprocessing/RenderPass.js'
 import { ShaderPass } from '/JS/three/examples/jsm/postprocessing/ShaderPass.js';
 import { OutlinePass } from '/JS/three/examples/jsm/postprocessing/OutlinePass.js';
 import { FXAAShader } from '/JS/three/examples/jsm/shaders/FXAAShader.js';
+import { BufferGeometryUtils } from '/JS/three/examples/jsm/utils/BufferGeometryUtils.js';
 
 // Internal Dependancies
 import Molecule from '/JS/Molecule.js'
@@ -29,6 +30,7 @@ var COLORS = {
     "N": 0x0033cc
 };
 
+// In nanometers
 var atom_radius = { // Van der walls from wiki https://en.wikipedia.org/wiki/Van_der_Waals_radius
     "H": .12,
     "C": .17,
@@ -41,30 +43,15 @@ var atom_radius = { // Van der walls from wiki https://en.wikipedia.org/wiki/Van
 
 
 
-let structures = {};
-
-// Values in nm
-structures['Reactant'] = [
-    ['N', new THREE.Vector3(0, 0, 0)],
-    ['O', new THREE.Vector3(-.07, .12, 0)],
-    ['O', new THREE.Vector3(-.07, -.12, 0)]
-];
-
-structures['Product'] = [
-    ['N', new THREE.Vector3(0, 0, 0)],
-    ['O', new THREE.Vector3(-0.07, 0.12, 0)],
-    ['O', new THREE.Vector3(-0.07, -0.12, 0)],
-    ['N', new THREE.Vector3(0.3, 0, 0)],
-    ['O', new THREE.Vector3(0.37, 0.12, 0)],
-    ['O', new THREE.Vector3(0.37, -0.1, 0)]
-]
-
-
-
 class Visualization {
 
-    constructor(incoming_data) {
+    constructor(incoming_data, chamber_edge_length) {
         this.data = incoming_data;
+        this.chamber_edge_length = chamber_edge_length;
+
+        this.camera_displacement = chamber_edge_length;
+
+        console.log(this.data)
 
         //Engine Variables
         this.height_for_3d = document.getElementById("Visualization").clientHeight;
@@ -72,13 +59,7 @@ class Visualization {
         this.background_and_emis = 0x00fffa;
         this.clock = new THREE.Clock();
 
-        this.renderer;
-        this.container;
-        this.composer;
-        this.scene;
-        this.camera;
 
-        this.outlinePass;
         this.selectedObjects = []
         this.outline_params = {
             edgeStrength: 3,
@@ -88,18 +69,10 @@ class Visualization {
             usePatternTexture: false
         };
 
-        // Simulation variables  -- PROBABLY need to move
-        this.molecules = this.data.instances;
-        this.chamber = null;
-        this.chamber_edge_length = 100 // Planning on this being equivalent to ---1 nm---
-
-
 
         // Graphics Variables
-        this.species = []
-        this.line = [];
-
-
+        this.chamber = null;
+        //this.line = [];
 
 
         //Create renderer
@@ -124,10 +97,10 @@ class Visualization {
         this.scene.position.y = 0;
         this.scene.position.z = 0;
 
-        this.camera = new THREE.PerspectiveCamera(30, this.width_for_3d / this.height_for_3d, 1, 2000);
-        this.camera.position.z = 50; //camera.lookAt(scene.position)
-        this.camera.position.x = 50; //camera.lookAt(scene.position)
-        this.camera.position.y = 50; //camera.lookAt(scene.position)
+        this.camera = new THREE.PerspectiveCamera(60, this.width_for_3d / this.height_for_3d, .01, 1000);
+        this.camera.position.z = this.camera_displacement; //camera.lookAt(scene.position)
+        this.camera.position.x = this.camera_displacement; //camera.lookAt(scene.position)
+        this.camera.position.y = this.camera_displacement; //camera.lookAt(scene.position)
 
         this.directionalLight = new THREE.DirectionalLight(0xffffff, .5);
         this.directionalLight.position.set(100, -100, 0);
@@ -154,47 +127,54 @@ class Visualization {
         this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
         this.controls.dampingFactor = 0.25;
         this.controls.screenSpacePanning = false;
-        this.controls.minDistance = 10;
-        this.controls.maxDistance = 500;
+        this.controls.minDistance = 1;
+        this.controls.maxDistance = this.camera_displacement * 2;
         this.controls.maxPolarAngle = Math.PI;
 
     }
 
-    init(starting_number) {
+    init(chamber_edge_length) {
 
-        for (name in structures) {
-            this.genererate_species(name)
+        this.chamber_edge_length = chamber_edge_length;
+        for (name in this.data) {
+            this.generate_species(name)
+            for (let i = 0; i < this.data[name].count.slice(-1)[0]; i++) {
+                this.add_molecule(name);
+            }
         }
 
-        for (let i = 0; i < starting_number; i++) {
-            this.add_molecule();
-        }
 
         // Create Reaction Chamber element
         if (this.chamber == null) {
-            this.add_reaction_chamber();
-
+            this.add_reaction_chamber(this.chamber_edge_length); // in nm
         }
 
+
+        console.log(this.scene);
         this.animate();
     }
 
     clean_all() {
         // Clean up old scene molecules and chamber
 
-        while (this.molecules.length > 0) {
-            let temp = this.molecules.pop();
-            //console.log(temp)
+        for (name in this.data) {
 
-            let object = this.scene.getObjectByProperty('uuid', temp.mesh.uuid);
-            //console.log(object)
-            object.geometry.dispose();
-            for (let mat in object.materials) {
-                mat.dispose();
+            while (this.data[name].instances.length > 0) {
+
+
+                let temp = this.data[name].instances.pop();
+                //console.log(temp)
+
+                let object = this.scene.getObjectByProperty('uuid', temp.mesh.uuid);
+                //console.log(object)
+                object.geometry.dispose();
+                for (let mat in object.materials) {
+                    mat.dispose();
+                }
+
+                this.scene.remove(object);
+
             }
-
-            this.scene.remove(object);
-
         }
 
 
@@ -210,21 +190,22 @@ class Visualization {
 
     }
 
-    genererate_species(name) {
+    generate_species(name) {
 
         let envMap = new THREE.TextureLoader().load('Images/envMap.png');
         envMap.mapping = THREE.SphericalReflectionMapping;
 
-        let geometry = structures[name]; // Setting up to import different geometries
+        let geometry = this.data[name].coords; // Setting up to import different geometries
 
         let materials = [];
-        let mergedGeometry = new THREE.Geometry();
-
+        let mergedGeometry = [];
         // basic monochromatic energy preservation
         let roughness = .1;
         let diffuseColor = new THREE.Color().setHSL(0.0, 0.0, .9);
 
         for (let i = 0; i < geometry.length; i++) {
+
+            //For atom i set up correct material
             let material = new THREE.MeshPhysicalMaterial({
                 color: COLORS[geometry[i][0]],
                 emissive: COLORS[geometry[i][0]],
@@ -234,45 +215,43 @@ class Visualization {
                 roughness: roughness,
                 envMap: envMap,
             });
-
             materials.push(material)
 
-            let sphereGeometry = new THREE.SphereGeometry(atom_radius[geometry[i][0]], sphere_quality, sphere_quality);
-            let sphereMesh = new THREE.Mesh(sphereGeometry);
-            sphereMesh.castShadow = true;
-            sphereMesh.receiveShadow = true;
-
-            sphereMesh.updateMatrix();
-            sphereMesh.geometry.faces.forEach(function(face) {
-                face.materialIndex = 0;
-            });
-
+            // for atom I create the correct geometry
+            let sphereGeometry = new THREE.SphereBufferGeometry(atom_radius[geometry[i][0]], sphere_quality, sphere_quality);
             sphereGeometry.translate(geometry[i][1].x, geometry[i][1].y, geometry[i][1].z);
-            mergedGeometry.merge(sphereGeometry, sphereGeometry.matrix, i);
+            mergedGeometry.push(sphereGeometry)
+
         };
 
+        // This information is now stored in the main data structure.
+        console.log(mergedGeometry)
 
-        this.species[name] = { 'geom': mergedGeometry, 'material': materials }
-
-        mergedGeometry.dispose();
-        for (let mat of materials) {
-            mat.dispose();
-        }
+        this.data[name]['graphics'] = { 'geom': BufferGeometryUtils.mergeBufferGeometries(mergedGeometry), 'material': materials }
 
 
-
+        // mergedGeometry.dispose();
+        // for (let mat of materials) {
+        //     mat.dispose();
+        // }
     }
 
-    add_molecule() {
+    add_molecule(name) {
         // This will turn into a many molecule method
+        if (name == null) {
+            name = 'Reactant'
+        }
+        let temp = new Molecule(name, this.data[name].graphics.geom, this.data[name].graphics.material);
 
-        let temp = new Molecule(this.species['Reactant'].geom, this.species['Reactant'].material);
-        this.molecules.push(temp);
-        this.scene.add(temp.mesh)
-        this.selectedObjects.push(temp.mesh)
+        this.data[name].instances.push(temp);
+
+        this.scene.add(temp.mesh);
+
+        console.log(this.scene)
+            //this.selectedObjects.push(temp.mesh)
     }
 
-    add_reaction_chamber() {
+    add_reaction_chamber(chamber_edge_length) {
         // Reaction Chamber
 
         let texture1 = new THREE.TextureLoader().load('Images/steel.jpg');
@@ -292,7 +271,7 @@ class Visualization {
             side: THREE.DoubleSide,
         });
 
-        let geometry = new THREE.BoxBufferGeometry(this.chamber_edge_length, this.chamber_edge_length, this.chamber_edge_length);
+        let geometry = new THREE.BoxBufferGeometry(chamber_edge_length, chamber_edge_length, chamber_edge_length);
         this.chamber = new THREE.Mesh(geometry, material);
         this.scene.add(this.chamber);
 
@@ -304,16 +283,17 @@ class Visualization {
     animate() {
         requestAnimationFrame(this.animate.bind(this));
 
-
-        for (let i = 0; i < this.molecules.length; i++) {
-            this.molecules[i].update();
+        for (name in this.data) {
+            for (let i = 0; i < this.data[name].length; i++) {
+                this.data[name].instances.update();
+            }
         }
+
+
+        //this.renderer.render(this.scene, this.camera);
 
         this.composer.render(this.scene, this.camera);
     };
-
-
-
 
     onWindowResize() {
         this.height_for_3d = document.getElementById("Visualization").clientHeight;
@@ -341,16 +321,6 @@ function make_line() {
 
     scene.add(line);
 }
-
-
-
-
-
-
-
-
-
-
 
 
 export default Visualization;

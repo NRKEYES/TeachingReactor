@@ -1,7 +1,6 @@
 class CountVsTime {
     constructor(incoming_data) {
         this.data = incoming_data;
-        console.log(this.data)
 
         this.w = document.getElementById("CountVsTime").clientWidth;
         this.h = document.getElementById("CountVsTime").clientHeight;

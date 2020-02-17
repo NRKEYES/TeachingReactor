@@ -1,7 +1,6 @@
 class Barchart {
     constructor(incoming_data) {
         this.data = incoming_data;
-        console.log(this.data)
 
         this.w = document.getElementById("Barchart").clientWidth;
         this.h = document.getElementById("Barchart").clientHeight;

@@ -8,7 +8,9 @@ import SideView from '/JS/SideView.js';
 let population_1 = [75];
 let population_2 = [25];
 let orders_of_magnitude = 1;
-
+let amount_chaos = 50;
+let starting_ratio;
+let chamber_edge_length = 5 // Planning on this being equivalent to ---5 nm---
 
 let starting_amount = Math.pow(10, orders_of_magnitude);
 let scaling_factor = .0000001
@@ -17,19 +19,33 @@ let species = [{
         'name': 'Reactants',
         'percent': [100],
         'count': [starting_amount],
-        'instances': []
+        'instances': [],
+        'coords': [
+            ['N', new THREE.Vector3(0, 0, 0)],
+            ['O', new THREE.Vector3(-.07, .12, 0)],
+            ['O', new THREE.Vector3(-.07, -.12, 0)]
+        ]
     },
     {
         'name': 'Products',
         'percent': [0],
         'count': [0],
-        'instances': []
+        'instances': [],
+        'coords': [
+            ['N', new THREE.Vector3(0, 0, 0)],
+            ['O', new THREE.Vector3(-0.07, 0.12, 0)],
+            ['O', new THREE.Vector3(-0.07, -0.12, 0)],
+            ['N', new THREE.Vector3(0.3, 0, 0)],
+            ['O', new THREE.Vector3(0.37, 0.12, 0)],
+            ['O', new THREE.Vector3(0.37, -0.12, 0)]
+        ]
     }
 ];
 
 
 
-let visualizer = new Visualization(species);
+
+let visualizer = new Visualization(species, chamber_edge_length);
 let sideview = new SideView();
 let count_v_time = new CountVsTime(species);
 let percent_v_time = new PercentVsTime(species);
@@ -40,16 +56,18 @@ let percent_bar = new Barchart(species);
 
 
 
-function start_simulation(orders_of_magnitude) {
+function start_simulation() {
     console.log(orders_of_magnitude)
-    starting_amount = Math.pow(10, orders_of_magnitude);
-    scaling_factor = .0000001
 
-    visualizer.init(starting_amount);
+    starting_amount = Math.pow(10, orders_of_magnitude);
+
+    visualizer.init(chamber_edge_length);
+
     sideview.init();
     count_v_time.init();
     percent_v_time.init();
     percent_bar.init();
+
     setInterval(update_all, 1000);
 }
 
@@ -123,16 +141,11 @@ function tick() {
 
 
 // Add monitors the the main.html page as needed
-d3.select("#orders_of_magnitude").on("input", function() {
-    orders_of_magnitude =
-        this.value;
-    console.log(this.value)
-});
 
 
 window.addEventListener('load', () => {
     console.log('Page is fully loaded');
-    start_simulation(orders_of_magnitude);
+    start_simulation();
 });
 
 document.querySelector('#run_simulation').addEventListener('click', () => {
@@ -143,3 +156,12 @@ document.querySelector('#run_simulation').addEventListener('click', () => {
 });
 
 window.addEventListener('resize', () => visualizer.onWindowResize(), false);
+
+d3.select("#orders_of_magnitude").on("input", function() {
+    orders_of_magnitude = this.value;
+    console.log(this.value)
+});
+d3.select("#amount_chaos").on("input", function() {
+    amount_chaos = this.value;
+    console.log(this.value)
+});

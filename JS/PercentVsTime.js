@@ -1,7 +1,6 @@
 class PercentVsTime {
     constructor(incoming_data) {
         this.data = incoming_data;
-        console.log(this.data)
 
         this.w = document.getElementById("PercentVsTime").clientWidth;
         this.h = document.getElementById("PercentVsTime").clientHeight;
