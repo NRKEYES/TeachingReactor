@@ -25,64 +25,105 @@
 <body>
 
     <div id="Tabs">
+        <div id='Views'>
+            <a href='#Visualization'>
+                <p><img src="Images/sci/png/atoms.png" alt="3d Visualization"> Visualization</p>
+            </a>
 
-        <a href='#Visualization'>
-            <p>Visualization</p><img src="Images/sci/png/atoms.png" alt="3d Visualization"> </a>
+            <a href="#PercentVsTime">
+                <p><img src="Images/sci/png/statistics-bars-graphic-hanging-of-a-nail.png" alt="">Proportion of species vs. Time </p>
+            </a>
 
-        <a href="#PercentVsTime">
-            <p>Percent Species vs. Time</p> <img src="Images/sci/png/statistics-bars-graphic-hanging-of-a-nail.png" alt=""> </a>
-
-        <a href="#CountVsTime">
-            <p>Species Count vs. Time</p> <img src="Images/sci/png/science-experiment.png" alt=""> </a>
-
-
-
-        <p>-----Uber Alpha------</p>
-        <a href="#Barchart"> <img src="Images/sci/png/heating-a-flask-with-testing-liquid-on-fire-flames.png" alt=""></a>
-        <a href="#SideView"> <img src="Images/sci/png/computer-analysis.png" alt="Kinetics Graph"></a>
+            <a href="#CountVsTime">
+                <p><img src="Images/sci/png/science-experiment.png" alt="">Count of each species vs. Time </p>
+            </a>
+        </div>
 
 
-
-
-        <a href="#tab_seven"> <img src="Images/sci/png/scientific-test-tubes-with-liquids.png" alt=""></a>
-        <a href="#tab_eight"> <img src="Images/sci/png/science-graphic-on-a-note.png" alt=""></a>
-        <a href="#tab_nine"> <img src="Images/sci/png/flask-container-outline.png" alt=""></a>
-
-
-        <a href="#threeD"> <img src="Images/sci/png/microscope.png" alt=""></a>
-
-
-
-        <div id='controls'>
+        <div id='Controls'>
 
             <h2>Controls:</h2>
-            <p>Number of Particles (Orders of Magnitude):
+
+
+
+
+            <p>Number of Particles (Exponent):
                 <div class="slidecontainer">
                     <input type="range" min="0" max="10" value="1" class="slider" id="orders_of_magnitude">
+                    <text id="slider_value"></text>
                 </div>
             </p>
-            <p>Amount Chaos:
-                <input type="range" min="1" max="100" value="50" class="slider" id="amount_chaos">
-            </p>
 
-            <p>Initial ratio of P/R:
-                <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
-            </p>
-            <p>Reactor Size:
-                <input type="range" min="5" max="50" value="5" class="slider" id="myRange">
-            </p>
 
-            <p>Forward Reaction Rate: <input type="text" name="frate"></p>
-            <p>Equilibrium (K)onstant:
-                <input type="range" min="5" max="50" value="5" class="slider" id="myRange">
-            </p>
 
-            <p>Backwards Reaction Rate: <input type="text" name="brate"></p>
+            <p><input type="button" id="run_simulation" value='Start Simulation'></p>
 
-            <input type="button" id="run_simulation" value='Restart Simulation'>
 
         </div>
+
+
+        <div id='Development'>
+            <h3>Planned/Partially Implemented:</h3>
+            <p><input type="button" id="run_simulation" value='Clear Graphs'></p>
+
+
+            <a href="#Barchart"> <img src="Images/sci/png/heating-a-flask-with-testing-liquid-on-fire-flames.png" alt=""></a>
+            <a href="#SideView"> <img src="Images/sci/png/computer-analysis.png" alt="Kinetics Graph"></a>
+
+            <a href="#tab_seven"> <img src="Images/sci/png/scientific-test-tubes-with-liquids.png" alt=""></a>
+            <a href="#tab_eight"> <img src="Images/sci/png/science-graphic-on-a-note.png" alt=""></a>
+            <a href="#tab_nine"> <img src="Images/sci/png/flask-container-outline.png" alt=""></a>
+
+
+            <a href="#threeD"> <img src="Images/sci/png/microscope.png" alt=""></a>
+
+
+            <p>Initial Proportion of Product:
+                <div class="slidecontainer">
+                    <input type="range" min="0" max="100" value="100" class="slider" id="initial_ratio">
+                    <text id="slider_value"></text>
+                </div>
+            </p>
+
+            <p>Reactor Size (edge length in nm):
+                <div class="slidecontainer">
+                    <input type="range" min="5" max="50" value="5" class="slider" id="edge_length">
+                    <text id="slider_value"></text>
+                </div>
+            </p>
+
+            <p>Forward Reaction Rate (Exponent):
+                <div class="slidecontainer">
+                    <input type="range" min="-10" max="0" value="-3" class="slider" id="forward_rate">
+                    <text id="slider_value"></text>
+                </div>
+            </p>
+
+            <p>Equilibrium (K)onstant (Exponent):
+                <div class="slidecontainer">
+                    <input type="range" min="-10" max="0" value="-3" class="slider" id="equilibrium_constant">
+                    <text id="slider_value"></text>
+                </div>
+            </p>
+
+            <p>Backwards Reaction Rate (Exponent):
+                <div class="slidecontainer">
+                    <input type="range" min="-10" max="0" value="-3" class="slider" id="backward_rate">
+                    <text id="slider_value"></text>
+                </div>
+            </p>
+
+            <p>Amount Chaos:
+                <div class="slidecontainer">
+                    <input type="range" min="1" max="100" value="50" class="slider" id="amount_chaos">
+                    <text id="slider_value"></text>
+                </div>
+            </p>
+
+        </div>
+
     </div>
+
 
     <div id="Scroll">
         <div id='Visualization' class='render'></div>

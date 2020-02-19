@@ -4,7 +4,7 @@ class Barchart {
 
         this.w = document.getElementById("Barchart").clientWidth;
         this.h = document.getElementById("Barchart").clientHeight;
-        this.margin = { top: 40, right: 100, bottom: 40, left: 100 };
+        this.margin = { top: 40, right: 40, bottom: 40, left: 100 };
         this.width = this.w - this.margin.left - this.margin.right;
         this.height = this.h - this.margin.top - this.margin.bottom;
 
@@ -16,14 +16,14 @@ class Barchart {
 
         // SCALES        
         this.x = d3.scaleLinear()
-            .domain([0, 1])
+            .domain([0, d3.max(this.data, (d) => { return d.count; })[0]])
             .range([this.margin.left, this.width])
 
 
         this.y = d3.scaleBand()
             .domain(this.data.map(d => { return d.name; }))
-            .range([0, this.height])
-            .padding(.4)
+            .range([this.margin.top, this.height])
+            .padding(1)
 
         // Lines Plots Bars etc.
         this.bars = this.svg.append('g').selectAll(".bar")
@@ -48,16 +48,6 @@ class Barchart {
             .attr("transform", "translate(" + this.margin.left + ",0 )")
             .call(d3.axisLeft().scale(this.y));
 
-        // this.svg.append("g")
-        //     .attr("fill", "white")
-        //     .attr("text-anchor", "end")
-        //     .style("font", "12px sans-serif")
-        //     .selectAll("text")
-        //     .data(this.data)
-        //     .attr("x", d => this.x(d.value[0]) - 4)
-        //     .attr("y", (d, i) => this.y(i) + y.bandwidth() / 2)
-        //     .attr("dy", "0.35em")
-        //     .text(d => format(d.value));
     }
 
     init() {
@@ -65,9 +55,10 @@ class Barchart {
     }
 
 
-    tick() {
+    tick(incoming_data) {
 
-        this.bars.transition().duration(1000)
+        this.bars
+            .transition().duration(1000)
             .ease(d3.easeLinear)
             .attr("fill", "red")
             .attr("width", (d) => this.x(d.count.slice(-1)[0]) - this.margin.left);

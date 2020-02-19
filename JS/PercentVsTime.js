@@ -4,7 +4,7 @@ class PercentVsTime {
 
         this.w = document.getElementById("PercentVsTime").clientWidth;
         this.h = document.getElementById("PercentVsTime").clientHeight;
-        this.margin = { top: 40, right: 100, bottom: 40, left: 100 };
+        this.margin = { top: 40, right: 40, bottom: 40, left: 80 };
         this.width = this.w - this.margin.left - this.margin.right;
         this.height = this.h - this.margin.top - this.margin.bottom;
 
@@ -20,12 +20,37 @@ class PercentVsTime {
             .range([this.margin.left, this.width])
 
         this.y = d3.scaleLinear()
-            .domain([1, 0])
-            .range([this.margin.top, this.height - this.margin.bottom]);
+            .domain([d3.max(this.data, (d) => { return d.count; })[0], 0])
+            .range([this.margin.top, this.height])
 
         this.z = d3.scaleOrdinal().domain(this.data)
             .range(d3.schemeSet3);
 
+        // AXES 
+        this.xAxes = this.svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(" + 0 + "," + this.height + ")")
+            .call(d3.axisBottom().scale(this.x))
+
+        this.yAxes = this.svg.append("g")
+            .attr("class", "y axis")
+            .attr("transform", "translate(" + this.margin.left + ",0 )")
+            .call(d3.axisLeft().scale(this.y));
+
+        // AXES LABELS
+        this.xAxes.append("text")
+            .text("Time ->")
+            .style("text-anchor", "middle")
+            .style("stroke", 'black')
+            .attr("x", this.w / 2).attr("y", this.margin.bottom)
+
+        this.yAxes.append("text")
+            .text("Proportion")
+            .attr('position', 'absolute')
+            .style("text-anchor", "middle")
+            .style("stroke", 'black')
+            .attr("x", -this.height / 2).attr("y", -this.margin.left / 2)
+            .attr("transform", "rotate(-90)")
 
         // LINES PATHS etc.
         this.line = d3.line()
@@ -34,71 +59,62 @@ class PercentVsTime {
             .curve(d3.curveMonotoneX) // apply smoothing to the line
 
 
-        this.paths = this.svg.append("g").selectAll('.path')
-            .data(this.data).enter().append("path") // for each population in data add a line
-            .attr("class", "line")
-            .style("stroke", 'orange')
-            .style("fill", "none")
-            .style("stroke-width", 4)
-            .attr("d", (d) => this.line(d.percent)); // call line function on the value element - should be an array
 
 
 
-        // AXES 
-        this.svg.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + this.height + ")")
-            .call(d3.axisBottom().scale(this.x));
-
-        this.svg.append("text")
-            .style("text-anchor", "middle")
-            .attr("y", this.height + this.margin.top)
-            .attr("x", this.w / 2)
-            .text("Time ->");
-
-        this.svg.append("g")
-            .attr("class", "y axis")
-            .attr("transform", "translate(" + this.margin.left + ",0 )")
-            .call(d3.axisLeft().scale(this.y));
-
-        this.svg.append("text")
-            .attr("x", this.margin.left / 2)
-            .attr("y", (this.height / 2))
-            //.attr("transform", "rotate(-90)")
-            .attr("dy", "1em")
-            .style("text-anchor", "middle")
-            .text("Percent %");
+        // this.legendEnter = this.svg.append("g")
+        //     .attr("class", "legend")
+        //     .attr("transform", "translate(" + (this.width - this.margin.right - this.margin.left - 75) + ",25)").append("rect")
+        //     .attr("width", 50)
+        //     .attr("height", 75)
+        //     .attr("fill", "#ffffff")
+        //     .attr("fill-opacity", 0.7);
 
 
-
-        this.legendEnter = this.svg.append("g")
-            .attr("class", "legend")
-            .attr("transform", "translate(" + (this.width - this.margin.right - this.margin.left - 75) + ",25)").append("rect")
-            .attr("width", 50)
-            .attr("height", 75)
-            .attr("fill", "#ffffff")
-            .attr("fill-opacity", 0.7);
-
-
-        this.legendEnter.selectAll("text")
-            .data(this.data).enter().append("text")
-            .attr("y", function(d, i) { return (i * 20) + 25; })
-            .attr("x", 5)
-            .text((d) => { return d.name })
-            .attr("stroke", (d) => { return this.z(d.name); });
+        // this.legendEnter.selectAll("text")
+        //     .data(this.data).enter().append("text")
+        //     .attr("y", function(d, i) { return (i * 20) + 25; })
+        //     .attr("x", 5)
+        //     .text((d) => { return d.name })
+        //     .attr("stroke", (d) => { return this.z(d.name); });
     }
 
-    init() {
-        console.log("PercentVsTime populating")
+
+    init(incoming_data) {
+        this.data = incoming_data;
+        console.log("ProportionVsTime populating")
+        this.svg.selectAll(".line").remove();
+        this.y.domain([d3.max(this.data, (d) => { return d.percent; })[0], 0])
+
     }
 
-    tick() {
-        this.paths.transition().duration(1000)
-            .ease(d3.easeLinear)
+    tick(incoming_data) {
+        this.y.domain([d3.max(this.data, (d) => { return d.percent; })[0], 0])
+
+        this.yAxes.transition().duration(1000).call(d3.axisLeft().scale(this.y));
+
+        // generate line paths
+        var lines = this.svg.selectAll(".line").data(incoming_data).attr("class", "line");
+
+        // transition from previous paths to new paths
+        lines.transition().duration(1000)
             .attr("d", (d) => this.line(d.percent))
-            .style("stroke", () =>
-                '#' + Math.floor(Math.random() * 16777215).toString(16)
-            );
+            .style("stroke", function() {
+                return '#' + Math.floor(Math.random() * 16777215).toString(16);
+            });
+
+        // enter any new data
+        lines.enter()
+            .append("path")
+            .attr("class", "line")
+            .attr("d", (d) => this.line(d.percent))
+            .style("stroke", function() {
+                return '#' + Math.floor(Math.random() * 16777215).toString(16);
+            });
+
+        // exit
+        lines.exit()
+            .remove();
 
     }
 }

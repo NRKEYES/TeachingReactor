@@ -7,9 +7,9 @@ import SideView from '/JS/SideView.js';
 let orders_of_magnitude = 1;
 let amount_chaos = 50;
 let starting_ratio = 1.0;
-let chamber_edge_length = 5 // this should be in nm
+let chamber_edge_length = 15 // this should be in nm
 
-let starting_amount = 50;
+let starting_amount = (Math.pow(chamber_edge_length / 5, 3) * 3.4).toFixed(0);
 
 // reaction deets
 // K = .005
@@ -17,12 +17,12 @@ let starting_amount = 50;
 // https://kinetics.nist.gov/kinetics/ReactionSearch?r0=10102440&r1=10102440&r2=0&r3=0&r4=0&p0=10544726&p1=0&p2=0&p3=0&p4=0&expandResults=true&
 //   k_fwd = 1.00E-12
 
-let K = 0.005;
-let scaling_factor = 1;
-let k_fwd = 1.2 * Math.pow(10, -33); // 0.0000000000012 cm3/molecule s
-let k_rev = k_fwd / K;
+let Keq = 0.005;
+let scaling_factor = 29;
+let k_fwd = 1.2 * Math.pow(10, -33 + scaling_factor); // 0.0000000000012 cm3/molecule s
+let k_rev = k_fwd / Keq;
 let stoich_coef = 2.0;
-let t_step = 5.0 * Math.pow(10, 29);
+let t_step = 5.0 //* Math.pow(10, 29);
 let t = 0;
 
 
@@ -72,10 +72,11 @@ function start_simulation() {
 
     visualizer.clean_all();
     visualizer.init(chamber_edge_length);
-    count_v_time.init(species);
-    sideview.init();
 
-    percent_v_time.init();
+    count_v_time.init(species);
+    percent_v_time.init(species);
+
+    sideview.init();
     percent_bar.init();
 
     setInterval(update_all, 1000);
@@ -90,7 +91,7 @@ function update_all() {
         tick();
         //visualizer.tick(); // Will add after render look?
         count_v_time.tick(species);
-        percent_v_time.tick();
+        percent_v_time.tick(species);
         percent_bar.tick();
 
     }
@@ -127,10 +128,6 @@ function tick() {
     // let conc_products = stoich_coef * (starting_amount - conc_reactants);
     // let percent_product = (conc_products / (conc_products + conc_reactants));
 
-    //let current_pop = species[0].value.slice(-1)[0]
-
-
-
     species[0].percent.push(1 - percent_product);
     species[0].count.push(A);
 
@@ -150,7 +147,6 @@ function tick() {
 
 window.addEventListener('load', () => {
     console.log('Page is fully loaded');
-    start_simulation();
 });
 
 document.querySelector('#run_simulation').addEventListener('click', () => {
@@ -189,11 +185,53 @@ document.querySelector('#run_simulation').addEventListener('click', () => {
 
 window.addEventListener('resize', () => visualizer.onWindowResize(), false);
 
+
+
+function update_slider_value(passed) {
+    passed.parentElement.lastElementChild.innerHTML = passed.value;
+    //console.log(this.parentElement.lastElementChild.innerHTML)
+
+}
+
 d3.select("#orders_of_magnitude").on("input", function() {
     orders_of_magnitude = this.value;
     console.log(starting_amount = 3 * Math.pow(10, orders_of_magnitude));
+    update_slider_value(this);
 });
+
+d3.select("#initial_ratio").on("input", function() {
+    starting_ratio = this.value / 100;
+
+    this.parentElement.lastElementChild.innerHTML = this.value / 100;
+
+});
+
+d3.select("#edge_length").on("input", function() {
+    chamber_edge_length = this.value;
+    update_slider_value(this);
+
+});
+
+d3.select("#forward_rate").on("input", function() {
+    k_fwd = this.value;
+    update_slider_value(this);
+
+});
+
+d3.select("#equilibrium_constant").on("input", function() {
+    Keq = this.value;
+    update_slider_value(this);
+
+});
+
+d3.select("#backward_rate").on("input", function() {
+    k_rev = this.value;
+    update_slider_value(this);
+
+});
+
 d3.select("#amount_chaos").on("input", function() {
     amount_chaos = this.value;
-    console.log(this.value)
+    update_slider_value(this);
+
 });

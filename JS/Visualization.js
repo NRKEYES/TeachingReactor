@@ -275,7 +275,7 @@ class Visualization {
             envMap: texture1,
             envMapIntensity: .9,
             depthTest: true,
-            transparency: .75,
+            transparency: .8,
             transparent: true,
             side: THREE.DoubleSide,
         });
@@ -288,6 +288,12 @@ class Visualization {
         geometry.dispose();
         material.dispose();
         //selectedObjects.push(chamber)
+    }
+
+
+    tick(incoming_data) {
+
+
     }
 
     animate() {

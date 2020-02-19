@@ -11,9 +11,9 @@ class Molecule {
         this.mesh = new THREE.Mesh(geometry, material);
 
         this.mesh.position.set(
-            d3.randomNormal(0.0)(.1),
-            d3.randomNormal(0.0)(.1),
-            d3.randomNormal(0.0)(.1));
+            d3.randomNormal(0.0)(.33),
+            d3.randomNormal(0.0)(.33),
+            d3.randomNormal(0.0)(.33));
 
         // this.mesh.updateMatrixWorld();
         // this.mesh.updateMatrix();

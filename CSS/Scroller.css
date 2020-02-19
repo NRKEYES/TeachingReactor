@@ -1,7 +1,7 @@
     body {
         width: 100vw;
         height: 100vh;
-        background-color: #A90021;
+        background-colors: silver;
         display: grid;
         gap: 1%;
         grid-template-rows: 98vh;
@@ -12,12 +12,33 @@
     #Tabs {
         grid-column: 1;
         position: sticky;
-        text-align: center;
+        text-align: left;
         background: #d5e4e6;
     }
     
+    #Views {
+        grid-column: 1;
+        position: sticky;
+        text-align: left;
+        background: greenyellow;
+    }
+    
+    #Controls {
+        grid-column: 1;
+        position: sticky;
+        text-align: left;
+        background: lightblue;
+    }
+    
+    #Development {
+        grid-column: 1;
+        position: sticky;
+        text-align: left;
+        background: red;
+    }
+    
     img {
-        width: 4vw;
+        width: 2vw;
     }
     
     #Scroll {
@@ -60,6 +81,11 @@
         stroke-width: 2.5px;
     }
     
+    .axis {
+        font-size: large;
+        color: Black;
+    }
+    
     .axis path,
     .axis line {
         fill: none;
@@ -73,7 +99,7 @@
     
     .slider {
         -webkit-appearance: none;
-        width: 100%;
+        width: 80%;
         height: 25px;
         background: #d3d3d3;
         outline: none;
