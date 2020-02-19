@@ -4,7 +4,7 @@ class PercentVsTime {
 
         this.w = document.getElementById("PercentVsTime").clientWidth;
         this.h = document.getElementById("PercentVsTime").clientHeight;
-        this.margin = { top: 40, right: 40, bottom: 40, left: 80 };
+        this.margin = { top: 40, right: 40, bottom: 40, left: 100 };
         this.width = this.w - this.margin.left - this.margin.right;
         this.height = this.h - this.margin.top - this.margin.bottom;
 
@@ -20,7 +20,7 @@ class PercentVsTime {
             .range([this.margin.left, this.width])
 
         this.y = d3.scaleLinear()
-            .domain([d3.max(this.data, (d) => { return d.count; })[0], 0])
+            .domain([d3.max(this.data, (d) => { return d.percent; })[0], 0])
             .range([this.margin.top, this.height])
 
         this.z = d3.scaleOrdinal().domain(this.data)
@@ -56,7 +56,7 @@ class PercentVsTime {
         this.line = d3.line()
             .x((d, i) => this.x(i)) // set the x values for the line generator
             .y((d) => this.y(d)) // set the y values for the line generator 
-            .curve(d3.curveMonotoneX) // apply smoothing to the line
+            .curve(d3.curveStep) // apply smoothing to the line
 
 
 
@@ -84,14 +84,19 @@ class PercentVsTime {
         this.data = incoming_data;
         console.log("ProportionVsTime populating")
         this.svg.selectAll(".line").remove();
-        this.y.domain([d3.max(this.data, (d) => { return d.percent; })[0], 0])
 
     }
 
     tick(incoming_data) {
-        this.y.domain([d3.max(this.data, (d) => { return d.percent; })[0], 0])
+        this.data = incoming_data;
 
-        this.yAxes.transition().duration(1000).call(d3.axisLeft().scale(this.y));
+        let num1 = d3.max(this.data[0].percent);
+        let num2 = d3.max(this.data[1].percent);
+        this.y.domain([d3.max([num1, num2]), 0])
+
+        this.yAxes.attr("class", "y axis")
+            .attr("transform", "translate(" + this.margin.left + ",0 )")
+            .transition().duration(1000).call(d3.axisLeft().scale(this.y));
 
         // generate line paths
         var lines = this.svg.selectAll(".line").data(incoming_data).attr("class", "line");
@@ -99,18 +104,14 @@ class PercentVsTime {
         // transition from previous paths to new paths
         lines.transition().duration(1000)
             .attr("d", (d) => this.line(d.percent))
-            .style("stroke", function() {
-                return '#' + Math.floor(Math.random() * 16777215).toString(16);
-            });
+            .style("stroke", (d) => { return this.z(d.name); });
 
         // enter any new data
         lines.enter()
             .append("path")
             .attr("class", "line")
             .attr("d", (d) => this.line(d.percent))
-            .style("stroke", function() {
-                return '#' + Math.floor(Math.random() * 16777215).toString(16);
-            });
+            .style("stroke", (d) => { return this.z(d.name); });
 
         // exit
         lines.exit()

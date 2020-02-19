@@ -1,33 +1,48 @@
     body {
         width: 100vw;
         height: 100vh;
-        background-colors: silver;
+        background-color: silver;
         display: grid;
         gap: 1%;
         grid-template-rows: 98vh;
         grid-template-columns: 14vw 84vw;
         justify-content: center;
+        font-family: "Source Sans Pro";
     }
     
     #Tabs {
+        font-family: "Source Sans Pro";
         grid-column: 1;
         position: sticky;
         text-align: left;
-        background: #d5e4e6;
+        background: goldenrod;
     }
     
     #Views {
+        padding: 1%;
         grid-column: 1;
         position: sticky;
         text-align: left;
-        background: greenyellow;
+        background: mediumturquoise;
+    }
+    
+    #start {
+        display: -webkit-flexbox;
+        display: -ms-flexbox;
+        display: -webkit-flex;
+        display: flex;
+        -webkit-flex-align: center;
+        -ms-flex-align: center;
+        -webkit-align-items: center;
+        align-items: center;
+        justify-content: center;
     }
     
     #Controls {
         grid-column: 1;
         position: sticky;
         text-align: left;
-        background: lightblue;
+        background: mediumturquoise;
     }
     
     #Development {
@@ -35,10 +50,6 @@
         position: sticky;
         text-align: left;
         background: red;
-    }
-    
-    img {
-        width: 2vw;
     }
     
     #Scroll {
@@ -54,7 +65,7 @@
         grid-column: 2;
         grid-row: 1;
         scroll-snap-align: start;
-        background: #d5e4e6;
+        background: slategray;
         width: 100%;
         height: 100%;
     }
@@ -93,6 +104,30 @@
         shape-rendering: crispEdges;
     }
     
+    a {
+        width: 80%;
+        background-color: grey;
+        color: white;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        padding: 1em 1.5em;
+    }
+    
+    .button {
+        transition: .5s;
+        align-self: center;
+        border: 2px solid #4CAF50;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        font-size: 16px;
+    }
+    
+    .button:hover {
+        background-color: red;
+    }
+    
     .slidecontainer {
         width: 95%;
     }
@@ -126,4 +161,19 @@
         height: 25px;
         background: #4CAF50;
         cursor: pointer;
+    }
+    
+    #floating {
+        grid-row-start: 1;
+        transition: .5s;
+        opacity: .5;
+        position: fixed;
+        border: 10px solid #4CAF50;
+        top: 30vh;
+        left: 60vw;
+        z-index: 100;
+    }
+    
+    #floating:hover {
+        opacity: 1.0;
     }

@@ -1,0 +1,8 @@
+
+    // let conc_reactants = starting_amount / (1 + k_fwd * starting_amount * t * t_step);
+    // let conc_products = stoich_coef * (starting_amount - conc_reactants);
+    // let percent_product = (conc_products / (conc_products + conc_reactants));
+    // for (name in species) {
+    //     species[name].percent.push(1 - percent_product);
+    //     species[name].count.push(A);
+    // }
