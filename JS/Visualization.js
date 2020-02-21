@@ -42,9 +42,9 @@ class Visualization {
 
     constructor(incoming_data, chamber_edge_length) {
         this.data = incoming_data;
-        this.chamber_edge_length = chamber_edge_length * 2;
+        this.chamber_edge_length = chamber_edge_length;
 
-        this.camera_displacement = chamber_edge_length;
+        this.camera_displacement = chamber_edge_length * 2;
 
         console.log(this.data)
 
@@ -127,17 +127,20 @@ class Visualization {
         this.controls.maxDistance = this.camera_displacement * 4;
         this.controls.maxPolarAngle = Math.PI;
 
+
+        // Just added remove if breaks.
+        this.add_reaction_chamber(chamber_edge_length)
+        this.animate();
+
     }
 
-    init(chamber_edge_length, ) {
+    init(chamber_edge_length) {
 
         this.chamber_edge_length = chamber_edge_length;
         // Create Reaction Chamber element
         if (this.chamber == null) {
             this.add_reaction_chamber(this.chamber_edge_length); // in nm
         }
-
-        this.chamber.position.set(0, 0, 0)
 
 
         for (name in this.data) {
@@ -148,48 +151,42 @@ class Visualization {
         }
 
 
-        // Create Reaction Chamber element
-        if (this.chamber == null) {
-            this.add_reaction_chamber(this.chamber_edge_length); // in nm
-        }
 
-        this.chamber.position.set(0, 0, 0)
-        console.log(this.scene);
-        this.animate();
+        //console.log(this.scene);
+        //this.animate();
+
+        return this.data;
     }
 
-    clean_all() {
+    clean_all(incoming_data) {
         // Clean up old scene molecules and chamber
-
         for (name in this.data) {
-
             while (this.data[name].instances.length > 0) {
-
                 let temp = this.data[name].instances.pop();
                 //console.log(temp)
-
                 let object = this.scene.getObjectByProperty('uuid', temp.mesh.uuid);
                 //console.log(object)
                 object.geometry.dispose();
                 for (let mat in object.materials) {
                     mat.dispose();
                 }
-
                 this.scene.remove(object);
-
             }
         }
 
+        this.data = incoming_data;
+        //Currently no changes to chamber are meaningful, so just gonna let it remain.
+        console.log(this.chamber)
+        if (this.chamber != null) {
+            this.chamber.geometry.dispose()
+            this.chamber.material.dispose();
+            this.scene.remove(this.chamber);
 
-        // Currently no changes to chamber are meaningful, so just gonna let it remain.
-        //console.log(this.chamber)
-        // this.chamber.geometry.dispose()
-        // this.chamber.material.dispose();
-        // this.scene.remove(this.chamber);
+            this.chamber = null;
+        }
 
-        // this.chamber = null;
 
-        //this.renderer.renderLists.dispose();
+        this.renderer.renderLists.dispose();
 
     }
 
@@ -236,10 +233,14 @@ class Visualization {
         this.data[name]['graphics'] = { 'geom': BufferGeometryUtils.mergeBufferGeometries(mergedGeometry, true), 'material': materials }
 
 
-        // mergedGeometry.dispose();
-        // for (let mat of materials) {
-        //     mat.dispose();
-        // }
+        //mergedGeometry.dispose();
+        for (let geo of mergedGeometry) {
+            geo.dispose();
+        }
+
+        for (let mat of materials) {
+            mat.dispose();
+        }
     }
 
     add_molecule(name) {
@@ -251,12 +252,9 @@ class Visualization {
 
         this.data[name].instances.push(temp);
 
-
-        // console.log(this.data[name].instances.slice(-1)[0].mesh);
+        //console.log(this.data[name].instances);
         // this.scene.add(this.data[name].instances.slice(-1)[0].mesh);
         this.scene.add(temp.mesh);
-
-
         //this.selectedObjects.push(temp.mesh)
     }
 
@@ -293,8 +291,15 @@ class Visualization {
 
     tick(incoming_data) {
 
-
+        for (name in this.data) {
+            //console.log(this.data[name]);
+            for (let i = 0; i < this.data[name].instances.length; i++) {
+                //console.log(this.data[name].instances[i]);
+                this.data[name].instances[i].tick();
+            }
+        }
     }
+
 
     animate() {
         requestAnimationFrame(this.animate.bind(this));
@@ -321,24 +326,5 @@ class Visualization {
         this.renderer.setSize(this.width_for_3d, this.height_for_3d);
     }
 }
-
-
-
-
-function make_line() {
-    // adding a line
-    this.points = [];
-    points.push(new THREE.Vector3(0, 0, 0));
-    points.push(new THREE.Vector3(0, 100, 0));
-    points.push(new THREE.Vector3(10, 0, 0));
-
-    geometry = new THREE.BufferGeometry().setFromPoints(points);
-    material = new THREE.LineBasicMaterial({ color: 0x0000ff });
-
-    line = new THREE.Line(geometry, material);
-
-    scene.add(line);
-}
-
 
 export default Visualization;

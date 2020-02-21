@@ -1,7 +1,7 @@
     body {
         width: 100vw;
         height: 100vh;
-        background-color: silver;
+        background-color: #fbeec1;
         display: grid;
         gap: 1%;
         grid-template-rows: 98vh;
@@ -14,19 +14,21 @@
         font-family: "Source Sans Pro";
         grid-column: 1;
         position: sticky;
-        text-align: left;
-        background: goldenrod;
+        text-align: center;
+        background: #daad86;
     }
     
     #Views {
         padding: 1%;
         grid-column: 1;
         position: sticky;
-        text-align: left;
-        background: mediumturquoise;
+        text-align: center;
+        background: 659dbd;
     }
     
     #start {
+        margin-top: 30px;
+        margin-bottom: 30px;
         display: -webkit-flexbox;
         display: -ms-flexbox;
         display: -webkit-flex;
@@ -42,14 +44,14 @@
         grid-column: 1;
         position: sticky;
         text-align: left;
-        background: mediumturquoise;
+        background: #659dbd;
     }
     
     #Development {
         grid-column: 1;
         position: sticky;
         text-align: left;
-        background: red;
+        background: #8d8741;
     }
     
     #Scroll {
@@ -125,7 +127,7 @@
     }
     
     .button:hover {
-        background-color: red;
+        background-color: orange;
     }
     
     .slidecontainer {
@@ -165,11 +167,11 @@
     
     #floating {
         grid-row-start: 1;
-        transition: .5s;
-        opacity: .5;
+        transition: .3s;
+        opacity: .1;
         position: fixed;
-        border: 10px solid #4CAF50;
-        top: 30vh;
+        border: 5px solid goldenrod;
+        top: 70vh;
         left: 60vw;
         z-index: 100;
     }

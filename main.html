@@ -30,7 +30,7 @@
         </div>
         <div id='Views'>
             <a href='#Visualization'>
-                <div style='float:right;'>
+                <div>
                     Visualization
                 </div>
             </a>
@@ -38,7 +38,7 @@
             <p></p>
 
             <a href="#PercentVsTime">
-                <div style='float:right;'>
+                <div>
                     Proportion of species vs. Time
                 </div>
             </a>
@@ -46,10 +46,12 @@
             <p></p>
 
             <a href="#CountVsTime">
-                <div style='float:right;'>
+                <div>
                     Count of each species vs. Time
                 </div>
             </a>
+
+            <p><input type="button" class='button' id="clear_graphs" value='Clear Graphs'></p>
         </div>
 
 
@@ -57,75 +59,65 @@
         <div id='Controls'>
             <p>Number of Particles (Exponent):
                 <div class="slidecontainer">
-                    <input type="range" min="0" max="10" value="1" class="slider" id="orders_of_magnitude">
-                    <text id="slider_value"></text>
+                    <input type="range" min="1" max="6" class="slider" id="orders_of_magnitude">
+                    <text id="slider_value"> </text>
                 </div>
             </p>
             <p>Initial Proportion of Product:
                 <div class="slidecontainer">
-                    <input type="range" min="0" max="100" value="100" class="slider" id="initial_ratio">
-                    <text id="slider_value"></text>
+                    <input type="range" min="1" max="100" class="slider" id="initial_ratio">
+                    <text id="slider_value"> </text>
                 </div>
             </p>
-
-            <p>Forward Reaction Rate (Exponent):
+            <p>Reactor Size (edge length in nm):
                 <div class="slidecontainer">
-                    <input type="range" min="0" max="20" value="9" class="slider" id="forward_rate">
+                    <input type="range" min="1" max="50" class="slider" id="edge_length">
                     <text id="slider_value"></text>
                 </div>
             </p>
-
-            <p>Equilibrium (K)onstant (Exponent):
-                <div class="slidecontainer">
-                    <input type="range" min="-10" max="10" value="-3" class="slider" id="equilibrium_constant">
-                    <text id="slider_value"></text>
-                </div>
-            </p>
-
-            <p>Backwards Reaction Rate (Exponent):
-                <div class="slidecontainer">
-                    <input type="range" min="0" max="20" value="12" class="slider" id="backward_rate">
-                    <text id="slider_value"></text>
-                </div>
-            </p>
-
             <p>Time Step Equivalent (exponent):
                 <div class="slidecontainer">
-                    <input type="range" min="0" max="10" value="0" class="slider" id="time_step">
-                    <text id="slider_value"></text>
+                    <input type="range" min="0" max="100" class="slider" id="time_step">
+                    <text id="slider_value"> </text>
                 </div>
             </p>
-
-
-
-
-
-
 
         </div>
 
 
         <div id='Development'>
             <h3>Planned/Partially Implemented:</h3>
-            <p><input type="button" class='button' id="run_simulation" value='Clear Graphs'></p>
 
-            <p>Reactor Size (edge length in nm):
+
+
+            <p>Forward Reaction Rate (Exponent):
                 <div class="slidecontainer">
-                    <input type="range" min="5" max="50" value="5" class="slider" id="edge_length">
-                    <text id="slider_value"></text>
+                    <input type="range" min="0" max="20" class="slider" id="forward_rate">
+                    <text id="slider_value"> </text>
                 </div>
             </p>
-
+            <p>Equilibrium (K)onstant (Exponent):
+                <div class="slidecontainer">
+                    <input type="range" min="-10" max="10" class="slider" id="equilibrium_constant">
+                    <text id="slider_value"> </text>
+                </div>
+            </p>
+            <p>Backwards Reaction Rate (Exponent):
+                <div class="slidecontainer">
+                    <input type="range" min="0" max="20" class="slider" id="backward_rate">
+                    <text id="slider_value"> </text>
+                </div>
+            </p>
 
             <p>Amount Chaos:
                 <div class="slidecontainer">
-                    <input type="range" min="1" max="100" value="50" class="slider" id="amount_chaos">
+                    <input type="range" min="1" max="100" class="slider" id="amount_chaos">
                     <text id="slider_value"></text>
                 </div>
             </p>
 
-        </div>
 
+        </div>
     </div>
 
 
@@ -133,8 +125,10 @@
     <div id="Scroll">
 
 
-        <div id='floating' style="width:30%; height: 15%;">
-            <h2>Information on current simulation:</h2>
+        <div id='floating' style="width:fit-content; height:fit-content;  text-align:left;">
+            <!--  <h2>Information on current simulation:</h2> -->
+            <ul>
+            </ul>
         </div>
         <div id='Visualization' class='render'></div>
 

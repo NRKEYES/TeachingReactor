@@ -6,3 +6,27 @@
     //     species[name].percent.push(1 - percent_product);
     //     species[name].count.push(A);
     // }
+
+
+    function update_slider_value(passed) {
+    passed.parentElement.lastElementChild.innerHTML = passed.value;
+    //console.log(this.parentElement.lastElementChild.innerHTML)
+}
+
+
+
+
+function make_line() {
+    // adding a line
+    this.points = [];
+    points.push(new THREE.Vector3(0, 0, 0));
+    points.push(new THREE.Vector3(0, 100, 0));
+    points.push(new THREE.Vector3(10, 0, 0));
+
+    geometry = new THREE.BufferGeometry().setFromPoints(points);
+    material = new THREE.LineBasicMaterial({ color: 0x0000ff });
+
+    line = new THREE.Line(geometry, material);
+
+    scene.add(line);
+}

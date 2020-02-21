@@ -43,6 +43,14 @@ class Molecule {
 
     }
 
+    tick() {
+        this.mesh.position.set(
+            d3.randomNormal(0.0)(.33),
+            d3.randomNormal(0.0)(.33),
+            d3.randomNormal(0.0)(.33));
+
+    }
+
 
     update() {
         //console.log('update')
