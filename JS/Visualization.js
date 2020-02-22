@@ -41,12 +41,11 @@ var atom_radius = { // Van der walls from wiki https://en.wikipedia.org/wiki/Van
 class Visualization {
 
     constructor(incoming_data, chamber_edge_length) {
-        this.data = incoming_data;
+
         this.chamber_edge_length = chamber_edge_length;
 
         this.camera_displacement = chamber_edge_length * 2;
 
-        console.log(this.data)
 
         //Engine Variables
         this.height_for_3d = document.getElementById("Visualization").clientHeight;
@@ -129,19 +128,59 @@ class Visualization {
 
 
         // Just added remove if breaks.
-        this.add_reaction_chamber(chamber_edge_length)
+        this.add_reaction_chamber()
         this.animate();
 
     }
 
-    init(chamber_edge_length) {
+    init(incoming_data, chamber_edge_length) {
+        this.data = incoming_data;
 
         this.chamber_edge_length = chamber_edge_length;
-        // Create Reaction Chamber element
-        if (this.chamber == null) {
-            this.add_reaction_chamber(this.chamber_edge_length); // in nm
-        }
 
+        this.camera_displacement = chamber_edge_length * 2;
+
+        // Setup scene, camera, lighting
+        this.scene = new THREE.Scene();
+        this.scene.position.x = 0;
+        this.scene.position.y = 0;
+        this.scene.position.z = 0;
+        //this.scene.overrideMaterial = { color: 0xffff00 };
+
+        this.camera = new THREE.PerspectiveCamera(30, this.width_for_3d / this.height_for_3d, 1, 2000);
+        this.camera.position.z = this.camera_displacement; //camera.lookAt(scene.position)
+        this.camera.position.x = this.camera_displacement; //camera.lookAt(scene.position)
+        this.camera.position.y = this.camera_displacement; //camera.lookAt(scene.position)
+
+        this.directionalLight = new THREE.DirectionalLight(0xffffff, .5);
+        this.directionalLight.position.set(100, -100, 0);
+        this.directionalLight.castShadow = true;
+        this.scene.add(this.directionalLight);
+        this.renderPass = new RenderPass(this.scene, this.camera);
+
+        this.composer = new EffectComposer(this.renderer);
+        this.composer.addPass(this.renderPass);
+        this.composer.addPass(this.outlinePass);
+
+        // Setup all the controls
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+        this.controls.dampingFactor = 0.25;
+        this.controls.screenSpacePanning = false;
+        this.controls.minDistance = 1;
+        this.controls.maxDistance = this.camera_displacement * 4;
+        this.controls.maxPolarAngle = Math.PI;
+
+
+        // Just added remove if breaks.
+
+
+
+
+
+
+        this.chamber = null;
+        this.chamber_edge_length = chamber_edge_length;
 
         for (name in this.data) {
             this.generate_species(name)
@@ -149,44 +188,37 @@ class Visualization {
                 this.add_molecule(name);
             }
         }
+        this.add_reaction_chamber()
 
 
-
-        //console.log(this.scene);
-        //this.animate();
-
-        return this.data;
     }
 
-    clean_all(incoming_data) {
+    clean_all() {
         // Clean up old scene molecules and chamber
-        for (name in this.data) {
-            while (this.data[name].instances.length > 0) {
-                let temp = this.data[name].instances.pop();
-                //console.log(temp)
-                let object = this.scene.getObjectByProperty('uuid', temp.mesh.uuid);
-                //console.log(object)
-                object.geometry.dispose();
-                for (let mat in object.materials) {
-                    mat.dispose();
-                }
-                this.scene.remove(object);
-            }
-        }
 
-        this.data = incoming_data;
-        //Currently no changes to chamber are meaningful, so just gonna let it remain.
-        console.log(this.chamber)
+        // for (name in this.data) {
+        //     while (this.data[name].instances.length > 0) {
+        //         let temp = this.data[name].instances.pop();
+        //         //console.log(temp)
+        //         let object = this.scene.getObjectByProperty('uuid', temp.mesh.uuid);
+        //         //console.log(object)
+        //         object.geometry.dispose();
+        //         for (let mat in object.materials) {
+        //             mat.dispose();
+        //         }
+        //         this.scene.remove(object);
+        //     }
+        // }
+
+        //console.log(this.chamber)
         if (this.chamber != null) {
             this.chamber.geometry.dispose()
             this.chamber.material.dispose();
             this.scene.remove(this.chamber);
-
-            this.chamber = null;
         }
 
 
-        this.renderer.renderLists.dispose();
+        // this.renderer.renderLists.dispose();
 
     }
 
@@ -258,7 +290,7 @@ class Visualization {
         //this.selectedObjects.push(temp.mesh)
     }
 
-    add_reaction_chamber(chamber_edge_length) {
+    add_reaction_chamber() {
         // Reaction Chamber
 
         let texture1 = new THREE.TextureLoader().load('Images/steel.jpg');
@@ -278,13 +310,14 @@ class Visualization {
             side: THREE.DoubleSide,
         });
 
-        let geometry = new THREE.BoxBufferGeometry(chamber_edge_length, chamber_edge_length, chamber_edge_length);
+        let geometry = new THREE.BoxBufferGeometry(this.chamber_edge_length, this.chamber_edge_length, this.chamber_edge_length);
         this.chamber = new THREE.Mesh(geometry, material);
         this.chamber.position.set(0, 0, 0);
+        //console.log(this.chamber)
         this.scene.add(this.chamber);
 
-        geometry.dispose();
-        material.dispose();
+        // geometry.dispose();
+        // material.dispose();
         //selectedObjects.push(chamber)
     }
 

@@ -218,7 +218,11 @@ function find_time_step() {
 }
 
 function simulation() {
-    //console.log(species)
+    console.log("Agent Based Physics")
+    console.log(species)
+
+
+
     //for (name in species) {
     //console.log(name)
     //console.log(species[name].instances[0])
@@ -321,8 +325,8 @@ function start_simulation() {
     print_info_block();
     t = 0;
 
-    //visualizer.clean_all(species);
-    species = visualizer.init(chamber_edge_length);
+    visualizer.clean_all();
+    visualizer.init(species, chamber_edge_length);
 
     count_v_time.init(species, t_step, steps);
     percent_v_time.init(species, t_step, steps);
