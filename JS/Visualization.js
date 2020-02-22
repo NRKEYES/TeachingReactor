@@ -324,13 +324,13 @@ class Visualization {
 
     tick(incoming_data) {
 
-        for (name in this.data) {
-            //console.log(this.data[name]);
-            for (let i = 0; i < this.data[name].instances.length; i++) {
-                //console.log(this.data[name].instances[i]);
-                this.data[name].instances[i].tick();
-            }
-        }
+        // for (name in this.data) {
+        //     //console.log(this.data[name]);
+        //     for (let i = 0; i < this.data[name].instances.length; i++) {
+        //         //console.log(this.data[name].instances[i]);
+        //         this.data[name].instances[i].tick();
+        //     }
+        // }
     }
 
 

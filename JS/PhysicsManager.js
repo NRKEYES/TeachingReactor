@@ -217,10 +217,30 @@ function find_time_step() {
 
 }
 
+
+function thermostat() {
+    // for gasses
+    // K = .5 m v_rms^2
+    // K = 1.5 R/N_ava T
+    // so velocity in terms of T is
+    // v_rms = sqrt( 3 R/N_ava T/m )
+
+
+
+
+}
+
 function simulation() {
     console.log("Agent Based Physics")
     console.log(species)
 
+    for (name in species) {
+        //console.log(this.data[name]);
+        for (let i = 0; i < species[name].instances.length; i++) {
+            //console.log(this.data[name].instances[i]);
+            species[name].instances[i].tick();
+        }
+    }
 
 
     //for (name in species) {
@@ -310,7 +330,7 @@ function update_all() {
         // Run the differential equations numerically with appropriate discrete modifications.
         numerical_simulation();
         // Actually move the particles around.
-        //simulation();
+        simulation();
 
         count_v_time.tick(species);
         percent_v_time.tick(species);
