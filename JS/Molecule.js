@@ -18,7 +18,7 @@ class Molecule {
             d3.randomUniform(-1)(1));
 
 
-        console.log(this.mesh.position)
+        //console.log(this.mesh.position)
 
         // this.mesh.updateMatrixWorld();
         // this.mesh.updateMatrix();
@@ -54,18 +54,16 @@ class Molecule {
 
     }
 
-    tick() {
+    tick(data) {
 
+        this.check_neighbors(data);
         //cHECK to see if we are inside a wall?
-
-
 
         //randomly move about
         // this.mesh.position.set(
         //     d3.randomNormal(0.0)(.33),
         //     d3.randomNormal(0.0)(.33),
         //     d3.randomNormal(0.0)(.33));
-
 
         //set the position to one corner of the cube
         // then clamp all at chamber length
@@ -75,19 +73,9 @@ class Molecule {
         // max - the maximum value the components will be clamped to
 
         // If this vector's x, y or z values are greater than the max value, they are replaced by the max value.
-
-
-
     }
 
-
-    update(delta_t, chamber_edge_length) {
-
-
-        this.mesh.position.addScaledVector(this.velocity, delta_t);
-        this.mesh.rotateOnAxis(this.rotational_axis, .05);
-
-
+    check_walls(chamber_edge_length) {
 
         if ((this.mesh.position.x >= chamber_edge_length / 2) ||
             (this.mesh.position.x <= -chamber_edge_length / 2)) {
@@ -112,6 +100,73 @@ class Molecule {
 
             this.velocity.setZ(this.velocity.z * -1);
         }
+    }
+
+    merge(mol_1) {
+        console.log('we hit!')
+
+    }
+    check_neighbors(data) {
+        //console.log('check neighbors')
+
+        let possible_x = [];
+        let possible_x_y = [];
+
+        for (let x = 0; x < data.instances.length; x++) {
+            //console.log(data.instances[x])
+
+            let aprox =
+                this.mesh.position.x -
+                data.instances[x].mesh.position.x;
+
+            //console.log(aprox);
+
+            if (Math.abs(aprox < 1)) {
+                //console.log('we hit! X')
+                possible_x.push(data.instances[x])
+            }
+        }
+
+        for (let y = 0; y < possible_x.length; y++) {
+
+            let aprox =
+                this.mesh.position.y -
+                possible_x[y].mesh.position.y;
+
+            //console.log(aprox);
+
+            if (Math.abs(aprox < 1)) {
+                //console.log('we hit Y!')
+                possible_x_y.push(possible_x[y])
+            }
+        }
+        //console.log(possible_x_y);
+        for (let z = 0; z < possible_x_y.length; z++) {
+
+            let aprox =
+                this.mesh.position.z -
+                possible_x_y[z].mesh.position.z;
+
+            //console.log(aprox);
+
+            if (Math.abs(aprox < 1)) {
+
+                this.merge(possible_x_y[z]);
+            }
+        }
+
+    }
+
+    update(data, delta_t, chamber_edge_length) {
+
+
+        this.mesh.position.addScaledVector(this.velocity, delta_t);
+        this.mesh.rotateOnAxis(this.rotational_axis, .05);
+
+
+
+        this.check_walls(chamber_edge_length);
+
 
 
 
@@ -119,8 +174,6 @@ class Molecule {
 
         //return console.log()
     }
-
-
 }
 
 export default Molecule;

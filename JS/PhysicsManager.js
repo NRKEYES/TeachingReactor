@@ -231,49 +231,14 @@ function thermostat() {
 }
 
 function simulation() {
-    console.log("Agent Based Physics")
-    console.log(species)
+    //console.log("Agent Based Physics")
+    //console.log(species)
 
     for (name in species) {
         //console.log(this.data[name]);
         for (let i = 0; i < species[name].instances.length; i++) {
             //console.log(this.data[name].instances[i]);
-            species[name].instances[i].tick();
-        }
-    }
-
-
-    for (name in species) {
-        for (let i = 0; i < species[name].instances.length; i++) {
-            //console.log(species[name].instances[i]);
-            //this.data[name].instances[i]
-
-
-            // if ((species[name].instances[i].mesh.position.x >= chamber_edge_length / 2) ||
-            //     (species[name].instances[i].mesh.position.x <= -chamber_edge_length / 2)) {
-
-            //     species[name].instances[i].mesh.position.setX(Math.sign(species[name].instances[i].velocity.x) * chamber_edge_length / 2);
-            //     let negate = -1 * species[name].instances[i].velocity.x;
-            //     console.log(negate)
-            //     species[name].instances[i].velocity.setX(negate);
-            // }
-            // if ((species[name].instances[i].mesh.position.y >= chamber_edge_length / 2) ||
-            //     (species[name].instances[i].mesh.position.y <= -chamber_edge_length / 2)) {
-
-            //     species[name].instances[i].mesh.position.setY(Math.sign(species[name].instances[i].velocity.y) * chamber_edge_length / 2);
-            //     let negate = -1 * species[name].instances[i].velocity.y;
-            //     species[name].instances[i].velocity.setY(negate);
-            // }
-            // if ((species[name].instances[i].mesh.position.z >= chamber_edge_length / 2) ||
-            //     (species[name].instances[i].mesh.position.z <= -chamber_edge_length / 2)) {
-
-            //     species[name].instances[i].mesh.position.setZ(Math.sign(species[name].instances[i].velocity.z) * chamber_edge_length / 2);
-            //     let negate = -1 * species[name].instances[i].velocity.z;
-            //     species[name].instances[i].velocity.setZ(negate);
-            // }
-
-
-
+            species[name].instances[i].tick(species[name]);
         }
     }
 }
@@ -434,6 +399,9 @@ document.querySelector('#clear_graphs').addEventListener('click', () => {
 });
 
 window.addEventListener('resize', () => visualizer.onWindowResize(), false);
+
+
+
 
 d3.select("#orders_of_magnitude").on("input", function() {
     orders_of_magnitude = this.value;
