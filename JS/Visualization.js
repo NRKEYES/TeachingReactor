@@ -13,7 +13,7 @@ import { BufferGeometryUtils } from '/JS/three/examples/jsm/utils/BufferGeometry
 import Molecule from '/JS/Molecule.js'
 
 
-let sphere_quality = 6;
+let sphere_quality = 10;
 
 var COLORS = {
     "H": 0xC0C0C0,
@@ -135,7 +135,9 @@ class Visualization {
 
     init(incoming_data, chamber_edge_length) {
         this.data = incoming_data;
-
+        for (name in this.data) {
+            this.data[name].instances = [];
+        }
         this.chamber_edge_length = chamber_edge_length;
 
         this.camera_displacement = chamber_edge_length * 2;
@@ -158,9 +160,25 @@ class Visualization {
         this.scene.add(this.directionalLight);
         this.renderPass = new RenderPass(this.scene, this.camera);
 
-        this.composer = new EffectComposer(this.renderer);
+        //this.composer = new EffectComposer(this.renderer);
         this.composer.addPass(this.renderPass);
         this.composer.addPass(this.outlinePass);
+
+
+        // Configure outline shader
+        this.outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), this.scene, this.camera);
+        this.selectedObjects = [];
+        this.outlinePass.selectedObjects = this.selectedObjects;
+        this.outlinePass.renderToScreen = true;
+
+        this.outlinePass.edgeStrength = this.outline_params.edgeStrength;
+        this.outlinePass.edgeGlow = this.outline_params.edgeGlow;
+        this.outlinePass.visibleEdgeColor.set(0xffffff);
+        this.outlinePass.hiddenEdgeColor.set(0xffffff);
+
+        this.composer.addPass(this.outlinePass);
+
+
 
         // Setup all the controls
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -173,7 +191,6 @@ class Visualization {
 
 
         // Just added remove if breaks.
-
 
 
 
@@ -218,7 +235,7 @@ class Visualization {
         }
 
 
-        // this.renderer.renderLists.dispose();
+        this.renderer.renderLists.dispose();
 
     }
 
@@ -262,7 +279,10 @@ class Visualization {
 
         console.log(mergedGeometry)
 
-        this.data[name]['graphics'] = { 'geom': BufferGeometryUtils.mergeBufferGeometries(mergedGeometry, true), 'material': materials }
+        this.data[name]['graphics'] = {
+            'geom': BufferGeometryUtils.mergeBufferGeometries(mergedGeometry, true),
+            'material': materials
+        }
 
 
         //mergedGeometry.dispose();
@@ -280,14 +300,16 @@ class Visualization {
         if (name == null) {
             name = 'Reactant'
         }
-        let temp = new Molecule(name, this.data[name].graphics.geom, this.data[name].graphics.material);
+
+        let temp = null;
+        temp = new Molecule(name, this.data[name].graphics.geom, this.data[name].graphics.material);
 
         this.data[name].instances.push(temp);
 
         //console.log(this.data[name].instances);
         // this.scene.add(this.data[name].instances.slice(-1)[0].mesh);
         this.scene.add(temp.mesh);
-        //this.selectedObjects.push(temp.mesh)
+        this.selectedObjects.push(temp.mesh)
     }
 
     add_reaction_chamber() {
@@ -337,16 +359,17 @@ class Visualization {
     animate() {
         requestAnimationFrame(this.animate.bind(this));
 
+        //console.log(this.clock.getDelta());
+        let delta_t = this.clock.getDelta();
+
         for (name in this.data) {
             //console.log(this.data[name]);
             for (let i = 0; i < this.data[name].instances.length; i++) {
                 //console.log(this.data[name].instances[i]);
-                this.data[name].instances[i].update();
+                this.data[name].instances[i].update(delta_t);
             }
         }
 
-
-        //this.renderer.render(this.scene, this.camera);
 
         this.composer.render(this.scene, this.camera);
     };
