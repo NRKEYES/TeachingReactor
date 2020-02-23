@@ -73,7 +73,7 @@ k_fwd = k_fwd / chamber_volume // cancel out volume units. 1/(molecule sec)
 console.log('k_fwd: ' + k_fwd);
 
 //let Keq = 5 * Math.pow(10, 0); // The ratio of k_fwd/k_rev
-let Keq = 5 //* 1.66
+let Keq = 1 //* 1.66
 
 let k_rev = k_fwd / Keq; // will have coresponding units.   1/(molecule sec)
 console.log('k_rev: ' + k_rev);
@@ -243,13 +243,39 @@ function simulation() {
     }
 
 
-    //for (name in species) {
-    //console.log(name)
-    //console.log(species[name].instances[0])
+    for (name in species) {
+        for (let i = 0; i < species[name].instances.length; i++) {
+            //console.log(species[name].instances[i]);
+            //this.data[name].instances[i]
 
-    // for (mol of species[name].instances) {
-    //     //console.log(instance)
-    // }
+
+            // if ((species[name].instances[i].mesh.position.x >= chamber_edge_length / 2) ||
+            //     (species[name].instances[i].mesh.position.x <= -chamber_edge_length / 2)) {
+
+            //     species[name].instances[i].mesh.position.setX(Math.sign(species[name].instances[i].velocity.x) * chamber_edge_length / 2);
+            //     let negate = -1 * species[name].instances[i].velocity.x;
+            //     console.log(negate)
+            //     species[name].instances[i].velocity.setX(negate);
+            // }
+            // if ((species[name].instances[i].mesh.position.y >= chamber_edge_length / 2) ||
+            //     (species[name].instances[i].mesh.position.y <= -chamber_edge_length / 2)) {
+
+            //     species[name].instances[i].mesh.position.setY(Math.sign(species[name].instances[i].velocity.y) * chamber_edge_length / 2);
+            //     let negate = -1 * species[name].instances[i].velocity.y;
+            //     species[name].instances[i].velocity.setY(negate);
+            // }
+            // if ((species[name].instances[i].mesh.position.z >= chamber_edge_length / 2) ||
+            //     (species[name].instances[i].mesh.position.z <= -chamber_edge_length / 2)) {
+
+            //     species[name].instances[i].mesh.position.setZ(Math.sign(species[name].instances[i].velocity.z) * chamber_edge_length / 2);
+            //     let negate = -1 * species[name].instances[i].velocity.z;
+            //     species[name].instances[i].velocity.setZ(negate);
+            // }
+
+
+
+        }
+    }
 }
 
 function numerical_simulation() {
@@ -412,7 +438,7 @@ window.addEventListener('resize', () => visualizer.onWindowResize(), false);
 d3.select("#orders_of_magnitude").on("input", function() {
     orders_of_magnitude = this.value;
     // raw starting numbers
-    total_molecules = 5 * Math.pow(10, orders_of_magnitude);
+    total_molecules = 1 * Math.pow(10, orders_of_magnitude);
     console.log(total_molecules);
 
     reactant_initial = total_molecules * r_to_p_ratio

@@ -116,6 +116,8 @@ class Visualization {
         this.outlinePass.hiddenEdgeColor.set(0xffffff);
 
         this.composer.addPass(this.outlinePass);
+        //console.log(this.composer)
+
 
         // Setup all the controls
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -138,36 +140,33 @@ class Visualization {
         for (name in this.data) {
             this.data[name].instances = [];
         }
+        this.selectedObjects = [];
+
         this.chamber_edge_length = chamber_edge_length;
 
-        this.camera_displacement = chamber_edge_length * 2;
+
+        this.composer = new EffectComposer(this.renderer);
 
         // Setup scene, camera, lighting
         this.scene = new THREE.Scene();
         this.scene.position.x = 0;
         this.scene.position.y = 0;
         this.scene.position.z = 0;
-        //this.scene.overrideMaterial = { color: 0xffff00 };
 
-        this.camera = new THREE.PerspectiveCamera(30, this.width_for_3d / this.height_for_3d, 1, 2000);
-        this.camera.position.z = this.camera_displacement; //camera.lookAt(scene.position)
-        this.camera.position.x = this.camera_displacement; //camera.lookAt(scene.position)
-        this.camera.position.y = this.camera_displacement; //camera.lookAt(scene.position)
-
-        this.directionalLight = new THREE.DirectionalLight(0xffffff, .5);
-        this.directionalLight.position.set(100, -100, 0);
-        this.directionalLight.castShadow = true;
         this.scene.add(this.directionalLight);
+
         this.renderPass = new RenderPass(this.scene, this.camera);
-
-        //this.composer = new EffectComposer(this.renderer);
         this.composer.addPass(this.renderPass);
-        this.composer.addPass(this.outlinePass);
 
+        // this.composer.reset();
+        // //this.composer.passes.dispose()
+        // 
+        // this.composer.addPass(this.outlinePass);
+        // console.log(this.composer)
 
         // Configure outline shader
         this.outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), this.scene, this.camera);
-        this.selectedObjects = [];
+        //
         this.outlinePass.selectedObjects = this.selectedObjects;
         this.outlinePass.renderToScreen = true;
 
@@ -302,7 +301,8 @@ class Visualization {
         }
 
         let temp = null;
-        temp = new Molecule(name, this.data[name].graphics.geom, this.data[name].graphics.material);
+        temp = new Molecule(name, this.data[name].graphics.geom, this.data[name].graphics.material, this.chamber_edge_length);
+        console.log(temp)
 
         this.data[name].instances.push(temp);
 
@@ -346,14 +346,9 @@ class Visualization {
 
     tick(incoming_data) {
 
-        // for (name in this.data) {
-        //     //console.log(this.data[name]);
-        //     for (let i = 0; i < this.data[name].instances.length; i++) {
-        //         //console.log(this.data[name].instances[i]);
-        //         this.data[name].instances[i].tick();
-        //     }
-        // }
     }
+
+
 
 
     animate() {
@@ -366,7 +361,7 @@ class Visualization {
             //console.log(this.data[name]);
             for (let i = 0; i < this.data[name].instances.length; i++) {
                 //console.log(this.data[name].instances[i]);
-                this.data[name].instances[i].update(delta_t);
+                this.data[name].instances[i].update(delta_t, this.chamber_edge_length);
             }
         }
 
