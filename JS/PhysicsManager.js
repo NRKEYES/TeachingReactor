@@ -349,8 +349,17 @@ function start_simulation() {
     setInterval(update_all, 1000);
 }
 
+
+
+
+
 // Add monitors the the main.html page as needed
 window.addEventListener('load', () => {
+
+    //hide elements at the start 
+    document.getElementById('floating_bar_chart').style.display = 'none'
+
+
     console.log('Page is fully loaded');
 
     update_all_sliders();
@@ -400,6 +409,7 @@ document.querySelector('#clear_graphs').addEventListener('click', () => {
 });
 document.querySelector('#barchart_button').addEventListener('click', () => {
 
+    //toggle element visability
     if (document.getElementById('floating_bar_chart').style.display == 'none') {
         document.getElementById('floating_bar_chart').style.display = 'initial';
     } else {
