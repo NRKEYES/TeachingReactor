@@ -7,6 +7,7 @@ import { RenderPass } from '/JS/three/examples/jsm/postprocessing/RenderPass.js'
 import { ShaderPass } from '/JS/three/examples/jsm/postprocessing/ShaderPass.js';
 import { OutlinePass } from '/JS/three/examples/jsm/postprocessing/OutlinePass.js';
 import { BokehPass } from '/JS/three/examples/jsm/postprocessing/BokehPass.js';
+import { BokehShader, BokehDepthShader } from '/JS/three/examples/jsm/shaders/BokehShader2.js';
 
 import { FXAAShader } from '/JS/three/examples/jsm/shaders/FXAAShader.js';
 import { BufferGeometryUtils } from '/JS/three/examples/jsm/utils/BufferGeometryUtils.js';
@@ -151,12 +152,18 @@ class Visualization {
         // A directional light shines from a specific direction. 
         // It acts like the sun, that means that all the rays produced are parallel. 
         this.shadowLight = new THREE.DirectionalLight(0xffffff, .5);
+        this.shadowLight_y = new THREE.DirectionalLight(0xffffff, .5);
+        this.shadowLight_z = new THREE.DirectionalLight(0xffffff, .5);
 
         // Set the direction of the light  
-        this.shadowLight.position.set(this.chamber_edge_length, this.chamber_edge_length / 2, this.chamber_edge_length / 2);
-
+        this.shadowLight.position.set(this.chamber_edge_length, 0, 0);
+        this.shadowLight_y.position.set(0, this.chamber_edge_length, 0);
+        this.shadowLight_z.position.set(0, 0, this.chamber_edge_length);
         // Allow shadow casting 
         this.shadowLight.castShadow = true;
+        this.shadowLight_y.castShadow = true;
+        this.shadowLight_z.castShadow = true;
+
 
         // define the visible area of the projected shadow
         this.shadowLight.shadow.camera.left = -this.chamber_edge_length;
@@ -174,8 +181,10 @@ class Visualization {
 
 
         // to activate the lights, just add them to the scene
-        //this.scene.add(this.hemisphereLight);
+        this.scene.add(this.hemisphereLight);
         this.scene.add(this.shadowLight);
+        this.scene.add(this.shadowLight_y);
+        this.scene.add(this.shadowLight_z);
     }
 
     init(incoming_data, chamber_edge_length) {
@@ -221,14 +230,15 @@ class Visualization {
         this.composer.addPass(this.outlinePass);
 
         this.bokehPass = new BokehPass(this.scene, this.camera, {
-            focus: this.chamber_edge_length,
+            focus: 5,
             aperture: 0.000005,
             maxblur: 1.0,
 
             // width: this.width,
             // height: this.height
         });
-        this.composer.addPass(this.bokehPass);
+        //this.composer.addPass(this.bokehPass);
+
 
 
 
@@ -358,7 +368,7 @@ class Visualization {
         //console.log(this.data[name].instances);
         // this.scene.add(this.data[name].instances.slice(-1)[0].mesh);
         this.scene.add(temp.mesh);
-        //this.selectedObjects.push(temp.mesh)
+        this.selectedObjects.push(temp.mesh)
     }
 
     add_floor() {
@@ -370,10 +380,9 @@ class Visualization {
         envMap.mapping = THREE.SphericalReflectionMapping;
 
         let material = new THREE.MeshPhysicalMaterial({
-            color: 0xD4AF37,
-            emissive: 0xD4AF37,
+            color: 'grey',
+            emissive: 'grey',
             reflectivity: 0,
-            color: 0xD4AF37,
             metalness: .9,
             roughness: 1,
             envMap: envMap,
@@ -381,27 +390,48 @@ class Visualization {
 
 
 
-        let geometry = new THREE.BoxBufferGeometry(.2, this.chamber_edge_length * 2, this.chamber_edge_length * 2);
+        let chamber_spacing = .3
+
+
+        let geometry = new THREE.BoxBufferGeometry(.2, this.chamber_edge_length, this.chamber_edge_length);
         this.chamber = new THREE.Mesh(geometry, material);
-        this.chamber.castShadow = true;
         this.chamber.receiveShadow = true;
-        this.chamber.position.set(-this.chamber_edge_length / 2, 0, 0);
+        this.chamber.position.set(-this.chamber_edge_length / 2 - chamber_spacing, 0, 0);
         //console.log(this.chamber)
         this.scene.add(this.chamber);
 
-        geometry = new THREE.BoxBufferGeometry(this.chamber_edge_length * 2, .2, this.chamber_edge_length * 2);
+        // material = new THREE.MeshPhysicalMaterial({
+        //     color: 'grey',
+        //     emissive: 'grey',
+        //     reflectivity: 0,
+        //     //metalness: .9,
+        //     roughness: 1,
+        //     envMap: envMap,
+        // });
+
+
+
+
+        geometry = new THREE.BoxBufferGeometry(this.chamber_edge_length, .2, this.chamber_edge_length);
         this.chamber = new THREE.Mesh(geometry, material);
-        this.chamber.castShadow = true;
         this.chamber.receiveShadow = true;
-        this.chamber.position.set(0, -this.chamber_edge_length / 2, 0);
+        this.chamber.position.set(0, -this.chamber_edge_length / 2 - chamber_spacing, 0);
         //console.log(this.chamber)
         this.scene.add(this.chamber);
 
-        geometry = new THREE.BoxBufferGeometry(this.chamber_edge_length * 2, this.chamber_edge_length * 2, .2);
+        // material = new THREE.MeshPhysicalMaterial({
+        //     color: 0xF4AF37,
+        //     emissive: 0xD4AF37,
+        //     reflectivity: 0,
+        //     //metalness: .9,
+        //     roughness: 1,
+        //     envMap: envMap,
+        // });
+
+        geometry = new THREE.BoxBufferGeometry(this.chamber_edge_length, this.chamber_edge_length, .2);
         this.chamber = new THREE.Mesh(geometry, material);
-        this.chamber.castShadow = true;
         this.chamber.receiveShadow = true;
-        this.chamber.position.set(0, 0, -this.chamber_edge_length / 2);
+        this.chamber.position.set(0, 0, -this.chamber_edge_length / 2 - chamber_spacing);
         //console.log(this.chamber)
         this.scene.add(this.chamber);
 
@@ -448,6 +478,7 @@ class Visualization {
         // material.dispose();
         //selectedObjects.push(chamber)
     }
+
     add_reaction_chamber() {
         // Reaction Chamber
 
