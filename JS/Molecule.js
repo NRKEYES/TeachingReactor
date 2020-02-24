@@ -2,6 +2,7 @@ class Molecule {
     constructor(name, geometry, material, chamber_edge_length) {
         this.name = name;
 
+        this.check = true;
 
         // geometry.computeFaceNormals();
         // geometry.computeBoundingSphere();
@@ -13,9 +14,10 @@ class Molecule {
         this.mesh.castShadow = true;
         this.mesh.receiveShadow = true;
         this.mesh.position.set(
-            d3.randomUniform(-1)(1),
-            d3.randomUniform(-1)(1),
-            d3.randomUniform(-1)(1));
+            d3.randomUniform(-chamber_edge_length)(chamber_edge_length),
+            d3.randomUniform(-chamber_edge_length)(chamber_edge_length),
+            d3.randomUniform(-chamber_edge_length)(chamber_edge_length)
+        );
 
 
         //console.log(this.mesh.position)
@@ -56,7 +58,14 @@ class Molecule {
 
     tick(data) {
 
-        this.check_neighbors(data);
+        if (this.check) {
+            this.check_neighbors(data);
+        } else {
+            this.check = true;
+        }
+
+
+
         //cHECK to see if we are inside a wall?
 
         //randomly move about
@@ -103,14 +112,35 @@ class Molecule {
     }
 
     merge(mol_1) {
-        console.log('we hit!')
+        //console.log('we hit!');
+        //console.log(mol_1.name.length)
+
+        let mass_factor = this.name.length / mol_1.name.length;
+
+        //console.log(mol_1.velocity);
+        mol_1.velocity.addScaledVector(mol_1.velocity, -2 * mass_factor);
+        //console.log(mol_1.velocity);
+
+        mol_1.check = false;
+        this.velocity.addScaledVector(this.velocity, -2 * (1 / mass_factor));
+
+
+
+        //this.velocity = // multiply by factor based on mass
 
     }
+
     check_neighbors(data) {
         //console.log('check neighbors')
 
+        let hit_dist = .2;
+
+
         let possible_x = [];
         let possible_x_y = [];
+
+
+
 
         for (let x = 0; x < data.instances.length; x++) {
             //console.log(data.instances[x])
@@ -121,7 +151,7 @@ class Molecule {
 
             //console.log(aprox);
 
-            if (Math.abs(aprox < 1)) {
+            if (Math.abs(aprox < hit_dist)) {
                 //console.log('we hit! X')
                 possible_x.push(data.instances[x])
             }
@@ -135,7 +165,7 @@ class Molecule {
 
             //console.log(aprox);
 
-            if (Math.abs(aprox < 1)) {
+            if (Math.abs(aprox < hit_dist)) {
                 //console.log('we hit Y!')
                 possible_x_y.push(possible_x[y])
             }
@@ -149,7 +179,7 @@ class Molecule {
 
             //console.log(aprox);
 
-            if (Math.abs(aprox < 1)) {
+            if (Math.abs(aprox < hit_dist)) {
 
                 this.merge(possible_x_y[z]);
             }
@@ -159,20 +189,11 @@ class Molecule {
 
     update(data, delta_t, chamber_edge_length) {
 
-
         this.mesh.position.addScaledVector(this.velocity, delta_t);
         this.mesh.rotateOnAxis(this.rotational_axis, .05);
 
-
-
         this.check_walls(chamber_edge_length);
 
-
-
-
-
-
-        //return console.log()
     }
 }
 

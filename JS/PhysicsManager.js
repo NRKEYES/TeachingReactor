@@ -6,8 +6,9 @@ import SideView from '/JS/SideView.js';
 
 // raw starting numbers
 let orders_of_magnitude = 1;
+let OoM_factor = 1;
 console.log(orders_of_magnitude)
-let total_molecules = 5 * Math.pow(10, orders_of_magnitude);
+let total_molecules = OoM_factor * Math.pow(10, orders_of_magnitude);
 console.log(total_molecules);
 
 //chamber settings
@@ -88,15 +89,14 @@ let steps = 100
 
 
 let visualizer = new Visualization(species, chamber_edge_length);
-let sideview = new SideView();
 let count_v_time = new BlankVsTime(species, 'count', t_step, steps, 'CountVsTime', '# of molecules present');
 let percent_v_time = new BlankVsTime(species, 'percent', t_step, steps, 'PercentVsTime', 'Proportion of each species');
-//let percent_bar = new Barchart(species);
-
+let percent_bar = new Barchart(species, 'count', t_step, steps, 'floating_bar_chart', '# of molecules present');
+//let sideview = new SideView();
 
 
 function print_info_block() {
-    let block = document.getElementById('floating').lastElementChild;
+    let block = document.getElementById('info_box').lastElementChild;
     block.innerHTML = '';
     let textnode = null;
     let node = null; // Create a <li> node
@@ -325,7 +325,8 @@ function update_all() {
 
         count_v_time.tick(species);
         percent_v_time.tick(species);
-        //percent_bar.tick();
+        percent_bar.tick(species);
+
         visualizer.tick(); // Will add after render look?
 
     }
@@ -341,10 +342,9 @@ function start_simulation() {
 
     count_v_time.init(species, t_step, steps);
     percent_v_time.init(species, t_step, steps);
+    percent_bar.init(species);
 
-    sideview.init();
-
-    //percent_bar.init();
+    //sideview.init();
 
     setInterval(update_all, 1000);
 }
@@ -355,6 +355,7 @@ window.addEventListener('load', () => {
 
     update_all_sliders();
     print_info_block();
+    start_simulation();
 });
 
 document.querySelector('#run_simulation').addEventListener('click', () => {
@@ -397,16 +398,22 @@ document.querySelector('#clear_graphs').addEventListener('click', () => {
     percent_v_time.init(species, t_step, steps);
 
 });
+document.querySelector('#barchart_button').addEventListener('click', () => {
+
+    if (document.getElementById('floating_bar_chart').style.display == 'none') {
+        document.getElementById('floating_bar_chart').style.display = 'initial';
+    } else {
+        document.getElementById('floating_bar_chart').style.display = 'none';
+
+    }
+});
 
 window.addEventListener('resize', () => visualizer.onWindowResize(), false);
-
-
-
 
 d3.select("#orders_of_magnitude").on("input", function() {
     orders_of_magnitude = this.value;
     // raw starting numbers
-    total_molecules = 1 * Math.pow(10, orders_of_magnitude);
+    total_molecules = OoM_factor * Math.pow(10, orders_of_magnitude);
     console.log(total_molecules);
 
     reactant_initial = total_molecules * r_to_p_ratio

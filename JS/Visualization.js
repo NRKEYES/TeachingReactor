@@ -99,9 +99,14 @@ class Visualization {
 
 
         this.camera = new THREE.PerspectiveCamera(30, this.width_for_3d / this.height_for_3d, 1, 1000);
+        // this.camera.position.z = this.camera_displacement; //camera.lookAt(scene.position)
+        // this.camera.position.x = this.camera_displacement; //camera.lookAt(scene.position)
+        // this.camera.position.y = this.camera_displacement; //camera.lookAt(scene.position)
+
+        //this.camera.position.x = this.camera_displacement; //camera.lookAt(scene.position)
+        this.camera.position.y = this.camera_displacement / 2; //camera.lookAt(scene.position)
         this.camera.position.z = this.camera_displacement; //camera.lookAt(scene.position)
-        this.camera.position.x = this.camera_displacement; //camera.lookAt(scene.position)
-        this.camera.position.y = this.camera_displacement; //camera.lookAt(scene.position)
+
 
 
 
@@ -134,10 +139,7 @@ class Visualization {
         this.controls.maxPolarAngle = Math.PI;
 
 
-        // Just added remove if breaks.
-        this.add_reaction_chamber()
         this.animate();
-
     }
 
 
@@ -152,15 +154,18 @@ class Visualization {
         // A directional light shines from a specific direction. 
         // It acts like the sun, that means that all the rays produced are parallel. 
         this.shadowLight = new THREE.DirectionalLight(0xffffff, .5);
+        this.shadowLight_x = new THREE.DirectionalLight(0xffffff, .5);
         this.shadowLight_y = new THREE.DirectionalLight(0xffffff, .5);
         this.shadowLight_z = new THREE.DirectionalLight(0xffffff, .5);
 
         // Set the direction of the light  
-        this.shadowLight.position.set(this.chamber_edge_length, 0, 0);
+        this.shadowLight.position.set(this.chamber_edge_length, this.chamber_edge_length / 2, this.chamber_edge_length / 2);
+        this.shadowLight_x.position.set(this.chamber_edge_length, 0, 0);
         this.shadowLight_y.position.set(0, this.chamber_edge_length, 0);
         this.shadowLight_z.position.set(0, 0, this.chamber_edge_length);
         // Allow shadow casting 
         this.shadowLight.castShadow = true;
+        this.shadowLight_x.castShadow = true;
         this.shadowLight_y.castShadow = true;
         this.shadowLight_z.castShadow = true;
 
@@ -183,8 +188,8 @@ class Visualization {
         // to activate the lights, just add them to the scene
         this.scene.add(this.hemisphereLight);
         this.scene.add(this.shadowLight);
-        this.scene.add(this.shadowLight_y);
-        this.scene.add(this.shadowLight_z);
+        //this.scene.add(this.shadowLight_y);
+        //this.scene.add(this.shadowLight_z);
     }
 
     init(incoming_data, chamber_edge_length) {
@@ -233,9 +238,8 @@ class Visualization {
             focus: 5,
             aperture: 0.000005,
             maxblur: 1.0,
-
-            // width: this.width,
-            // height: this.height
+            width: this.width,
+            height: this.height
         });
         //this.composer.addPass(this.bokehPass);
 
@@ -307,7 +311,7 @@ class Visualization {
         let materials = [];
         let mergedGeometry = [];
         // basic monochromatic energy preservation
-        let roughness = .1;
+        let roughness = .4;
         let diffuseColor = new THREE.Color().setHSL(0.0, 0.0, .9);
 
         for (let i = 0; i < geometry.length; i++) {
@@ -360,7 +364,7 @@ class Visualization {
             name = 'Reactant'
         }
 
-        let temp = new Molecule(name, this.data[name].graphics.geom, this.data[name].graphics.material, this.chamber_edge_length);
+        let temp = new Molecule(this.data[name].coords, this.data[name].graphics.geom, this.data[name].graphics.material, this.chamber_edge_length);
         //        console.log(temp)
 
         this.data[name].instances.push(temp);
@@ -380,60 +384,116 @@ class Visualization {
         envMap.mapping = THREE.SphericalReflectionMapping;
 
         let material = new THREE.MeshPhysicalMaterial({
-            color: 'grey',
+            color: 'yellow',
             emissive: 'grey',
             reflectivity: 0,
             metalness: .9,
             roughness: 1,
-            envMap: envMap,
+            //envMap: envMap,
+            side: THREE.BackSide
+
         });
+
+
+        let geometry = new THREE.SphereBufferGeometry(
+            this.chamber_edge_length * 10, 4, 4, 4);
+
+        // this.chamber = new THREE.Mesh(geometry, material);
+        // this.chamber.receiveShadow = false;
+        // this.chamber.castShadow = false;
+        // this.chamber.position.set(0, 0, 0);
+        // this.scene.add(this.chamber);
+
 
 
 
         let chamber_spacing = .3
 
 
-        let geometry = new THREE.BoxBufferGeometry(.2, this.chamber_edge_length, this.chamber_edge_length);
+        material = new THREE.MeshPhysicalMaterial({
+            color: 'grey',
+            emissive: 'grey',
+            reflectivity: 0,
+            metalness: .9,
+            roughness: 1,
+            envMap: envMap,
+            polygonOffset: true,
+            polygonOffsetFactor: 1, // positive value pushes polygon further away
+            polygonOffsetUnits: 1,
+            side: THREE.DoubleSide
+
+        });
+
+        geometry = new THREE.BoxBufferGeometry(.2, this.chamber_edge_length, this.chamber_edge_length);
         this.chamber = new THREE.Mesh(geometry, material);
         this.chamber.receiveShadow = true;
         this.chamber.position.set(-this.chamber_edge_length / 2 - chamber_spacing, 0, 0);
-        //console.log(this.chamber)
         this.scene.add(this.chamber);
 
         // material = new THREE.MeshPhysicalMaterial({
         //     color: 'grey',
         //     emissive: 'grey',
         //     reflectivity: 0,
-        //     //metalness: .9,
         //     roughness: 1,
         //     envMap: envMap,
         // });
-
-
-
 
         geometry = new THREE.BoxBufferGeometry(this.chamber_edge_length, .2, this.chamber_edge_length);
         this.chamber = new THREE.Mesh(geometry, material);
         this.chamber.receiveShadow = true;
         this.chamber.position.set(0, -this.chamber_edge_length / 2 - chamber_spacing, 0);
-        //console.log(this.chamber)
         this.scene.add(this.chamber);
 
-        // material = new THREE.MeshPhysicalMaterial({
-        //     color: 0xF4AF37,
-        //     emissive: 0xD4AF37,
-        //     reflectivity: 0,
-        //     //metalness: .9,
-        //     roughness: 1,
-        //     envMap: envMap,
-        // });
-
-        geometry = new THREE.BoxBufferGeometry(this.chamber_edge_length, this.chamber_edge_length, .2);
+        geometry = new THREE.BoxGeometry(
+            this.chamber_edge_length, this.chamber_edge_length, .2, // size
+            this.chamber_edge_length, this.chamber_edge_length, 1); // divisions
         this.chamber = new THREE.Mesh(geometry, material);
         this.chamber.receiveShadow = true;
         this.chamber.position.set(0, 0, -this.chamber_edge_length / 2 - chamber_spacing);
-        //console.log(this.chamber)
         this.scene.add(this.chamber);
+
+
+
+        // ADD GRIDS
+        var size = this.chamber_edge_length;
+        var divisions = this.chamber_edge_length;
+
+        var gridHelper = new THREE.GridHelper(size, divisions, 'black', 'black');
+        gridHelper.position.set(0, -this.chamber_edge_length / 2, 0);
+        this.scene.add(gridHelper);
+
+
+        gridHelper = new THREE.GridHelper(size, divisions, 'black', 'black');
+        gridHelper.position.set(0, 0, -this.chamber_edge_length / 2);
+        gridHelper.geometry.rotateX(Math.PI / 2);
+        this.scene.add(gridHelper);
+
+        gridHelper = new THREE.GridHelper(size, divisions, 'black', 'black');
+        gridHelper.position.set(-this.chamber_edge_length / 2, 0, 0);
+        gridHelper.geometry.rotateZ(Math.PI / 2);
+        this.scene.add(gridHelper);
+
+        var gridHelper = new THREE.GridHelper(size, divisions);
+        gridHelper.position.set(0, this.chamber_edge_length / 2, 0);
+        this.scene.add(gridHelper);
+
+
+        gridHelper = new THREE.GridHelper(size, divisions);
+        gridHelper.position.set(0, 0, this.chamber_edge_length / 2);
+        gridHelper.geometry.rotateX(Math.PI / 2);
+        this.scene.add(gridHelper);
+
+        gridHelper = new THREE.GridHelper(size, divisions);
+        gridHelper.position.set(this.chamber_edge_length / 2, 0, 0);
+        gridHelper.geometry.rotateZ(Math.PI / 2);
+        this.scene.add(gridHelper);
+        // END ADD GRIDS
+
+
+
+
+
+
 
 
 

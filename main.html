@@ -51,7 +51,9 @@
                 </div>
             </a>
 
+            <p><input type="button" class='button' id="barchart_button" value='Barchart'></p>
             <p><input type="button" class='button' id="clear_graphs" value='Clear Graphs'></p>
+
         </div>
 
 
@@ -125,11 +127,13 @@
     <div id="Scroll">
 
 
-        <div id='floating' style="width:fit-content; height:fit-content;  text-align:left;">
-            <!--  <h2>Information on current simulation:</h2> -->
+        <div class='floating' id='info_box' style="width:fit-content; height:fit-content;  text-align:left;">
             <ul>
             </ul>
         </div>
+
+        <div class='floating' id='floating_bar_chart' style="width:30vw; height:50vh;"></div>
+
         <div id='Visualization' class='render'></div>
 
         <div id='PercentVsTime'></div>

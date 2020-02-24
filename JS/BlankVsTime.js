@@ -73,7 +73,7 @@ class BlankVsTime {
             .transition().duration(100).call(d3.axisBottom().scale(this.x))
 
 
-        this.svg.selectAll(".line").remove();
+        //this.svg.selectAll(".line").remove();
 
         this.y.domain([d3.max(this.data, (d) => { return d[this.blank_target]; })[0], 0])
 
