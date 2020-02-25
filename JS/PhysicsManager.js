@@ -371,6 +371,8 @@ function update_all() {
 }
 
 function start_simulation() {
+
+    setupPhysicsWorld();
     find_time_step();
     print_info_block();
     t = 0;
