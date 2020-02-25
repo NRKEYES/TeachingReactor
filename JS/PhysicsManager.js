@@ -3,6 +3,8 @@ import BlankVsTime from '/JS/BlankVsTime.js';
 import Barchart from '/JS/Barchart.js';
 import SideView from '/JS/SideView.js';
 
+//import ammo from '/JS/ammo/ammo.js'
+
 
 // raw starting numbers
 let orders_of_magnitude = 1;
@@ -165,7 +167,6 @@ function quadratic_solver(a, b, c) {
     }
 }
 
-
 function compute_delta_per_time(a, b) {
     // d[A]/dt= k_f[A] + k_b[B]
     // d[A]= k_f[A]*dt + k_b[B]*dt
@@ -232,7 +233,30 @@ function thermostat() {
 
 }
 
-//let clock = new THREE.Clock();
+
+let physicsWorld;
+
+function setupPhysicsWorld() {
+
+    let collisionConfiguration = new Ammo.btDefaultCollisionConfiguration(),
+        dispatcher = new Ammo.btCollisionDispatcher(collisionConfiguration),
+        overlappingPairCache = new Ammo.btDbvtBroadphase(),
+        solver = new Ammo.btSequentialImpulseConstraintSolver();
+
+    physicsWorld = new Ammo.btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
+
+    // Currently I don't want gravity.
+    //physicsWorld.setGravity(new Ammo.btVector3(0, -10, 0));
+
+}
+//Ammojs Initialization
+Ammo().then(start)
+
+function start() {
+
+    //code goes here
+
+}
 
 function simulation() {
     //console.log("Agent Based Physics")
