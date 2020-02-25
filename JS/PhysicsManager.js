@@ -81,6 +81,8 @@ console.log('k_rev: ' + k_rev);
 
 let stoich_coef = 2.0;
 
+
+let run_sim = false;
 let t_step = 0;
 let t_step_target = 1;
 let t_eq = 1.0;
@@ -230,9 +232,21 @@ function thermostat() {
 
 }
 
+//let clock = new THREE.Clock();
+
 function simulation() {
     //console.log("Agent Based Physics")
     //console.log(species)
+
+    // let delta_t = clock.getDelta();
+
+    // for (name in species) {
+    //     //console.log(this.data[name]);
+    //     for (let i = 0; i < species[name].instances.length; i++) {
+    //         //console.log(this.data[name].instances[i]);
+    //         species[name].instances[i].update(species, delta_t, chamber_edge_length);
+    //     }
+    // }
 
     for (name in species) {
         //console.log(this.data[name]);
@@ -317,7 +331,7 @@ function update_all_sliders() {
 }
 
 function update_all() {
-    if (t < steps) {
+    if ((t < steps) && (run_sim)) {
         // Run the differential equations numerically with appropriate discrete modifications.
         numerical_simulation();
         // Actually move the particles around.
@@ -346,7 +360,7 @@ function start_simulation() {
 
     //sideview.init();
 
-    setInterval(update_all, 1000);
+    setInterval(update_all, 1);
 }
 
 
@@ -358,7 +372,7 @@ window.addEventListener('load', () => {
 
     //hide elements at the start 
     document.getElementById('floating_bar_chart').style.display = 'none'
-
+    document.getElementById('floating_histogram').style.display = 'none'
 
     console.log('Page is fully loaded');
 
@@ -367,7 +381,12 @@ window.addEventListener('load', () => {
     start_simulation();
 });
 
+document.querySelector('#pause_simulation').addEventListener('click', () => {
+    run_sim = false;
+
+});
 document.querySelector('#run_simulation').addEventListener('click', () => {
+    run_sim = true;
     species = [{
             'name': 'Reactants',
             'percent': [r_to_p_ratio],

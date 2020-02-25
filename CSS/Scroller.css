@@ -197,3 +197,19 @@
         opacity: 1.0;
         background-color: orange;
     }
+    
+    #floating_histogram {
+        width: 10vw;
+        height: 10vh;
+        transition: .3s;
+        opacity: .5;
+        z-index: 100;
+        border: 5px solid red;
+        top: 20vh;
+        left: 60vw;
+    }
+    
+    #floating_histogram:hover {
+        opacity: 1.0;
+        background-color: orange;
+    }

@@ -235,8 +235,8 @@ class Visualization {
         this.composer.addPass(this.outlinePass);
 
         this.bokehPass = new BokehPass(this.scene, this.camera, {
-            focus: 5,
-            aperture: 0.000005,
+            focus: this.chamber_edge_length,
+            aperture: 0.000009,
             maxblur: 1.0,
             width: this.width,
             height: this.height
