@@ -9,7 +9,7 @@ class Barchart {
 
         this.w = document.getElementById("floating_bar_chart").clientWidth;
         this.h = document.getElementById("floating_bar_chart").clientHeight;
-        this.margin = { top: 10, right: 20, bottom: 20, left: 40 };
+        this.margin = { top: 10, right: 10, bottom: 20, left: 40 };
         this.width = this.w - this.margin.left - this.margin.right;
         this.height = this.h - this.margin.top - this.margin.bottom;
 

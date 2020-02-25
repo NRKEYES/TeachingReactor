@@ -23,152 +23,134 @@
 
 
 <body>
-
-    <div id="Tabs">
+    <div id='Menu'>
         <p>
-            <a type="button" class='button' id="run_simulation">Start Simulation</a>
-        </p>
-        <p>
-            <a type="button" class='button' id="pause_simulation">Pause Simulation</a>
-        </p>
-        <p>
-            <a type="button" class='button' id="barchart_button"> Display Barchart</a>
-        </p>
-        <p>
-            <a type="button" class='button' id="histogram_button"> Display Histogram</a>
+            <a type="button" class='button' id="menu-toggle">Menu</a>
         </p>
 
-        <p>
-            <a type="button" class='button' id="clear_graphs"> Clear Graphs</a>
-        </p>
+        <div id='Sub-Menu-Toggle' style='display: none;'>
+            <p>
+                <a type="button" class='button' id="controls-toggle">Simulation Controls</a>
+            </p>
 
-        <div id='Views'>
-            <a href='#Visualization'>
-                <div>
-                    Visualization
-                </div>
-            </a>
+            <p>
+                <a type="button" class='button' id="tab-toggle">Visualizations</a>
+            </p>
 
-            <p></p>
-
-            <a href="#PercentVsTime">
-                <div>
-                    Proportion of species vs. Time
-                </div>
-            </a>
-
-            <p></p>
-
-            <a href="#CountVsTime">
-                <div>
-                    Count of each species vs. Time
-                </div>
-            </a>
-
-
-
+            <p>
+                <a type="button" class='button' id="dev-toggle">Developmental Features</a>
+            </p>
         </div>
+        <div id='Sub-Menus'>
+            <div id='Controls' class="sub-menu" style='display: none;'>
 
+                <p>
+                    <a type="button" class='button' id="run_simulation">Start Simulation</a>
+                </p>
+                <p>
+                    <a type="button" class='button' id="pause_simulation">Pause Simulation</a>
+                </p>
 
-
-        <div id='Controls'>
-            <p>Number of Particles (Exponent):
                 <div class="slidecontainer">
+                    Number of Particles (Exponent):
                     <input type="range" min="0" max="6" class="slider" id="orders_of_magnitude">
                     <text id="slider_value"> </text>
                 </div>
-            </p>
-            <p>Initial Proportion of Product:
+
                 <div class="slidecontainer">
+                    Initial Proportion of Product:
                     <input type="range" min="1" max="100" class="slider" id="initial_ratio">
                     <text id="slider_value"> </text>
                 </div>
-            </p>
-            <p>Reactor Size (edge length in nm):
+
                 <div class="slidecontainer">
+                    Reactor Size (edge length in nm):
                     <input type="range" min="1" max="50" class="slider" id="edge_length">
                     <text id="slider_value"></text>
                 </div>
-            </p>
-            <p>Time Step Equivalent (exponent):
+
                 <div class="slidecontainer">
+                    Time Step Equivalent (exponent):
                     <input type="range" min="0" max="100" class="slider" id="time_step">
                     <text id="slider_value"> </text>
                 </div>
-            </p>
+            </div>
 
-        </div>
-
-
-        <div id='Development'>
-            <h3>Planned/Partially Implemented:</h3>
+            <div id="Tabs" class='sub-menu' style='display: none;'>
 
 
+                <p>
+                    <a type="button" class='button' id="barchart_button"> Display Barchart</a>
+                </p>
+                <p>
+                    <a type="button" class='button' id="histogram_button"> Display Histogram</a>
+                </p>
+                <p>
+                    <a type="button" class='button' id="clear_graphs"> Population vs. Time</a>
+                </p>
+                <p>
+                    <a type="button" class='button' id="clear_graphs"> Proportion vs. Time</a>
+                </p>
 
-            <p>Forward Reaction Rate (Exponent):
-                <div class="slidecontainer">
-                    <input type="range" min="0" max="20" class="slider" id="forward_rate">
-                    <text id="slider_value"> </text>
-                </div>
-            </p>
-            <p>Equilibrium (K)onstant (Exponent):
-                <div class="slidecontainer">
-                    <input type="range" min="-10" max="10" class="slider" id="equilibrium_constant">
-                    <text id="slider_value"> </text>
-                </div>
-            </p>
-            <p>Backwards Reaction Rate (Exponent):
-                <div class="slidecontainer">
-                    <input type="range" min="0" max="20" class="slider" id="backward_rate">
-                    <text id="slider_value"> </text>
-                </div>
-            </p>
-
-            <p>Amount Chaos:
-                <div class="slidecontainer">
-                    <input type="range" min="1" max="100" class="slider" id="amount_chaos">
-                    <text id="slider_value"></text>
-                </div>
-            </p>
+                <p>
+                    <a type="button" class='button' id="clear_graphs"> Clear Graphs</a>
+                </p>
 
 
+            </div>
+
+
+
+            <div id='Development' class='sub-menu' style='display: none;'>
+                <h3>Planned/Partially Implemented:</h3>
+
+
+
+                <p>Forward Reaction Rate (Exponent):
+                    <div class="slidecontainer">
+                        <input type="range" min="0" max="20" class="slider" id="forward_rate">
+                        <text id="slider_value"> </text>
+                    </div>
+                </p>
+                <p>Equilibrium (K)onstant (Exponent):
+                    <div class="slidecontainer">
+                        <input type="range" min="-10" max="10" class="slider" id="equilibrium_constant">
+                        <text id="slider_value"> </text>
+                    </div>
+                </p>
+                <p>Backwards Reaction Rate (Exponent):
+                    <div class="slidecontainer">
+                        <input type="range" min="0" max="20" class="slider" id="backward_rate">
+                        <text id="slider_value"> </text>
+                    </div>
+                </p>
+
+                <p>Amount Chaos:
+                    <div class="slidecontainer">
+                        <input type="range" min="1" max="100" class="slider" id="amount_chaos">
+                        <text id="slider_value"></text>
+                    </div>
+                </p>
+            </div>
         </div>
     </div>
 
+    <div id="Visuals">
+        <div id='Visualization' class='render'></div>
 
-
-    <div id="Scroll">
-
-
-        <div class='floating' id='info_box' style="width:fit-content; height:fit-content;  text-align:left;">
+        <div id='info_box' class='floating' style="width:fit-content; height:fit-content;  text-align:left;">
             <ul>
             </ul>
         </div>
 
-        <div class='floating' id='floating_bar_chart' style="width:30vw; height:50vh;"></div>
-        <div class='floating' id='floating_histogram' style="width:30vw; height:50vh;"></div>
-
-        <div id='Visualization' class='render'></div>
-
-        <div id='PercentVsTime'></div>
-
-        <div id='CountVsTime'></div>
-
-        <div id='SideView'></div>
-
-        <div id='Barchart'></div>
-
-
-        <div id='tab_six'></div>
-        <div id='tab_seven'></div>
-        <div id='tab_eight'></div>
-        <div id='tab_nine'></div>
+        <div id='floating_bar_chart' class='floating' style="width:30vw; height:50vh; z-index: -1;"></div>
+        <div id='floating_histogram' class='floating' style="width:30vw; height:50vh; z-index: -1;"></div>
 
 
 
-        <div id='threeD' class='render'> </div>
-
+        <div id='PercentVsTime' style='display: none;'></div>
+        <div id='CountVsTime' style='display: none;'></div>
+        <div id='Barchart' style='display: none;'></div>
+        <div id='SideView' style='display: none;'></div>
     </div>
-
-
 </body>

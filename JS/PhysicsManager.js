@@ -370,16 +370,56 @@ function start_simulation() {
 // Add monitors the the main.html page as needed
 window.addEventListener('load', () => {
 
-    //hide elements at the start 
-    document.getElementById('floating_bar_chart').style.display = 'none'
-    document.getElementById('floating_histogram').style.display = 'none'
-
     console.log('Page is fully loaded');
 
     update_all_sliders();
     print_info_block();
     start_simulation();
 });
+
+document.querySelector('#menu-toggle').addEventListener('click', () => {
+    //toggle element visability
+    if (document.getElementById('Sub-Menu-Toggle').style.display == 'none') {
+        document.getElementById('Sub-Menu-Toggle').style.display = '';
+    } else {
+        document.getElementById('Sub-Menu-Toggle').style.display = 'none';
+
+    }
+});
+
+document.querySelector('#tab-toggle').addEventListener('click', () => {
+    //toggle element visability
+    if (document.getElementById('Tabs').style.display == 'none') {
+        document.getElementById('Tabs').style.display = '';
+    } else {
+        document.getElementById('Tabs').style.display = 'none';
+
+    }
+
+});
+
+document.querySelector('#controls-toggle').addEventListener('click', () => {
+    //toggle element visability
+    if (document.getElementById('Controls').style.display == 'none') {
+        document.getElementById('Controls').style.display = '';
+    } else {
+        document.getElementById('Controls').style.display = 'none';
+
+    }
+
+});
+
+document.querySelector('#dev-toggle').addEventListener('click', () => {
+    //toggle element visability
+    if (document.getElementById('Development').style.display == 'none') {
+        document.getElementById('Development').style.display = '';
+    } else {
+        document.getElementById('Development').style.display = 'none';
+
+    }
+});
+
+
 
 document.querySelector('#pause_simulation').addEventListener('click', () => {
     run_sim = false;
@@ -429,10 +469,10 @@ document.querySelector('#clear_graphs').addEventListener('click', () => {
 document.querySelector('#barchart_button').addEventListener('click', () => {
 
     //toggle element visability
-    if (document.getElementById('floating_bar_chart').style.display == 'none') {
-        document.getElementById('floating_bar_chart').style.display = 'initial';
+    if (document.getElementById('floating_bar_chart').style.zIndex == -1) {
+        document.getElementById('floating_bar_chart').style.zIndex = 100;
     } else {
-        document.getElementById('floating_bar_chart').style.display = 'none';
+        document.getElementById('floating_bar_chart').style.zIndex = -1;
 
     }
 });

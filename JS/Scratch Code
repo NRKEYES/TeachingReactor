@@ -30,3 +30,162 @@ function make_line() {
 
     scene.add(line);
 }
+
+
+
+
+
+
+
+
+
+    #Views {
+        grid-column: 1;
+        position: sticky;
+        text-align: center;
+        background: 659dbd;
+    }
+    
+    #Controls {
+        grid-column: 1;
+        position: sticky;
+        text-align: left;
+        background: #659dbd;
+    }
+    
+    #Development {
+        grid-column: 1;
+        position: sticky;
+        text-align: left;
+        background: #8d8741;
+    }
+
+
+
+
+    #start {
+        margin-top: 30px;
+        margin-bottom: 30px;
+        display: -webkit-flexbox;
+        display: -ms-flexbox;
+        display: -webkit-flex;
+        display: flex;
+        -webkit-flex-align: center;
+        -ms-flex-align: center;
+        -webkit-align-items: center;
+        align-items: center;
+        justify-content: center;
+    }
+
+
+
+        #Side-view {
+        overflow-y: scroll;
+    }
+    
+    #PercentVsTime {
+        overflow-y: scroll;
+    }
+    
+    #CountVsTime {
+        overflow-y: scroll;
+    }
+
+
+        #Scroll {
+        position: sticky;
+        width: 100%;
+        height: 100%;
+        overflow-y: scroll;
+        text-align: center;
+        scroll-snap-type: y mandatory;
+    }
+    
+    #Scroll div {
+        grid-column: 2;
+        grid-row: 1;
+        scroll-snap-align: start;
+        background: slategray;
+        width: 100%;
+        height: 100%;
+    }
+    
+    #Visualization {
+        overflow-y: scroll;
+    }
+    
+
+
+
+
+
+        <div id='tab_six'></div>
+        <div id='tab_seven'></div>
+        <div id='tab_eight'></div>
+        <div id='tab_nine'></div>
+
+
+
+        <div id='threeD' class='render'> </div>
+
+
+
+        <div id='Views'>
+            <a href='#Visualization'>
+                <div>
+                    Visualization
+                </div>
+            </a>
+
+            <p></p>
+
+            <a href="#PercentVsTime">
+                <div>
+                    Proportion of species vs. Time
+                </div>
+            </a>
+
+            <p></p>
+
+            <a href="#CountVsTime">
+                <div>
+                    Count of each species vs. Time
+                </div>
+            </a>
+
+
+
+
+
+
+    <div id='Development' class='menu'>
+        <h3>Planned/Partially Implemented:</h3>
+
+
+
+        <p>Forward Reaction Rate (Exponent):
+            <div class="slidecontainer">
+                <input type="range" min="0" max="20" class="slider" id="forward_rate">
+                <text id="slider_value"> </text>
+            </div>
+        </p>
+        <p>Equilibrium (K)onstant (Exponent):
+            <div class="slidecontainer">
+                <input type="range" min="-10" max="10" class="slider" id="equilibrium_constant">
+                <text id="slider_value"> </text>
+            </div>
+        </p>
+        <p>Backwards Reaction Rate (Exponent):
+            <div class="slidecontainer">
+                <input type="range" min="0" max="20" class="slider" id="backward_rate">
+                <text id="slider_value"> </text>
+            </div>
+        </p>
+
+        <p>Amount Chaos:
+            <div class="slidecontainer">
+                <input type="range" min="1" max="100" class="slider" id="amount_chaos">
+                <text id="slider_value"></text>
+            </div>
+        </p>
+    </div>

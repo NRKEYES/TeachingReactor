@@ -2,107 +2,50 @@
         width: 100vw;
         height: 100vh;
         background-color: #fbeec1;
-        display: grid;
-        gap: 1%;
-        grid-template-rows: 98vh;
-        grid-template-columns: 14vw 84vw;
+        display: fixed;
+        width: 98vw;
+        height: 98vh;
         justify-content: center;
         font-family: "Source Sans Pro";
     }
     
-    #Tabs {
-        font-family: "Source Sans Pro";
-        grid-column: 1;
-        position: sticky;
-        text-align: center;
-        background: #daad86;
-    }
-    
-    #Views {
-        grid-column: 1;
-        position: sticky;
-        text-align: center;
-        background: 659dbd;
-    }
-    
-    #start {
-        margin-top: 30px;
-        margin-bottom: 30px;
-        display: -webkit-flexbox;
-        display: -ms-flexbox;
-        display: -webkit-flex;
-        display: flex;
-        -webkit-flex-align: center;
-        -ms-flex-align: center;
-        -webkit-align-items: center;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    #Controls {
-        grid-column: 1;
-        position: sticky;
-        text-align: left;
-        background: #659dbd;
-    }
-    
-    #Development {
-        grid-column: 1;
-        position: sticky;
-        text-align: left;
-        background: #8d8741;
-    }
-    
-    #Scroll {
-        position: sticky;
-        width: 100%;
-        height: 100%;
+    #Visuals {
         overflow-y: scroll;
         text-align: center;
-        scroll-snap-type: y mandatory;
-    }
-    
-    #Scroll div {
-        grid-column: 2;
-        grid-row: 1;
-        scroll-snap-align: start;
-        background: slategray;
-        width: 100%;
-        height: 100%;
     }
     
     #Visualization {
+        position: fixed;
+        z-index: 10;
+        width: 98vw;
+        height: 98vh;
         overflow-y: scroll;
+        text-align: center;
+        background-color: white;
     }
     
-    #Side-view {
-        overflow-y: scroll;
+    #Menu {
+        position: fixed;
+        z-index: 100;
+        top: 2vh;
+        left: 2vw;
+        width: 20vw;
+        height: 10vh;
+        transition: .3s;
+        opacity: .5;
     }
     
-    #PercentVsTime {
-        overflow-y: scroll;
+    #Menu:hover {
+        opacity: 1.0;
     }
     
-    #CountVsTime {
-        overflow-y: scroll;
-    }
-    
-    .line {
-        fill: none;
-        stroke: #000;
-        stroke-width: 2.5px;
-    }
-    
-    .axis {
-        font-size: large;
-        color: Black;
-    }
-    
-    .axis path,
-    .axis line {
-        fill: none;
-        stroke: #bdc3c7;
-        shape-rendering: crispEdges;
+    #Sub-Menus {
+        position: fixed;
+        z-index: 100;
+        top: 2vh;
+        left: 22vw;
+        width: 20vw;
+        height: 10vh;
     }
     
     a {
@@ -121,6 +64,7 @@
     
     .slidecontainer {
         width: 95%;
+        background-color: orange;
     }
     
     .slider {
@@ -155,12 +99,9 @@
     }
     
     .floating {
-        width: 10vw;
-        height: 10vh;
-        grid-row-start: 1;
+        position: fixed;
         transition: .3s;
         opacity: .1;
-        position: fixed;
     }
     
     .floating:hover {
@@ -183,28 +124,22 @@
     }
     
     #floating_bar_chart {
-        width: 10vw;
-        height: 10vh;
         transition: .3s;
         opacity: .5;
         z-index: 100;
-        border: 5px solid red;
         top: 20vh;
         left: 60vw;
     }
     
     #floating_bar_chart:hover {
         opacity: 1.0;
-        background-color: orange;
+        background-color: slategrey;
     }
     
     #floating_histogram {
-        width: 10vw;
-        height: 10vh;
         transition: .3s;
         opacity: .5;
         z-index: 100;
-        border: 5px solid red;
         top: 20vh;
         left: 60vw;
     }
@@ -212,4 +147,22 @@
     #floating_histogram:hover {
         opacity: 1.0;
         background-color: orange;
+    }
+    
+    .line {
+        fill: none;
+        stroke: #000;
+        stroke-width: 2.5px;
+    }
+    
+    .axis {
+        font-size: large;
+        color: Black;
+    }
+    
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: #bdc3c7;
+        shape-rendering: crispEdges;
     }

@@ -102,14 +102,9 @@ class Visualization {
         // this.camera.position.z = this.camera_displacement; //camera.lookAt(scene.position)
         // this.camera.position.x = this.camera_displacement; //camera.lookAt(scene.position)
         // this.camera.position.y = this.camera_displacement; //camera.lookAt(scene.position)
-
         //this.camera.position.x = this.camera_displacement; //camera.lookAt(scene.position)
-        this.camera.position.y = this.camera_displacement / 2; //camera.lookAt(scene.position)
-        this.camera.position.z = this.camera_displacement; //camera.lookAt(scene.position)
-
-
-
-
+        this.camera.position.y = this.chamber_edge_length / 2; //camera.lookAt(scene.position)
+        this.camera.position.z = this.chamber_edge_length * 2; //camera.lookAt(scene.position)
 
         this.renderPass = new RenderPass(this.scene, this.camera);
 
@@ -128,7 +123,6 @@ class Visualization {
         this.composer.addPass(this.outlinePass);
         //console.log(this.composer)
 
-
         // Setup all the controls
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
@@ -137,7 +131,6 @@ class Visualization {
         this.controls.minDistance = 1;
         this.controls.maxDistance = this.camera_displacement * 4;
         this.controls.maxPolarAngle = Math.PI;
-
 
         this.animate();
     }
@@ -193,14 +186,15 @@ class Visualization {
     }
 
     init(incoming_data, chamber_edge_length) {
+
         this.data = incoming_data;
         for (name in this.data) {
             this.data[name].instances = [];
         }
-        this.selectedObjects = [];
 
         this.chamber_edge_length = chamber_edge_length;
 
+        this.selectedObjects = [];
 
         this.composer = new EffectComposer(this.renderer);
 
@@ -209,9 +203,6 @@ class Visualization {
         this.scene.position.x = 0;
         this.scene.position.y = 0;
         this.scene.position.z = 0;
-
-
-
 
         //this.scene.fog = new THREE.FogExp2(0xefd1b5, .035);
         //this.scene.fog = new THREE.Fog(0xefd1b5, 1, 1000);
@@ -234,30 +225,25 @@ class Visualization {
 
         this.composer.addPass(this.outlinePass);
 
-        this.bokehPass = new BokehPass(this.scene, this.camera, {
-            focus: this.chamber_edge_length,
-            aperture: 0.000009,
-            maxblur: 1.0,
-            width: this.width,
-            height: this.height
-        });
+        // this.bokehPass = new BokehPass(this.scene, this.camera, {
+        //     focus: this.chamber_edge_length,
+        //     aperture: 0.000009,
+        //     maxblur: 1.0,
+        //     width: this.width,
+        //     height: this.height
+        // });
         //this.composer.addPass(this.bokehPass);
 
+        // // Setup all the controls
+        // this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        // this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+        // this.controls.dampingFactor = 0.25;
+        // this.controls.screenSpacePanning = false;
+        // this.controls.minDistance = 1;
+        this.controls.maxDistance = this.chamber_edge_length * 4;
+        // this.controls.maxPolarAngle = Math.PI;
 
-
-
-
-
-        // Setup all the controls
-        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-        this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
-        this.controls.dampingFactor = 0.25;
-        this.controls.screenSpacePanning = false;
-        this.controls.minDistance = 1;
-        this.controls.maxDistance = this.camera_displacement * 4;
-        this.controls.maxPolarAngle = Math.PI;
-
-        this.chamber = null;
+        // this.chamber = null;
         this.chamber_edge_length = chamber_edge_length;
 
         for (name in this.data) {
@@ -268,8 +254,6 @@ class Visualization {
         }
         //this.add_reaction_chamber()
         this.add_floor()
-
-
     }
 
     clean_all() {
@@ -424,33 +408,33 @@ class Visualization {
 
         });
 
-        geometry = new THREE.BoxBufferGeometry(.2, this.chamber_edge_length, this.chamber_edge_length);
-        this.chamber = new THREE.Mesh(geometry, material);
-        this.chamber.receiveShadow = true;
-        this.chamber.position.set(-this.chamber_edge_length / 2 - chamber_spacing, 0, 0);
-        this.scene.add(this.chamber);
+        // geometry = new THREE.BoxBufferGeometry(.2, this.chamber_edge_length, this.chamber_edge_length);
+        // this.chamber = new THREE.Mesh(geometry, material);
+        // this.chamber.receiveShadow = true;
+        // this.chamber.position.set(-this.chamber_edge_length / 2 - chamber_spacing, 0, 0);
+        // this.scene.add(this.chamber);
 
-        // material = new THREE.MeshPhysicalMaterial({
-        //     color: 'grey',
-        //     emissive: 'grey',
-        //     reflectivity: 0,
-        //     roughness: 1,
-        //     envMap: envMap,
-        // });
+        // // material = new THREE.MeshPhysicalMaterial({
+        // //     color: 'grey',
+        // //     emissive: 'grey',
+        // //     reflectivity: 0,
+        // //     roughness: 1,
+        // //     envMap: envMap,
+        // // });
 
-        geometry = new THREE.BoxBufferGeometry(this.chamber_edge_length, .2, this.chamber_edge_length);
-        this.chamber = new THREE.Mesh(geometry, material);
-        this.chamber.receiveShadow = true;
-        this.chamber.position.set(0, -this.chamber_edge_length / 2 - chamber_spacing, 0);
-        this.scene.add(this.chamber);
+        // geometry = new THREE.BoxBufferGeometry(this.chamber_edge_length, .2, this.chamber_edge_length);
+        // this.chamber = new THREE.Mesh(geometry, material);
+        // this.chamber.receiveShadow = true;
+        // this.chamber.position.set(0, -this.chamber_edge_length / 2 - chamber_spacing, 0);
+        // this.scene.add(this.chamber);
 
-        geometry = new THREE.BoxGeometry(
-            this.chamber_edge_length, this.chamber_edge_length, .2, // size
-            this.chamber_edge_length, this.chamber_edge_length, 1); // divisions
-        this.chamber = new THREE.Mesh(geometry, material);
-        this.chamber.receiveShadow = true;
-        this.chamber.position.set(0, 0, -this.chamber_edge_length / 2 - chamber_spacing);
-        this.scene.add(this.chamber);
+        // geometry = new THREE.BoxGeometry(
+        //     this.chamber_edge_length, this.chamber_edge_length, .2, // size
+        //     this.chamber_edge_length, this.chamber_edge_length, 1); // divisions
+        // this.chamber = new THREE.Mesh(geometry, material);
+        // this.chamber.receiveShadow = true;
+        // this.chamber.position.set(0, 0, -this.chamber_edge_length / 2 - chamber_spacing);
+        // this.scene.add(this.chamber);
 
 
 
