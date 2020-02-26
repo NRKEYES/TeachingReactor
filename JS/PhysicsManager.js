@@ -220,7 +220,6 @@ function find_time_step() {
 
 }
 
-
 function thermostat() {
     // for gasses
     // K = .5 m v_rms^2
@@ -234,29 +233,7 @@ function thermostat() {
 }
 
 
-let physicsWorld;
 
-function setupPhysicsWorld() {
-
-    let collisionConfiguration = new Ammo.btDefaultCollisionConfiguration(),
-        dispatcher = new Ammo.btCollisionDispatcher(collisionConfiguration),
-        overlappingPairCache = new Ammo.btDbvtBroadphase(),
-        solver = new Ammo.btSequentialImpulseConstraintSolver();
-
-    physicsWorld = new Ammo.btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
-
-    // Currently I don't want gravity.
-    //physicsWorld.setGravity(new Ammo.btVector3(0, -10, 0));
-
-}
-//Ammojs Initialization
-Ammo().then(start)
-
-function start() {
-
-    //code goes here
-
-}
 
 function simulation() {
     //console.log("Agent Based Physics")
@@ -372,7 +349,6 @@ function update_all() {
 
 function start_simulation() {
 
-    setupPhysicsWorld();
     find_time_step();
     print_info_block();
     t = 0;
@@ -408,6 +384,21 @@ document.querySelector('#menu-toggle').addEventListener('mouseenter', () => {
     document.getElementById('Sub-Menu-Toggle').style.display = '';
     //document.getElementById('menu-toggle').style.height = '60vh';
 });
+document.querySelector('#tab-toggle').addEventListener('mouseover', () => {
+    document.getElementById('Tabs').style.display = '';
+    document.getElementById('Controls').style.display = 'none';
+    document.getElementById('Development').style.display = 'none';
+});
+document.querySelector('#controls-toggle').addEventListener('mouseover', () => {
+    document.getElementById('Tabs').style.display = 'none';
+    document.getElementById('Controls').style.display = '';
+    document.getElementById('Development').style.display = 'none';
+});
+document.querySelector('#dev-toggle').addEventListener('mouseover', () => {
+    document.getElementById('Tabs').style.display = 'none';
+    document.getElementById('Controls').style.display = 'none';
+    document.getElementById('Development').style.display = '';
+});
 document.querySelector('#Menu').addEventListener('mouseleave', () => {
     //toggle element visability
     document.getElementById('Sub-Menu-Toggle').style.display = 'none';
@@ -415,49 +406,6 @@ document.querySelector('#Menu').addEventListener('mouseleave', () => {
     document.getElementById('Controls').style.display = 'none';
     document.getElementById('Development').style.display = 'none';
 });
-
-
-
-
-document.querySelector('#tab-toggle').addEventListener('mouseover', () => {
-    document.getElementById('Tabs').style.display = '';
-    document.getElementById('Controls').style.display = 'none';
-    document.getElementById('Development').style.display = 'none';
-});
-
-document.querySelector('#controls-toggle').addEventListener('mouseover', () => {
-    document.getElementById('Tabs').style.display = 'none';
-    document.getElementById('Controls').style.display = '';
-    document.getElementById('Development').style.display = 'none';
-});
-
-document.querySelector('#dev-toggle').addEventListener('mouseover', () => {
-    document.getElementById('Tabs').style.display = 'none';
-    document.getElementById('Controls').style.display = 'none';
-    document.getElementById('Development').style.display = '';
-});
-
-
-
-
-
-// document.querySelector('#Tabs').addEventListener('mouseout', () => {
-//     document.getElementById('Tabs').style.display = 'none';
-// });
-
-// document.querySelector('#Controls').addEventListener('mouseleave', () => {
-//     document.getElementById('Controls').style.display = 'none';
-// });
-
-// document.querySelector('#Development').addEventListener('mouseleave', () => {
-//     document.getElementById('Development').style.display = 'none';
-// });
-
-
-
-
-
-
 
 
 document.querySelector('#pause_simulation').addEventListener('click', () => {

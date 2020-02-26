@@ -14,6 +14,7 @@ import { BufferGeometryUtils } from '/JS/three/examples/jsm/utils/BufferGeometry
 
 // Internal Dependancies
 import Molecule from '/JS/Molecule.js'
+//importScripts('/JS/ammo/ammo.js')
 
 
 let sphere_quality = 10;
@@ -43,7 +44,37 @@ var atom_radius = { // Van der walls from wiki https://en.wikipedia.org/wiki/Van
 
 class Visualization {
 
+
+    setupPhysicsWorld() {
+
+
+        this.collisionConfiguration = new Ammo.btDefaultCollisionConfiguration();
+        this.dispatcher = new Ammo.btCollisionDispatcher(this.collisionConfiguration);
+        this.broadphase = new Ammo.btDbvtBroadphase();
+        this.solver = new Ammo.btSequentialImpulseConstraintSolver();
+        this.overlappingPairCache = new Ammo.btDbvtBroadphase();
+        this.physicsWorld = new Ammo.btDiscreteDynamicsWorld(this.dispatcher, this.overlappingPairCache, this.solver, this.collisionConfiguration);
+        // this.physicsWorld.setGravity(new Ammo.btVector3(0, gravityConstant, 0));
+        // this.physicsWorld.getWorldInfo().set_m_gravity(new Ammo.btVector3(0, gravityConstant, 0));
+
+
+
+        // Currently I don't want gravity.
+        this.physicsWorld.setGravity(new Ammo.btVector3(-10, 0, 0));
+
+    }
+
+
     constructor(incoming_data, chamber_edge_length) {
+
+        Ammo()
+        this.tmpTrans = new Ammo.btTransform();
+
+
+        this.physicsWorld;
+        this.rigidBodies = [];
+        this.setupPhysicsWorld()
+
 
         this.chamber_edge_length = chamber_edge_length;
 
@@ -82,6 +113,13 @@ class Visualization {
         this.renderer.setClearColor(this.background_and_emis, 0.0)
             //this.renderer.domElement.style.position = 'absolute';
         this.renderer.setSize(this.width_for_3d, this.height_for_3d);
+        this.renderer.gammaInput = true;
+        this.renderer.gammaOutput = true;
+
+        this.renderer.shadowMap.enabled = true;
+
+
+
 
         // Add rendering to everything that needs it
         this.container = document.getElementById('Visualization');
@@ -102,9 +140,9 @@ class Visualization {
         // this.camera.position.z = this.camera_displacement; //camera.lookAt(scene.position)
         // this.camera.position.x = this.camera_displacement; //camera.lookAt(scene.position)
         // this.camera.position.y = this.camera_displacement; //camera.lookAt(scene.position)
-        //this.camera.position.x = this.camera_displacement; //camera.lookAt(scene.position)
-        this.camera.position.y = this.chamber_edge_length / 2; //camera.lookAt(scene.position)
-        this.camera.position.z = this.chamber_edge_length * 2; //camera.lookAt(scene.position)
+        this.camera.position.x = this.camera_displacement; //camera.lookAt(scene.position)
+        this.camera.position.y = this.chamber_edge_length * 3 / 2; //camera.lookAt(scene.position)
+        this.camera.position.z = this.chamber_edge_length * 3; //camera.lookAt(scene.position)
 
         this.renderPass = new RenderPass(this.scene, this.camera);
 
@@ -129,7 +167,7 @@ class Visualization {
         this.controls.dampingFactor = 0.25;
         this.controls.screenSpacePanning = false;
         this.controls.minDistance = 1;
-        this.controls.maxDistance = this.camera_displacement * 4;
+        this.controls.maxDistance = this.chamber_edge_length * 4;
         this.controls.maxPolarAngle = Math.PI;
 
         this.animate();
@@ -192,6 +230,14 @@ class Visualization {
             this.data[name].instances = [];
         }
 
+        this.tmpTrans = new Ammo.btTransform();
+
+
+        this.physicsWorld;
+        this.rigidBodies = [];
+        this.setupPhysicsWorld()
+
+
         this.chamber_edge_length = chamber_edge_length;
 
         this.selectedObjects = [];
@@ -253,7 +299,7 @@ class Visualization {
             }
         }
         //this.add_reaction_chamber()
-        this.add_floor()
+        this.add_grid()
     }
 
     clean_all() {
@@ -348,212 +394,126 @@ class Visualization {
             name = 'Reactant'
         }
 
-        let temp = new Molecule(this.data[name].coords, this.data[name].graphics.geom, this.data[name].graphics.material, this.chamber_edge_length);
-        //        console.log(temp)
+        let temp = new Molecule(this.data[name].coords,
+            this.data[name].graphics.geom,
+            this.data[name].graphics.material,
+            this.chamber_edge_length);
+
+        temp.mesh.userData.physicsBody.setLinearVelocity(temp.mesh.velocity)
 
         this.data[name].instances.push(temp);
-
-        //console.log(this.data[name].instances);
-        // this.scene.add(this.data[name].instances.slice(-1)[0].mesh);
         this.scene.add(temp.mesh);
+
+        let rbInfo = new Ammo.btRigidBodyConstructionInfo(temp.mass, temp.motionState, temp.colShape, temp.localInertia);
+        let body = new Ammo.btRigidBody(rbInfo);
+        body.setRestitution(1);
+        body.setDamping(0.8, 0);
+        //add to simulation
+        this.physicsWorld.addRigidBody(body);
+        //add to update list
+        this.rigidBodies.push(temp.mesh);
+        // add to glow list
         this.selectedObjects.push(temp.mesh)
     }
 
-    add_floor() {
-        // Reaction Chamber
-
-        let texture1 = new THREE.TextureLoader().load('Images/steel.jpg');
-        let texture2 = new THREE.TextureLoader().load('Images/glass1.gif');
-        let envMap = new THREE.TextureLoader().load('Images/envMap.png');
-        envMap.mapping = THREE.SphericalReflectionMapping;
-
-        let material = new THREE.MeshPhysicalMaterial({
-            color: 'yellow',
-            emissive: 'grey',
-            reflectivity: 0,
-            metalness: .9,
-            roughness: 1,
-            //envMap: envMap,
-            side: THREE.BackSide
-
-        });
-
-
-        let geometry = new THREE.SphereBufferGeometry(
-            this.chamber_edge_length * 10, 4, 4, 4);
-
-        // this.chamber = new THREE.Mesh(geometry, material);
-        // this.chamber.receiveShadow = false;
-        // this.chamber.castShadow = false;
-        // this.chamber.position.set(0, 0, 0);
-        // this.scene.add(this.chamber);
-
-
-
-
-        let chamber_spacing = .3
-
-
-        material = new THREE.MeshPhysicalMaterial({
-            color: 'grey',
-            emissive: 'grey',
-            reflectivity: 0,
-            metalness: .9,
-            roughness: 1,
-            envMap: envMap,
-            polygonOffset: true,
-            polygonOffsetFactor: 1, // positive value pushes polygon further away
-            polygonOffsetUnits: 1,
-            side: THREE.DoubleSide
-
-        });
-
-        // geometry = new THREE.BoxBufferGeometry(.2, this.chamber_edge_length, this.chamber_edge_length);
-        // this.chamber = new THREE.Mesh(geometry, material);
-        // this.chamber.receiveShadow = true;
-        // this.chamber.position.set(-this.chamber_edge_length / 2 - chamber_spacing, 0, 0);
-        // this.scene.add(this.chamber);
-
-        // // material = new THREE.MeshPhysicalMaterial({
-        // //     color: 'grey',
-        // //     emissive: 'grey',
-        // //     reflectivity: 0,
-        // //     roughness: 1,
-        // //     envMap: envMap,
-        // // });
-
-        // geometry = new THREE.BoxBufferGeometry(this.chamber_edge_length, .2, this.chamber_edge_length);
-        // this.chamber = new THREE.Mesh(geometry, material);
-        // this.chamber.receiveShadow = true;
-        // this.chamber.position.set(0, -this.chamber_edge_length / 2 - chamber_spacing, 0);
-        // this.scene.add(this.chamber);
-
-        // geometry = new THREE.BoxGeometry(
-        //     this.chamber_edge_length, this.chamber_edge_length, .2, // size
-        //     this.chamber_edge_length, this.chamber_edge_length, 1); // divisions
-        // this.chamber = new THREE.Mesh(geometry, material);
-        // this.chamber.receiveShadow = true;
-        // this.chamber.position.set(0, 0, -this.chamber_edge_length / 2 - chamber_spacing);
-        // this.scene.add(this.chamber);
-
-
+    add_grid() {
+        // Set up local
+        let mass = 0;
+        let pos = new THREE.Vector3();
+        let dim = new THREE.Vector3();
+        let size = this.chamber_edge_length;
+        let divisions = this.chamber_edge_length;
+        let gridHelper = null;
 
         // ADD GRIDS
-        var size = this.chamber_edge_length;
-        var divisions = this.chamber_edge_length;
 
-        var gridHelper = new THREE.GridHelper(size, divisions, 'black', 'black');
-        gridHelper.position.set(0, -this.chamber_edge_length / 2, 0);
+        //Top and bottom   - along Y axis
+        gridHelper = new THREE.GridHelper(size, divisions, 'grey', 'grey');
+        gridHelper.geometry.rotateY(Math.PI / 2);
+        pos.set(0, -this.chamber_edge_length / 2, 0);
+        dim.set(this.chamber_edge_length, .1, this.chamber_edge_length);
+        gridHelper.position.copy(pos);
         this.scene.add(gridHelper);
+        this.createRigidBody(dim, mass, pos);
 
-
-        gridHelper = new THREE.GridHelper(size, divisions, 'black', 'black');
-        gridHelper.position.set(0, 0, -this.chamber_edge_length / 2);
-        gridHelper.geometry.rotateX(Math.PI / 2);
+        gridHelper = new THREE.GridHelper(size, divisions, 'grey', 'grey');
+        gridHelper.geometry.rotateY(Math.PI / 2);
+        pos.set(0, this.chamber_edge_length / 2, 0);
+        dim.set(this.chamber_edge_length, .1, this.chamber_edge_length);
+        gridHelper.position.copy(pos);
         this.scene.add(gridHelper);
+        this.createRigidBody(dim, mass, pos);
 
-        gridHelper = new THREE.GridHelper(size, divisions, 'black', 'black');
-        gridHelper.position.set(-this.chamber_edge_length / 2, 0, 0);
+        // Front and back - along X
+        gridHelper = new THREE.GridHelper(size, divisions, 'grey', 'grey');
         gridHelper.geometry.rotateZ(Math.PI / 2);
+        pos.set(-this.chamber_edge_length / 2, 0, 0);
+        dim.set(.1, this.chamber_edge_length, this.chamber_edge_length);
+        gridHelper.position.copy(pos);
         this.scene.add(gridHelper);
+        this.createRigidBody(dim, mass, pos);
 
-        var gridHelper = new THREE.GridHelper(size, divisions);
-        gridHelper.position.set(0, this.chamber_edge_length / 2, 0);
-        this.scene.add(gridHelper);
-
-
-        gridHelper = new THREE.GridHelper(size, divisions);
-        gridHelper.position.set(0, 0, this.chamber_edge_length / 2);
-        gridHelper.geometry.rotateX(Math.PI / 2);
-        this.scene.add(gridHelper);
-
-        gridHelper = new THREE.GridHelper(size, divisions);
-        gridHelper.position.set(this.chamber_edge_length / 2, 0, 0);
+        gridHelper = new THREE.GridHelper(size, divisions, 'grey', 'grey');
         gridHelper.geometry.rotateZ(Math.PI / 2);
+        pos.set(this.chamber_edge_length / 2, 0, 0);
+        dim.set(.1, this.chamber_edge_length, this.chamber_edge_length);
+        gridHelper.position.copy(pos);
         this.scene.add(gridHelper);
+        this.createRigidBody(dim, mass, pos);
+
+        // Front and back - along Z
+        gridHelper = new THREE.GridHelper(size, divisions, 'grey', 'grey');
+        gridHelper.geometry.rotateX(Math.PI / 2);
+        pos.set(0, 0, -this.chamber_edge_length / 2);
+        dim.set(this.chamber_edge_length, this.chamber_edge_length, .1);
+        gridHelper.position.copy(pos);
+        this.scene.add(gridHelper);
+        this.createRigidBody(dim, mass, pos);
+
+        gridHelper = new THREE.GridHelper(size, divisions, 'grey', 'grey');
+        gridHelper.geometry.rotateX(Math.PI / 2);
+        pos.set(0, 0, this.chamber_edge_length / 2);
+        dim.set(this.chamber_edge_length, this.chamber_edge_length, .1);
+        gridHelper.position.copy(pos);
+        this.scene.add(gridHelper);
+        this.createRigidBody(dim, mass, pos);
+
         // END ADD GRIDS
-
-
-
-
-
-
-
-
-
-        //Set of transparent walls towards the initial camera
-        // material = new THREE.MeshPhysicalMaterial({
-        //     color: 'lightblue',
-        //     metalness: 1.0,
-        //     roughness: .1,
-        //     //alphaMap: texture2,
-        //     //alphaTest: 0.33,
-        //     envMap: texture1,
-        //     envMapIntensity: .9,
-        //     depthTest: true,
-        //     transparency: .8,
-        //     transparent: true,
-        //     side: THREE.DoubleSide,
-        // });
-        // geometry = new THREE.BoxBufferGeometry(.2, this.chamber_edge_length, this.chamber_edge_length);
-        // this.chamber = new THREE.Mesh(geometry, material);
-
-        // this.chamber.position.set(this.chamber_edge_length / 2, 0, 0);
-        // //console.log(this.chamber)
-        // this.scene.add(this.chamber);
-
-        // geometry = new THREE.BoxBufferGeometry(this.chamber_edge_length, .2, this.chamber_edge_length);
-        // this.chamber = new THREE.Mesh(geometry, material);
-
-        // this.chamber.position.set(0, this.chamber_edge_length / 2, 0);
-        // //console.log(this.chamber)
-        // this.scene.add(this.chamber);
-
-        // geometry = new THREE.BoxBufferGeometry(this.chamber_edge_length, this.chamber_edge_length, .2);
-        // this.chamber = new THREE.Mesh(geometry, material);
-
-        // this.chamber.position.set(0, 0, this.chamber_edge_length / 2);
-        // //console.log(this.chamber)
-        // this.scene.add(this.chamber);
-
-
-
-        // geometry.dispose();
-        // material.dispose();
-        //selectedObjects.push(chamber)
     }
 
-    add_reaction_chamber() {
-        // Reaction Chamber
+    createRigidBody(dim, mass, pos) {
+        // for visualizaton purposes:
+        // let material = new THREE.MeshPhysicalMaterial({
+        //     color: 'grey',
+        //     emissive: 'grey',
+        //     reflectivity: 0,
+        //     metalness: .9,
+        //     roughness: 1
+        // });
+        // let geometry = new THREE.BoxBufferGeometry(dim.x, dim.y, dim.z);
+        // this.chamber = new THREE.Mesh(geometry, material);
+        // this.chamber.position.set(pos.x, pos.y, pos.z);
+        // this.scene.add(this.chamber);
+        // End geometry helper block
 
-        let texture1 = new THREE.TextureLoader().load('Images/steel.jpg');
-        let texture2 = new THREE.TextureLoader().load('Images/glass1.gif');
+        // Actual ammo code
+        let transform = new Ammo.btTransform();
+        transform.setIdentity();
+        transform.setOrigin(new Ammo.btVector3(pos.x, pos.y, pos.z));
+        let motionState = new Ammo.btDefaultMotionState(transform);
 
-        let material = new THREE.MeshPhysicalMaterial({
-            color: 'lightblue',
-            metalness: 1.0,
-            roughness: .1,
-            //alphaMap: texture2,
-            //alphaTest: 0.33,
-            envMap: texture1,
-            envMapIntensity: .9,
-            depthTest: true,
-            transparency: .8,
-            transparent: true,
-            side: THREE.DoubleSide,
-        });
+        let colShape = new Ammo.btBoxShape(new Ammo.btVector3(dim.x, dim.y, dim.z));
+        colShape.setMargin(0.05);
 
-        let geometry = new THREE.BoxBufferGeometry(this.chamber_edge_length, this.chamber_edge_length, this.chamber_edge_length);
-        this.chamber = new THREE.Mesh(geometry, material);
-        this.chamber.castShadow = true;
-        this.chamber.receiveShadow = true;
-        this.chamber.position.set(0, 0, 0);
-        //console.log(this.chamber)
-        this.scene.add(this.chamber);
+        let localInertia = new Ammo.btVector3(0, 0, 0);
+        colShape.calculateLocalInertia(mass, localInertia);
 
-        // geometry.dispose();
-        // material.dispose();
-        //selectedObjects.push(chamber)
+        let rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, colShape, localInertia);
+        let body = new Ammo.btRigidBody(rbInfo);
+        body.setRestitution(2);
+        //body.setDamping(0.8, 0);
+
+        this.physicsWorld.addRigidBody(body);
     }
 
     tick(incoming_data) {
@@ -564,15 +524,35 @@ class Visualization {
         requestAnimationFrame(this.animate.bind(this));
 
         //console.log(this.clock.getDelta());
-        let delta_t = this.clock.getDelta();
+        this.delta_t = this.clock.getDelta();
 
-        for (name in this.data) {
-            //console.log(this.data[name]);
-            for (let i = 0; i < this.data[name].instances.length; i++) {
-                //console.log(this.data[name].instances[i]);
-                this.data[name].instances[i].update(this.data, delta_t, this.chamber_edge_length);
+        // Step world
+        this.physicsWorld.stepSimulation(this.delta_t, 10);
+
+        // Update rigid bodies
+        for (let i = 0; i < this.rigidBodies.length; i++) {
+            let objThree = this.rigidBodies[i];
+            let objAmmo = objThree.userData.physicsBody;
+
+            let ms = objAmmo.getMotionState();
+            if (ms) {
+
+                ms.getWorldTransform(this.tmpTrans);
+                let p = this.tmpTrans.getOrigin();
+                let q = this.tmpTrans.getRotation();
+                objThree.position.set(p.x(), p.y(), p.z());
+                objThree.quaternion.set(q.x(), q.y(), q.z(), q.w());
+
             }
         }
+
+        // for (name in this.data) {
+        //     //console.log(this.data[name]);
+        //     for (let i = 0; i < this.data[name].instances.length; i++) {
+        //         //console.log(this.data[name].instances[i]);
+        //         this.data[name].instances[i].update(this.data, this.delta_t, this.chamber_edge_length);
+        //     }
+        // }
 
 
         this.composer.render(this.scene, this.camera);
@@ -585,6 +565,8 @@ class Visualization {
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(this.width_for_3d, this.height_for_3d);
     }
+
+
 }
 
 export default Visualization;

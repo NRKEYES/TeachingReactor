@@ -1,11 +1,40 @@
 class Molecule {
     constructor(name, geometry, material, chamber_edge_length) {
         this.name = name;
+        this.radius = .07;
 
-        this.check = true;
+        let pos = {
+            x: d3.randomUniform(-2, 2)(),
+            y: d3.randomUniform(-2, 2)(),
+            z: d3.randomUniform(-2, 2)()
+        };
 
+        // let pos = {
+        //     x: 0,
+        //     y: 0,
+        //     z: 0
+        // };
+
+        let vel = {
+            x: d3.randomNormal(0.0)(1),
+            y: d3.randomNormal(0.0)(1),
+            z: d3.randomNormal(0.0)(1)
+        };
+
+        // this.rotational_axis = new THREE.Vector3(
+        //         d3.randomNormal(0.0)(1),
+        //         d3.randomNormal(0.0)(1),
+        //         d3.randomNormal(0.0)(1))
+        //     .normalize();
+
+        let quat = {
+            x: d3.randomNormal(0.0)(1),
+            y: d3.randomNormal(0.0)(1),
+            z: d3.randomNormal(0.0)(1),
+            w: 1
+        };
         // geometry.computeFaceNormals();
-        // geometry.computeBoundingSphere();
+        geometry.computeBoundingSphere();
         geometry.center();
 
 
@@ -13,75 +42,46 @@ class Molecule {
         this.mesh = new THREE.Mesh(geometry, material);
         this.mesh.castShadow = true;
         this.mesh.receiveShadow = true;
-        this.mesh.position.set(
-            d3.randomUniform(-chamber_edge_length)(chamber_edge_length),
-            d3.randomUniform(-chamber_edge_length)(chamber_edge_length),
-            d3.randomUniform(-chamber_edge_length)(chamber_edge_length)
-        );
+        this.mesh.position.set(pos.x, pos.y, pos.z);
+        this.mesh.castShadow = true;
+        this.mesh.receiveShadow = true;
 
-
-        //console.log(this.mesh.position)
-
-        // this.mesh.updateMatrixWorld();
-        // this.mesh.updateMatrix();
-        // create a geometry
-        //geometry = new THREE.BoxBufferGeometry(2, 2, 2);
-        //material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
-
-        // create a Mesh containing the geometry and material
-        // this.mesh = new THREE.Mesh(geometry, material);
+        this.mass = 1;
 
 
 
-        // velocity is normally around 5×10^11 nm/s (nanometers per second)
-        // My timesteps are on the order of 10^-11 seconds
-        // 5 nm each tick
-        // this is wayyyy to fast.  with more I wonder how fast my animation ticks are. 
-        // on my laptop: about the order of 10^-2
-        // so this could put us into the:
-        // .05 nm each tick
+        //Ammojs Section
+        this.transform = new Ammo.btTransform();
 
-        this.velocity = new THREE.Vector3(
-            d3.randomNormal(0.0)(1),
-            d3.randomNormal(0.0)(1),
-            d3.randomNormal(0.0)(1));
+        this.transform.setIdentity();
 
+        this.transform.setOrigin(new Ammo.btVector3(pos.x, pos.y, pos.z));
 
-        this.rotational_axis = new THREE.Vector3(
-                d3.randomNormal(0.0)(1),
-                d3.randomNormal(0.0)(1),
-                d3.randomNormal(0.0)(1))
-            .normalize();
+        this.transform.setRotation(new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
 
+        this.motionState = new Ammo.btDefaultMotionState(this.transform);
 
+        this.colShape = new Ammo.btSphereShape(this.radius);
+        //this.colShape = geometry;
+        this.colShape.setMargin(0.05);
+
+        this.localInertia = new Ammo.btVector3(vel.x, vel.y, vel.z);
+        this.colShape.calculateLocalInertia(this.mass, this.localInertia);
+
+        this.rbInfo = new Ammo.btRigidBodyConstructionInfo(this.mass, this.motionState, this.colShape, this.localInertia);
+        this.body = new Ammo.btRigidBody(this.rbInfo);
+        this.body.setRestitution(1);
+        this.body.setDamping(0.8, 0);
+        this.mesh.userData.physicsBody = this.body;
     }
 
     tick(data) {
 
-        if (this.check) {
-            this.check_neighbors(data);
-        } else {
-            this.check = true;
-        }
-
-
-
-        //cHECK to see if we are inside a wall?
-
-        //randomly move about
-        // this.mesh.position.set(
-        //     d3.randomNormal(0.0)(.33),
-        //     d3.randomNormal(0.0)(.33),
-        //     d3.randomNormal(0.0)(.33));
-
-        //set the position to one corner of the cube
-        // then clamp all at chamber length
-        // run reverse/bounce/passthrough on any object with one of these values
-        // .clampScalar ( min : Float, max : Float ) : this
-        // min - the minimum value the components will be clamped to
-        // max - the maximum value the components will be clamped to
-
-        // If this vector's x, y or z values are greater than the max value, they are replaced by the max value.
+        // if (this.check) {
+        //     this.check_neighbors(data);
+        // } else {
+        //     this.check = true;
+        // }
     }
 
     check_walls(chamber_edge_length) {
@@ -189,10 +189,10 @@ class Molecule {
 
     update(data, delta_t, chamber_edge_length) {
 
-        this.mesh.position.addScaledVector(this.velocity, delta_t);
-        this.mesh.rotateOnAxis(this.rotational_axis, .05);
+        // this.mesh.position.addScaledVector(this.velocity, delta_t);
+        // this.mesh.rotateOnAxis(this.rotational_axis, .05);
 
-        this.check_walls(chamber_edge_length);
+        //this.check_walls(chamber_edge_length);
 
     }
 }
