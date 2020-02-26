@@ -1,5 +1,6 @@
 import Visualization from '/JS/Visualization.js'
 import BlankVsTime from '/JS/BlankVsTime.js';
+import Histogram from '/JS/Histogram.js'
 import Barchart from '/JS/Barchart.js';
 import SideView from '/JS/SideView.js';
 
@@ -96,6 +97,8 @@ let visualizer = new Visualization(species, chamber_edge_length);
 let count_v_time = new BlankVsTime(species, 'count', t_step, steps, 'CountVsTime', '# of molecules present');
 let percent_v_time = new BlankVsTime(species, 'percent', t_step, steps, 'PercentVsTime', 'Proportion of each species');
 let percent_bar = new Barchart(species, 'count', t_step, steps, 'floating_bar_chart', '# of molecules present');
+let speed_hist = new Histogram(species, 'count', t_step, steps, 'floating_histogram', 'Number');
+
 //let sideview = new SideView();
 
 
@@ -161,8 +164,8 @@ function quadratic_solver(a, b, c) {
         var x1 = x1 / a2;
         var x2 = -b - dis_sqrt;
         var x2 = x2 / a2;
-        console.log('x1: ' + x1);
-        console.log('x2: ' + x2);
+        // console.log('x1: ' + x1);
+        // console.log('x2: ' + x2);
         return x2;
     }
 }
@@ -341,6 +344,7 @@ function update_all() {
         count_v_time.tick(species);
         percent_v_time.tick(species);
         percent_bar.tick(species);
+        speed_hist.tick(species)
 
         visualizer.tick(); // Will add after render look?
 
@@ -359,15 +363,12 @@ function start_simulation() {
     count_v_time.init(species, t_step, steps);
     percent_v_time.init(species, t_step, steps);
     percent_bar.init(species);
+    speed_hist.init(species)
 
     //sideview.init();
 
     setInterval(update_all, 1);
 }
-
-
-
-
 
 // Add monitors the the main.html page as needed
 window.addEventListener('load', () => {
@@ -378,7 +379,6 @@ window.addEventListener('load', () => {
     print_info_block();
     start_simulation();
 });
-
 document.querySelector('#menu-toggle').addEventListener('mouseenter', () => {
     //toggle element visability
     document.getElementById('Sub-Menu-Toggle').style.display = '';
@@ -460,6 +460,16 @@ document.querySelector('#barchart_button').addEventListener('click', () => {
         document.getElementById('floating_bar_chart').style.zIndex = 100;
     } else {
         document.getElementById('floating_bar_chart').style.zIndex = -1;
+
+    }
+});
+document.querySelector('#histogram_button').addEventListener('click', () => {
+
+    //toggle element visability
+    if (document.getElementById('floating_histogram').style.zIndex == -1) {
+        document.getElementById('floating_histogram').style.zIndex = 100;
+    } else {
+        document.getElementById('floating_histogram').style.zIndex = -1;
 
     }
 });

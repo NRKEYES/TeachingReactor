@@ -84,7 +84,7 @@ class Barchart {
         let num1 = d3.max(this.data[0][this.blank_target]);
 
         let num2 = d3.max(this.data[1][this.blank_target]);
-        console.log(num1)
+        //console.log(num1)
         this.y.domain([d3.max([num1, num2]), 0])
 
         this.yAxes.attr("class", "y axis")
@@ -113,8 +113,6 @@ class Barchart {
         // exit
         this.bars.exit()
             .remove();
-
-
     }
 }
 

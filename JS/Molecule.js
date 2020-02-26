@@ -1,7 +1,7 @@
 class Molecule {
     constructor(name, geometry, material, chamber_edge_length) {
         this.name = name;
-        this.radius = .03;
+        this.radius = .01 * (this.name.length - 1);
 
         let pos = {
             x: d3.randomUniform(-2, 2)(),
@@ -15,12 +15,6 @@ class Molecule {
             y: d3.randomNormal(0.0)(1),
             z: d3.randomNormal(0.0)(1)
         };
-
-        // this.rotational_axis = new THREE.Vector3(
-        //         d3.randomNormal(0.0)(1),
-        //         d3.randomNormal(0.0)(1),
-        //         d3.randomNormal(0.0)(1))
-        //     .normalize();
 
         let quat = {
             x: d3.randomNormal(0.0)(1),
@@ -41,23 +35,17 @@ class Molecule {
         this.mesh.castShadow = true;
         this.mesh.receiveShadow = true;
 
-        this.mass = 1;
-
-
+        let mass_factor = this.name.length;
+        this.mass = mass_factor;
 
         //Ammojs Section
         this.transform = new Ammo.btTransform();
-
         this.transform.setIdentity();
-
         this.transform.setOrigin(new Ammo.btVector3(pos.x, pos.y, pos.z));
-
         this.transform.setRotation(new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
-
         this.motionState = new Ammo.btDefaultMotionState(this.transform);
 
         this.colShape = new Ammo.btSphereShape(this.radius);
-        //this.colShape = geometry;
         this.colShape.setMargin(0.05);
 
         this.localInertia = new Ammo.btVector3(0, 0, 0);
@@ -73,10 +61,11 @@ class Molecule {
 
         let vel_vec = new Ammo.btVector3(vel.x, vel.y, vel.z);
         this.body.setLinearVelocity(vel_vec);
-        //this.body.setLinearFactor(vel_vec);
-        //this.body.applyCentralImpulse(vel_vec);
-        //this.body.applyImpulse(vel_vec);
-        //this.body.setAngularVelocity()
+        this.body.setFriction(0)
+            //this.body.setLinearFactor(vel_vec);
+            //this.body.applyCentralImpulse(vel_vec);
+            //this.body.applyImpulse(vel_vec);
+            //this.body.setAngularVelocity()
 
         this.body.setActivationState(4);
         this.body.setRestitution(1.0);

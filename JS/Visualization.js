@@ -366,7 +366,7 @@ class Visualization {
 
         // This information is now stored in the main data structure.
 
-        console.log(mergedGeometry)
+        //console.log(mergedGeometry)
 
         this.data[name]['graphics'] = {
             'geom': BufferGeometryUtils.mergeBufferGeometries(mergedGeometry, true),
@@ -500,7 +500,7 @@ class Visualization {
 
         let rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, colShape, localInertia);
         let body = new Ammo.btRigidBody(rbInfo);
-        body.setRestitution(.5);
+        body.setRestitution(1.0);
         //body.setDamping(0.8, 0);
 
         this.physicsWorld.addRigidBody(body);
@@ -526,15 +526,35 @@ class Visualization {
 
             let ms = objAmmo.getMotionState();
             if (ms) {
-
                 ms.getWorldTransform(this.tmpTrans);
                 let p = this.tmpTrans.getOrigin();
                 let q = this.tmpTrans.getRotation();
                 objThree.position.set(p.x(), p.y(), p.z());
                 objThree.quaternion.set(q.x(), q.y(), q.z(), q.w());
-
             }
         }
+
+        // for (var i = 0; i < this.rigidBodies.length; i++) {
+        //     var contactManifold = this.physicsWorld.getDispatcher().getManifoldByIndexInternal(i);
+        //     var obA = contactManifold.getBody0();
+        //     var obB = contactManifold.getBody1();
+        //     //contactManifold.refreshContactPoints(obA.getWorldTransform(), obB.getWorldTransform());
+        //     var numContacts = contactManifold.getNumContacts();
+
+        //     // For each contact point in that manifold 
+        //     for (var j = 0; j < numContacts; j++) {
+
+        //         // Get the contact information
+        //         var pt = contactManifold.getContactPoint(j);
+        //         var ptA = pt.getPositionWorldOnA();
+        //         var ptB = pt.getPositionWorldOnB();
+        //         var ptdist = pt.getDistance();
+        //         //console.log(ptdist)
+
+        //         // Do whatever else you need with the information...
+        //     }
+        // }
+
 
         // for (name in this.data) {
         //     //console.log(this.data[name]);
