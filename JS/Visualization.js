@@ -60,8 +60,7 @@ class Visualization {
 
 
         // Currently I don't want gravity.
-        this.physicsWorld.setGravity(new Ammo.btVector3(-10, 0, 0));
-
+        this.physicsWorld.setGravity(new Ammo.btVector3(0, 0, 0));
     }
 
 
@@ -172,9 +171,6 @@ class Visualization {
 
         this.animate();
     }
-
-
-
 
     createLights() {
         // A hemisphere light is a gradient colored light; 
@@ -399,17 +395,11 @@ class Visualization {
             this.data[name].graphics.material,
             this.chamber_edge_length);
 
-        temp.mesh.userData.physicsBody.setLinearVelocity(temp.mesh.velocity)
 
         this.data[name].instances.push(temp);
         this.scene.add(temp.mesh);
-
-        let rbInfo = new Ammo.btRigidBodyConstructionInfo(temp.mass, temp.motionState, temp.colShape, temp.localInertia);
-        let body = new Ammo.btRigidBody(rbInfo);
-        body.setRestitution(1);
-        body.setDamping(0.8, 0);
         //add to simulation
-        this.physicsWorld.addRigidBody(body);
+        this.physicsWorld.addRigidBody(temp.mesh.userData.physicsBody);
         //add to update list
         this.rigidBodies.push(temp.mesh);
         // add to glow list
@@ -510,7 +500,7 @@ class Visualization {
 
         let rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, colShape, localInertia);
         let body = new Ammo.btRigidBody(rbInfo);
-        body.setRestitution(2);
+        body.setRestitution(.5);
         //body.setDamping(0.8, 0);
 
         this.physicsWorld.addRigidBody(body);

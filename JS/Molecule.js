@@ -1,7 +1,7 @@
 class Molecule {
     constructor(name, geometry, material, chamber_edge_length) {
         this.name = name;
-        this.radius = .07;
+        this.radius = .03;
 
         let pos = {
             x: d3.randomUniform(-2, 2)(),
@@ -9,11 +9,6 @@ class Molecule {
             z: d3.randomUniform(-2, 2)()
         };
 
-        // let pos = {
-        //     x: 0,
-        //     y: 0,
-        //     z: 0
-        // };
 
         let vel = {
             x: d3.randomNormal(0.0)(1),
@@ -65,14 +60,30 @@ class Molecule {
         //this.colShape = geometry;
         this.colShape.setMargin(0.05);
 
-        this.localInertia = new Ammo.btVector3(vel.x, vel.y, vel.z);
+        this.localInertia = new Ammo.btVector3(0, 0, 0);
+
         this.colShape.calculateLocalInertia(this.mass, this.localInertia);
 
         this.rbInfo = new Ammo.btRigidBodyConstructionInfo(this.mass, this.motionState, this.colShape, this.localInertia);
         this.body = new Ammo.btRigidBody(this.rbInfo);
-        this.body.setRestitution(1);
-        this.body.setDamping(0.8, 0);
+
         this.mesh.userData.physicsBody = this.body;
+
+
+
+        let vel_vec = new Ammo.btVector3(vel.x, vel.y, vel.z);
+        this.body.setLinearVelocity(vel_vec);
+        //this.body.setLinearFactor(vel_vec);
+        //this.body.applyCentralImpulse(vel_vec);
+        //this.body.applyImpulse(vel_vec);
+        //this.body.setAngularVelocity()
+
+        this.body.setActivationState(4);
+        this.body.setRestitution(1.0);
+        this.body.setDamping(0, 0);
+
+
+
     }
 
     tick(data) {
