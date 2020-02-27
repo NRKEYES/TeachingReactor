@@ -58,6 +58,10 @@
         padding: 15px 15px;
     }
     
+    #info_box {
+        background-color: teal;
+    }
+    
     a:hover {
         background-color: orange;
     }
@@ -100,25 +104,13 @@
     
     .floating {
         position: fixed;
+        top: 20vh;
+        left: 60vw;
         transition: .3s;
         opacity: .1;
     }
     
     .floating:hover {
-        opacity: 1.0;
-        background-color: orange;
-    }
-    
-    #info_box {
-        transition: .3s;
-        opacity: .1;
-        z-index: 100;
-        border: 5px solid goldenrod;
-        top: 70vh;
-        left: 60vw;
-    }
-    
-    #info_box:hover {
         opacity: 1.0;
         background-color: orange;
     }
@@ -142,9 +134,36 @@
         z-index: 100;
         top: 20vh;
         left: 60vw;
+        border-color: goldenrod;
     }
     
     #floating_histogram:hover {
+        opacity: 1.0;
+        background-color: orange;
+    }
+    
+    #PercentVsTime {
+        transition: .3s;
+        opacity: .5;
+        z-index: 100;
+        top: 20vh;
+        left: 60vw;
+    }
+    
+    #PercentVsTime:hover {
+        opacity: 1.0;
+        background-color: orange;
+    }
+    
+    #CountVsTime {
+        transition: .3s;
+        opacity: .5;
+        z-index: 100;
+        top: 20vh;
+        left: 60vw;
+    }
+    
+    #CountVsTime:hover {
         opacity: 1.0;
         background-color: orange;
     }

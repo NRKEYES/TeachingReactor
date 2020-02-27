@@ -98,38 +98,37 @@ let count_v_time = new BlankVsTime(species, 'count', t_step, steps, 'CountVsTime
 let percent_v_time = new BlankVsTime(species, 'percent', t_step, steps, 'PercentVsTime', 'Proportion of each species');
 let percent_bar = new Barchart(species, 'count', t_step, steps, 'floating_bar_chart', '# of molecules present');
 let speed_hist = new Histogram(species, 'count', t_step, steps, 'floating_histogram', 'Number');
-
 //let sideview = new SideView();
 
 
 function print_info_block() {
-    let block = document.getElementById('info_box').lastElementChild;
+    let block = document.getElementById('info_box');
     block.innerHTML = '';
     let textnode = null;
     let node = null; // Create a <li> node
 
     textnode = document.createTextNode("The time step is: " + t_step + " seconds");
-    node = document.createElement("li");
+    node = document.createElement("p");
     node.appendChild(textnode);
     block.appendChild(node)
 
     textnode = document.createTextNode("There were initially " + reactant_initial + " Reactant Molecules.");
-    node = document.createElement("li");
+    node = document.createElement("p");
     node.appendChild(textnode);
     block.appendChild(node)
 
     textnode = document.createTextNode("There were initially " + product_initial + " Product Molecules.");
-    node = document.createElement("li");
+    node = document.createElement("p");
     node.appendChild(textnode);
     block.appendChild(node)
 
     textnode = document.createTextNode("The volume of the reactor is " + chamber_volume + " nm^3.");
-    node = document.createElement("li");
+    node = document.createElement("p");
     node.appendChild(textnode);
     block.appendChild(node)
 
     textnode = document.createTextNode("The molecular density is " + reactant_initial / chamber_volume + " molecules/nm^3.");
-    node = document.createElement("li");
+    node = document.createElement("p");
     node.appendChild(textnode);
     block.appendChild(node)
 
@@ -142,7 +141,7 @@ function print_info_block() {
         favor = 'neither'
     }
     textnode = document.createTextNode("This reaction favors the " + favor + " side.");
-    node = document.createElement("li");
+    node = document.createElement("p");
     node.appendChild(textnode);
     block.appendChild(node)
 
@@ -234,9 +233,6 @@ function thermostat() {
 
 
 }
-
-
-
 
 function simulation() {
     //console.log("Agent Based Physics")
@@ -367,7 +363,7 @@ function start_simulation() {
 
     //sideview.init();
 
-    setInterval(update_all, 1);
+    setInterval(update_all, 1000);
 }
 
 // Add monitors the the main.html page as needed
@@ -379,6 +375,8 @@ window.addEventListener('load', () => {
     print_info_block();
     start_simulation();
 });
+window.addEventListener('resize', () => visualizer.onWindowResize(), false);
+
 document.querySelector('#menu-toggle').addEventListener('mouseenter', () => {
     //toggle element visability
     document.getElementById('Sub-Menu-Toggle').style.display = '';
@@ -473,8 +471,27 @@ document.querySelector('#histogram_button').addEventListener('click', () => {
 
     }
 });
+document.querySelector('#pop_button').addEventListener('click', () => {
 
-window.addEventListener('resize', () => visualizer.onWindowResize(), false);
+    //toggle element visability
+    if (document.getElementById('PercentVsTime').style.zIndex == -1) {
+        document.getElementById('PercentVsTime').style.zIndex = 100;
+    } else {
+        document.getElementById('PercentVsTime').style.zIndex = -1;
+
+    }
+});
+document.querySelector('#prop_button').addEventListener('click', () => {
+
+    //toggle element visability
+    if (document.getElementById('CountVsTime').style.zIndex == -1) {
+        document.getElementById('CountVsTime').style.zIndex = 100;
+    } else {
+        document.getElementById('CountVsTime').style.zIndex = -1;
+
+    }
+});
+
 
 d3.select("#orders_of_magnitude").on("input", function() {
     orders_of_magnitude = this.value;

@@ -45,6 +45,9 @@
             <p>
                 <a type="button" class='button' id="dev-toggle">Developmental Features</a>
             </p>
+
+            <a id='info_box' class='button'>
+            </a>
         </div>
         <div id='Sub-Menus'>
             <div id='Controls' class="sub-menu" style='display: none;'>
@@ -91,10 +94,10 @@
                     <a type="button" class='button' id="histogram_button"> Display Histogram</a>
                 </p>
                 <p>
-                    <a type="button" class='button' id="clear_graphs"> Population vs. Time</a>
+                    <a type="button" class='button' id="pop_button"> Population vs. Time</a>
                 </p>
                 <p>
-                    <a type="button" class='button' id="clear_graphs"> Proportion vs. Time</a>
+                    <a type="button" class='button' id="prop_button"> Proportion vs. Time</a>
                 </p>
 
                 <p>
@@ -135,25 +138,25 @@
                     </div>
                 </p>
             </div>
+
+
+
         </div>
     </div>
 
     <div id="Visuals">
         <div id='Visualization' class='render'></div>
 
-        <div id='info_box' class='floating' style="width:fit-content; height:fit-content;  text-align:left;">
-            <ul>
-            </ul>
-        </div>
+
 
         <div id='floating_bar_chart' class='floating' style="width:30vw; height:50vh; z-index: -1;"></div>
         <div id='floating_histogram' class='floating' style="width:30vw; height:50vh; z-index: -1;"></div>
 
 
 
-        <div id='PercentVsTime' style='display: none;'></div>
-        <div id='CountVsTime' style='display: none;'></div>
-        <div id='Barchart' style='display: none;'></div>
-        <div id='SideView' style='display: none;'></div>
+        <div id='PercentVsTime' class='floating' style="width:30vw; height:50vh; z-index: -1;"></div>
+        <div id='CountVsTime' class='floating' style="width:30vw; height:50vh; z-index: -1;"></div>
+        <div id='Barchart' class='floating' style="width:30vw; height:50vh; z-index: -1;"></div>
+        <div id='SideView' class='floating' style="width:30vw; height:50vh; z-index: -1;"></div>
     </div>
 </body>

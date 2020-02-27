@@ -4,9 +4,9 @@ class Molecule {
         this.radius = .01 * (this.name.length - 1);
 
         let pos = {
-            x: d3.randomUniform(-2, 2)(),
-            y: d3.randomUniform(-2, 2)(),
-            z: d3.randomUniform(-2, 2)()
+            x: d3.randomUniform(-chamber_edge_length / 2, chamber_edge_length / 2)(),
+            y: d3.randomUniform(-chamber_edge_length / 2, chamber_edge_length / 2)(),
+            z: d3.randomUniform(-chamber_edge_length / 2, chamber_edge_length / 2)()
         };
 
 
@@ -46,7 +46,7 @@ class Molecule {
         this.motionState = new Ammo.btDefaultMotionState(this.transform);
 
         this.colShape = new Ammo.btSphereShape(this.radius);
-        this.colShape.setMargin(0.05);
+        this.colShape.setMargin(0.5);
 
         this.localInertia = new Ammo.btVector3(0, 0, 0);
 
