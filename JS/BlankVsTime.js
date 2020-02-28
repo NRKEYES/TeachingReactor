@@ -28,7 +28,7 @@ class BlankVsTime {
             .range([this.margin.top, this.height])
 
         this.z = d3.scaleOrdinal().domain(this.data)
-            .range(d3.schemeSet3);
+            .range(d3.schemeCategory10);
 
         // AXES 
         this.xAxes = this.svg.append("g")

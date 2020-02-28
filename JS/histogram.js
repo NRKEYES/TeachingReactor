@@ -20,11 +20,6 @@ class Histogram {
             .attr("height", this.h)
             .append("g")
 
-        // SCALES
-        // this.x = d3.scaleLinear()
-        //     .domain(this.data.map(d => { return d.count; }))
-        //     .range([this.margin.left, this.width])
-
 
         this.x = d3.scaleLinear()
             .domain([0, 1])
@@ -35,7 +30,7 @@ class Histogram {
             .range([this.margin.top, this.height]);
 
         this.z = d3.scaleOrdinal().domain(this.data)
-            .range(d3.schemeSet3);
+            .range(d3.schemeCategory10);
 
 
         // AXES 

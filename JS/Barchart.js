@@ -31,7 +31,7 @@ class Barchart {
 
 
         this.z = d3.scaleOrdinal().domain(this.data)
-            .range(d3.schemeSet3);
+            .range(d3.schemeCategory10);
 
         // Lines Plots Bars etc.
         this.bars = this.svg.append('g').selectAll(".bar")
