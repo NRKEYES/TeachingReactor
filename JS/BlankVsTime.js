@@ -80,8 +80,16 @@ class BlankVsTime {
     }
 
 
-    tick(incoming_data) {
+    tick(incoming_data, steps) {
         this.data = incoming_data;
+        this.steps = steps;
+
+        this.x.domain([0, this.steps]);
+
+        this.xAxes.attr("class", "x axis")
+            .attr("transform", "translate(" + 0 + "," + this.height + ")")
+            .transition().duration(100).call(d3.axisBottom().scale(this.x))
+
 
 
         let num1 = d3.max(this.data[0][this.blank_target]);

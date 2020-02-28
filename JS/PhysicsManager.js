@@ -331,14 +331,13 @@ function update_all_sliders() {
 }
 
 function update_all() {
-    if ((t < steps) && (run_sim)) {
+    if (run_sim) {
         // Run the differential equations numerically with appropriate discrete modifications.
         numerical_simulation();
         // Actually move the particles around.
         simulation();
-
-        count_v_time.tick(species);
-        percent_v_time.tick(species);
+        count_v_time.tick(species, t);
+        percent_v_time.tick(species, t);
         percent_bar.tick(species);
         speed_hist.tick(species)
 
@@ -348,7 +347,6 @@ function update_all() {
 }
 
 function start_simulation() {
-
     find_time_step();
     print_info_block();
     t = 0;
@@ -363,7 +361,7 @@ function start_simulation() {
 
     //sideview.init();
 
-    setInterval(update_all, 1000);
+    setInterval(update_all, 2000);
 }
 
 // Add monitors the the main.html page as needed
@@ -376,11 +374,27 @@ window.addEventListener('load', () => {
     start_simulation();
 });
 window.addEventListener('resize', () => visualizer.onWindowResize(), false);
-
-document.querySelector('#menu-toggle').addEventListener('mouseenter', () => {
+document.querySelector('#Visuals').addEventListener('mouseenter', () => {
     //toggle element visability
-    document.getElementById('Sub-Menu-Toggle').style.display = '';
-    //document.getElementById('menu-toggle').style.height = '60vh';
+    document.getElementById('Sub-Menu-Toggle').style.display = 'none';
+    document.getElementById('Tabs').style.display = 'none';
+    document.getElementById('Controls').style.display = 'none';
+    document.getElementById('Development').style.display = 'none';
+});
+document.querySelector('#Menu').addEventListener('mouseleave', () => {
+    //toggle element visability
+    //document.getElementById('Sub-Menu-Toggle').style.display = 'none';
+    document.getElementById('Tabs').style.display = 'none';
+    document.getElementById('Controls').style.display = 'none';
+    document.getElementById('Development').style.display = 'none';
+});
+document.querySelector('#menu-toggle').addEventListener('click', () => {
+    //toggle element visability
+    if (document.getElementById('Sub-Menu-Toggle').style.display == 'none') {
+        document.getElementById('Sub-Menu-Toggle').style.display = '';
+    } else {
+        document.getElementById('Sub-Menu-Toggle').style.display = 'none';
+    }
 });
 document.querySelector('#tab-toggle').addEventListener('mouseover', () => {
     document.getElementById('Tabs').style.display = '';
@@ -397,18 +411,8 @@ document.querySelector('#dev-toggle').addEventListener('mouseover', () => {
     document.getElementById('Controls').style.display = 'none';
     document.getElementById('Development').style.display = '';
 });
-document.querySelector('#Menu').addEventListener('mouseleave', () => {
-    //toggle element visability
-    document.getElementById('Sub-Menu-Toggle').style.display = 'none';
-    document.getElementById('Tabs').style.display = 'none';
-    document.getElementById('Controls').style.display = 'none';
-    document.getElementById('Development').style.display = 'none';
-});
-
-
 document.querySelector('#pause_simulation').addEventListener('click', () => {
     run_sim = false;
-
 });
 document.querySelector('#run_simulation').addEventListener('click', () => {
     run_sim = true;
@@ -491,7 +495,6 @@ document.querySelector('#prop_button').addEventListener('click', () => {
 
     }
 });
-
 
 d3.select("#orders_of_magnitude").on("input", function() {
     orders_of_magnitude = this.value;

@@ -10,7 +10,7 @@ class Molecule {
         };
 
 
-        let vel = {
+        let velocity = {
             x: d3.randomNormal(0.0)(1),
             y: d3.randomNormal(0.0)(1),
             z: d3.randomNormal(0.0)(1)
@@ -21,6 +21,12 @@ class Molecule {
             y: d3.randomNormal(0.0)(1),
             z: d3.randomNormal(0.0)(1),
             w: 1
+        };
+
+        let rot = {
+            x: d3.randomNormal(0.0)(3, 14),
+            y: d3.randomNormal(0.0)(3.14),
+            z: d3.randomNormal(0.0)(3.14)
         };
         // geometry.computeFaceNormals();
         geometry.computeBoundingSphere();
@@ -59,17 +65,25 @@ class Molecule {
 
 
 
-        let vel_vec = new Ammo.btVector3(vel.x, vel.y, vel.z);
+        let vel_vec = new Ammo.btVector3(velocity.x, velocity.y, velocity.z);
         this.body.setLinearVelocity(vel_vec);
         this.body.setFriction(0)
             //this.body.setLinearFactor(vel_vec);
             //this.body.applyCentralImpulse(vel_vec);
             //this.body.applyImpulse(vel_vec);
-            //this.body.setAngularVelocity()
+        let rot_vec = new Ammo.btVector3(rot.x, rot.y, rot.z);
+        this.body.setAngularVelocity(rot_vec);
 
+
+        //prevents physics deactivation
+        // haven't explored this much
         this.body.setActivationState(4);
+
+
+        // Very basic collision parameters
+        // Something here may be causing acceleration(excessive acceleration)
         this.body.setRestitution(1.0);
-        this.body.setDamping(0, 0);
+        this.body.setDamping(0.05, 0);
 
 
 
@@ -188,6 +202,9 @@ class Molecule {
     }
 
     update(data, delta_t, chamber_edge_length) {
+
+        //this.velocity = this.body.getLinearVelocity()
+        console.log(this.velocity)
 
         // this.mesh.position.addScaledVector(this.velocity, delta_t);
         // this.mesh.rotateOnAxis(this.rotational_axis, .05);

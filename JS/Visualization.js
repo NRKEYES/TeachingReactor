@@ -44,10 +44,7 @@ var atom_radius = { // Van der walls from wiki https://en.wikipedia.org/wiki/Van
 
 class Visualization {
 
-
     setupPhysicsWorld() {
-
-
         this.collisionConfiguration = new Ammo.btDefaultCollisionConfiguration();
         this.dispatcher = new Ammo.btCollisionDispatcher(this.collisionConfiguration);
         this.broadphase = new Ammo.btDbvtBroadphase();
@@ -57,48 +54,37 @@ class Visualization {
         // this.physicsWorld.setGravity(new Ammo.btVector3(0, gravityConstant, 0));
         // this.physicsWorld.getWorldInfo().set_m_gravity(new Ammo.btVector3(0, gravityConstant, 0));
 
-
-
         // Currently I don't want gravity.
         this.physicsWorld.setGravity(new Ammo.btVector3(0, 0, 0));
     }
 
 
     constructor(incoming_data, chamber_edge_length) {
-
-        Ammo()
-        this.tmpTrans = new Ammo.btTransform();
-
-
-        this.physicsWorld;
-        this.rigidBodies = [];
-        this.setupPhysicsWorld()
-
-
-        this.chamber_edge_length = chamber_edge_length;
-
-        this.camera_displacement = chamber_edge_length * 2;
-
-
+        // Initialize Ammo engine
+        Ammo();
         //Engine Variables
         this.height_for_3d = document.getElementById("Visualization").clientHeight;
         this.width_for_3d = document.getElementById("Visualization").clientWidth;
         this.background_and_emis = 0x00fffa;
         this.clock = new THREE.Clock();
+        this.tmpTrans = new Ammo.btTransform();
+        this.physicsWorld;
+        this.setupPhysicsWorld()
 
+        this.chamber_edge_length = chamber_edge_length;
+        this.camera_displacement = chamber_edge_length * 2;
 
-        this.selectedObjects = []
+        this.rigidBodies = []; // for ammo
+        this.selectedObjects = [] // for glow
         this.outline_params = {
-            edgeStrength: 3,
-            edgeGlow: 1,
-            edgeThickness: 3.0,
+            edgeStrength: 30,
+            edgeGlow: .1,
+            edgeThickness: 1.0,
             pulsePeriod: 0,
             usePatternTexture: false
         };
-
-
-        // Graphics Variables
         this.chamber = null;
+
         //this.line = [];
 
 
@@ -110,55 +96,45 @@ class Visualization {
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.shadowMap.enabled = true;
         this.renderer.setClearColor(this.background_and_emis, 0.0)
-            //this.renderer.domElement.style.position = 'absolute';
         this.renderer.setSize(this.width_for_3d, this.height_for_3d);
         this.renderer.gammaInput = true;
         this.renderer.gammaOutput = true;
-
         this.renderer.shadowMap.enabled = true;
 
-
-
-
-        // Add rendering to everything that needs it
-        this.container = document.getElementById('Visualization');
-        this.container.appendChild(this.renderer.domElement);
-        this.composer = new EffectComposer(this.renderer);
 
         // Setup scene, camera, lighting
         this.scene = new THREE.Scene();
         this.scene.position.x = 0;
         this.scene.position.y = 0;
         this.scene.position.z = 0;
-        //this.scene.overrideMaterial = { color: 0xffff00 };
-
-
+        this.scene.overrideMaterial = { color: 0xffff00 };
 
 
         this.camera = new THREE.PerspectiveCamera(30, this.width_for_3d / this.height_for_3d, 1, 1000);
-        // this.camera.position.z = this.camera_displacement; //camera.lookAt(scene.position)
-        // this.camera.position.x = this.camera_displacement; //camera.lookAt(scene.position)
-        // this.camera.position.y = this.camera_displacement; //camera.lookAt(scene.position)
         this.camera.position.x = this.camera_displacement; //camera.lookAt(scene.position)
         this.camera.position.y = this.chamber_edge_length * 3 / 2; //camera.lookAt(scene.position)
         this.camera.position.z = this.chamber_edge_length * 3; //camera.lookAt(scene.position)
 
-        this.renderPass = new RenderPass(this.scene, this.camera);
 
-        this.composer.addPass(this.renderPass);
+
+        this.renderPass = new RenderPass(this.scene, this.camera);
 
         // Configure outline shader
         this.outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), this.scene, this.camera);
         this.outlinePass.selectedObjects = this.selectedObjects;
         this.outlinePass.renderToScreen = true;
-
         this.outlinePass.edgeStrength = this.outline_params.edgeStrength;
         this.outlinePass.edgeGlow = this.outline_params.edgeGlow;
         this.outlinePass.visibleEdgeColor.set(0xffffff);
-        this.outlinePass.hiddenEdgeColor.set(0xffffff);
+        //this.outlinePass.hiddenEdgeColor.set(0xffffff);
 
+        // Add rendering to everything that needs it
+        this.container = document.getElementById('Visualization');
+        this.container.appendChild(this.renderer.domElement);
+        this.composer = new EffectComposer(this.renderer);
+        this.composer.addPass(this.renderPass);
         this.composer.addPass(this.outlinePass);
-        //console.log(this.composer)
+
 
         // Setup all the controls
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -227,16 +203,16 @@ class Visualization {
         }
 
         this.tmpTrans = new Ammo.btTransform();
-
-
         this.physicsWorld;
         this.rigidBodies = [];
         this.setupPhysicsWorld()
 
 
         this.chamber_edge_length = chamber_edge_length;
-
+        this.controls.maxDistance = this.chamber_edge_length * 4;
         this.selectedObjects = [];
+
+
 
         this.composer = new EffectComposer(this.renderer);
 
@@ -246,8 +222,9 @@ class Visualization {
         this.scene.position.y = 0;
         this.scene.position.z = 0;
 
-        //this.scene.fog = new THREE.FogExp2(0xefd1b5, .035);
-        //this.scene.fog = new THREE.Fog(0xefd1b5, 1, 1000);
+        // No success with fog really adding anything
+        // this.scene.fog = new THREE.FogExp2(0xefd1b5, .035);
+        // this.scene.fog = new THREE.Fog(0xefd1b5, 1, 1000);
 
         this.createLights();
 
@@ -256,14 +233,12 @@ class Visualization {
 
         // Configure outline shader
         this.outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), this.scene, this.camera);
-        //
         this.outlinePass.selectedObjects = this.selectedObjects;
         this.outlinePass.renderToScreen = true;
-
         this.outlinePass.edgeStrength = this.outline_params.edgeStrength;
         this.outlinePass.edgeGlow = this.outline_params.edgeGlow;
-        this.outlinePass.visibleEdgeColor.set(0xffffff);
-        this.outlinePass.hiddenEdgeColor.set(0xffffff);
+        this.outlinePass.visibleEdgeColor.set(0x01cdfe);
+        this.outlinePass.hiddenEdgeColor.set(0x01cdfe);
 
         this.composer.addPass(this.outlinePass);
 
@@ -274,19 +249,8 @@ class Visualization {
         //     width: this.width,
         //     height: this.height
         // });
-        //this.composer.addPass(this.bokehPass);
+        // this.composer.addPass(this.bokehPass);
 
-        // // Setup all the controls
-        // this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-        // this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
-        // this.controls.dampingFactor = 0.25;
-        // this.controls.screenSpacePanning = false;
-        // this.controls.minDistance = 1;
-        this.controls.maxDistance = this.chamber_edge_length * 4;
-        // this.controls.maxPolarAngle = Math.PI;
-
-        // this.chamber = null;
-        this.chamber_edge_length = chamber_edge_length;
 
         for (name in this.data) {
             this.generate_species(name)
@@ -294,7 +258,6 @@ class Visualization {
                 this.add_molecule(name);
             }
         }
-        //this.add_reaction_chamber()
         this.add_grid()
     }
 

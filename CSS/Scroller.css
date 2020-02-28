@@ -1,12 +1,12 @@
     body {
         width: 100vw;
         height: 100vh;
-        background-color: #fbeec1;
         display: fixed;
         width: 98vw;
         height: 98vh;
         justify-content: center;
         font-family: "Source Sans Pro";
+        background-color: #DB504A;
     }
     
     #Visuals {
@@ -16,7 +16,7 @@
     
     #Visualization {
         position: fixed;
-        z-index: 10;
+        z-index: 50;
         width: 98vw;
         height: 98vh;
         overflow-y: scroll;
@@ -50,20 +50,23 @@
     
     a {
         width: 70%;
-        background-color: grey;
+        background-color: #084C61;
         color: white;
         text-decoration: none;
         display: inline-block;
-        font-size: 14px;
+        font-size: 20px;
         padding: 15px 15px;
-    }
-    
-    #info_box {
-        background-color: teal;
+        transition: .3s;
+        opacity: .8;
     }
     
     a:hover {
-        background-color: orange;
+        opacity: 1.0;
+        background-color: #56A3A6;
+    }
+    
+    #info_box {
+        font-size: 12px;
     }
     
     .slidecontainer {
@@ -112,7 +115,7 @@
     
     .floating:hover {
         opacity: 1.0;
-        background-color: orange;
+        background-color: #4f6d7a;
     }
     
     #floating_bar_chart {
@@ -125,7 +128,7 @@
     
     #floating_bar_chart:hover {
         opacity: 1.0;
-        background-color: slategrey;
+        background-color: #4f6d7a;
     }
     
     #floating_histogram {
@@ -134,12 +137,11 @@
         z-index: 100;
         top: 20vh;
         left: 60vw;
-        border-color: goldenrod;
     }
     
     #floating_histogram:hover {
         opacity: 1.0;
-        background-color: orange;
+        background-color: #708090;
     }
     
     #PercentVsTime {
@@ -152,7 +154,7 @@
     
     #PercentVsTime:hover {
         opacity: 1.0;
-        background-color: orange;
+        background-color: #4f6d7a;
     }
     
     #CountVsTime {
@@ -165,7 +167,7 @@
     
     #CountVsTime:hover {
         opacity: 1.0;
-        background-color: orange;
+        background-color: #4f6d7a;
     }
     
     .line {
@@ -182,6 +184,6 @@
     .axis path,
     .axis line {
         fill: none;
-        stroke: #bdc3c7;
+        stroke: #999999;
         shape-rendering: crispEdges;
     }
