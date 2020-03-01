@@ -75,6 +75,11 @@ class Histogram {
 
 
     tick(incoming_data) {
+        // TODO clean this up more
+        // TODO add KDE - density plots
+        //TODO make sure this can take more than 2 categories??
+
+
         this.svg.selectAll(".bar").remove();
 
         this.data = incoming_data;

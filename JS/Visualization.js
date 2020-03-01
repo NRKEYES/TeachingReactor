@@ -78,12 +78,15 @@ class Visualization {
         this.selectedObjects = [] // for glow
         this.outline_params = {
             edgeStrength: 30,
-            edgeGlow: .1,
+            edgeGlow: 3,
             edgeThickness: 1.0,
             pulsePeriod: 0,
             usePatternTexture: false
         };
-        this.chamber = null;
+
+        this.raycaster = new THREE.Raycaster();
+
+        this.INTERSECTED;
 
         //this.line = [];
 
@@ -97,8 +100,6 @@ class Visualization {
         this.renderer.shadowMap.enabled = true;
         this.renderer.setClearColor(this.background_and_emis, 0.0)
         this.renderer.setSize(this.width_for_3d, this.height_for_3d);
-        this.renderer.gammaInput = true;
-        this.renderer.gammaOutput = true;
         this.renderer.shadowMap.enabled = true;
 
 
@@ -126,7 +127,7 @@ class Visualization {
         this.outlinePass.edgeStrength = this.outline_params.edgeStrength;
         this.outlinePass.edgeGlow = this.outline_params.edgeGlow;
         this.outlinePass.visibleEdgeColor.set(0xffffff);
-        //this.outlinePass.hiddenEdgeColor.set(0xffffff);
+        this.outlinePass.hiddenEdgeColor.set(0xffffff);
 
         // Add rendering to everything that needs it
         this.container = document.getElementById('Visualization');
@@ -144,6 +145,13 @@ class Visualization {
         this.controls.minDistance = 1;
         this.controls.maxDistance = this.chamber_edge_length * 4;
         this.controls.maxPolarAngle = Math.PI;
+
+
+
+        this.mouse = new THREE.Vector2();
+        console.log(this.mouse);
+
+        //this.mouse_viewer = this.view_mouse();
 
         this.animate();
     }
@@ -198,6 +206,8 @@ class Visualization {
     init(incoming_data, chamber_edge_length) {
 
         this.data = incoming_data;
+        this.chamber = this.view_mouse();
+
         for (name in this.data) {
             this.data[name].instances = [];
         }
@@ -258,7 +268,10 @@ class Visualization {
                 this.add_molecule(name);
             }
         }
-        this.add_grid()
+        //this.mouse_viewer = this.view_mouse();
+        //console.log(this.mouse_viewer)
+        this.add_grid();
+
     }
 
     clean_all() {
@@ -279,11 +292,11 @@ class Visualization {
         // }
 
         //console.log(this.chamber)
-        if (this.chamber != null) {
-            this.chamber.geometry.dispose()
-            this.chamber.material.dispose();
-            this.scene.remove(this.chamber);
-        }
+        // if (this.chamber != null) {
+        //     this.chamber.geometry.dispose()
+        //     this.chamber.material.dispose();
+        //     this.scene.remove(this.chamber);
+        // }
 
 
         this.renderer.renderLists.dispose();
@@ -366,7 +379,7 @@ class Visualization {
         //add to update list
         this.rigidBodies.push(temp.mesh);
         // add to glow list
-        this.selectedObjects.push(temp.mesh)
+        //this.selectedObjects.push(temp.mesh)
     }
 
     add_grid() {
@@ -473,11 +486,120 @@ class Visualization {
 
     }
 
-    animate() {
-        requestAnimationFrame(this.animate.bind(this));
+    onDocumentMouseMove(event) {
+        event.preventDefault();
+        //console.log(event.clientX, event.clientY);
+        //this.mouse.x = event.clientX // / this.width_for_3d * 2;
+        //this.mouse.y = -event.clientY // / this.height_for_3d * 2;
+        //console.log(this.mouse.x)
 
+        this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        this.mouse.unproject(this.camera);
+    }
+
+    onDocumentMouseDown(event) {
+
+        event.preventDefault();
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+
+        let intersects = this.raycaster.intersectObjects(this.rigidBodies);
+
+        if (intersects.length > 0) {
+
+            if (this.selectedObjects.length > 0) {
+                console.log('shrinking!')
+                this.selectedObjects.pop().scale.setScalar(1.0);
+            }
+
+            this.selectedObjects.push(intersects[0].object)
+            intersects[0].object.scale.setScalar(3.0);
+            console.log(intersects[0].object);
+
+        } else {
+            this.INTERSECTED = null;
+        }
+    }
+
+
+    view_mouse() {
+        //console.log('in this mouse')
+        // for visualizaton purposes:
+        let material = new THREE.MeshPhysicalMaterial({
+            color: 'grey',
+            emissive: 'grey',
+            reflectivity: 0,
+            metalness: .9,
+            roughness: 1,
+            tranparency: .5
+        });
+        let geometry = new THREE.SphereBufferGeometry(.1, 10, 10);
+
+        let temp = new THREE.Mesh(geometry, material);
+        temp.position.set(0, 0, 0);
+        this.scene.add(temp);
+        return temp;
+        //End geometry helper block
+
+
+
+    }
+
+    add_line() {
+        let material = new THREE.LineBasicMaterial({ color: 0x0000ff });
+        let points = [];
+        //console.log(this.raycaster.ray.origin)
+        let origin = new THREE.Vector3();
+        //origin.copy(this.raycaster.ray.origin)
+        origin.x = this.mouse.x;
+        origin.y = this.mouse.y;
+        points.push(origin);
+
+        // console.log(origin);
+        // console.log(probe);
+        //points.push(this.camera.position);
+
+        // let probe = new THREE.Vector3();
+        // probe.copy(origin)
+        // probe.addScaledVector(this.raycaster.ray.direction, 10);
+        // points.push(origin);
+        // points.push(probe);
+
+        let probe = new THREE.Vector3(0, 0, 0);
+        points.push(probe);
+
+        let geometry = new THREE.BufferGeometry().setFromPoints(points);
+        let line = new THREE.Line(geometry, material);
+        this.scene.add(line)
+    }
+
+
+
+    animate() {
+
+        //this.add_line();
+
+
+        this.camera.updateMatrixWorld();
         //console.log(this.clock.getDelta());
         this.delta_t = this.clock.getDelta();
+
+        //console.log(this.mouse_viewer)
+        //this.chamber.position.set(this.mouse.x, this.mouse, y, 0)
+
+        // this.raycaster.setFromCamera(this.mouse, this.camera);
+
+        // let intersects = this.raycaster.intersectObjects(this.rigidBodies);
+
+        // if (intersects.length > 0) {
+        //     this.selectedObjects.pop();
+        //     console.log(intersects[0].object);
+        //     this.selectedObjects.push(intersects[0].object)
+
+
+        // } else {
+        //     this.INTERSECTED = null;
+        // }
 
         // Step world
         this.physicsWorld.stepSimulation(this.delta_t, 10);
@@ -528,6 +650,7 @@ class Visualization {
         // }
 
 
+        requestAnimationFrame(this.animate.bind(this));
         this.composer.render(this.scene, this.camera);
     };
 

@@ -82,8 +82,10 @@ class Molecule {
 
         // Very basic collision parameters
         // Something here may be causing acceleration(excessive acceleration)
-        this.body.setRestitution(1.0);
-        this.body.setDamping(0.05, 0);
+        this.body.setRestitution(0.9);
+        this.body.setDamping(0.0, 0);
+
+
 
 
 

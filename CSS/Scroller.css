@@ -115,7 +115,7 @@
     
     .floating:hover {
         opacity: 1.0;
-        background-color: #4f6d7a;
+        background-color: lightgray;
     }
     
     #floating_bar_chart {
@@ -128,7 +128,6 @@
     
     #floating_bar_chart:hover {
         opacity: 1.0;
-        background-color: #4f6d7a;
     }
     
     #floating_histogram {
@@ -141,7 +140,6 @@
     
     #floating_histogram:hover {
         opacity: 1.0;
-        background-color: #708090;
     }
     
     #PercentVsTime {
@@ -154,7 +152,6 @@
     
     #PercentVsTime:hover {
         opacity: 1.0;
-        background-color: #4f6d7a;
     }
     
     #CountVsTime {
@@ -167,7 +164,6 @@
     
     #CountVsTime:hover {
         opacity: 1.0;
-        background-color: #4f6d7a;
     }
     
     .line {

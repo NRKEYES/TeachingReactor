@@ -547,3 +547,7 @@ d3.select("#amount_chaos").on("input", function() {
     amount_chaos = this.value;
     update_all_sliders();
 });
+
+
+document.addEventListener('mousemove', (d) => { return visualizer.onDocumentMouseMove(event) }, false);
+document.addEventListener('mousedown', (d) => { return visualizer.onDocumentMouseDown(event) }, false);
