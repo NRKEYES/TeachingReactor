@@ -77,8 +77,8 @@ class Visualization {
         this.rigidBodies = []; // for ammo
         this.selectedObjects = [] // for glow
         this.outline_params = {
-            edgeStrength: 30,
-            edgeGlow: 3,
+            edgeStrength: 20,
+            edgeGlow: 2,
             edgeThickness: 1.0,
             pulsePeriod: 0,
             usePatternTexture: false
