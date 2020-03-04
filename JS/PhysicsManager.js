@@ -299,7 +299,7 @@ function numerical_simulation() {
 }
 
 function update_all_sliders() {
-
+    console.log(" in update")
     document.getElementById("orders_of_magnitude").value = orders_of_magnitude;
     document.getElementById("orders_of_magnitude").parentElement.lastElementChild.innerHTML = orders_of_magnitude;
 
@@ -374,45 +374,22 @@ window.addEventListener('load', () => {
     start_simulation();
 });
 window.addEventListener('resize', () => visualizer.onWindowResize(), false);
-document.querySelector('#Visuals').addEventListener('mouseenter', () => {
-    //toggle element visability
-    document.getElementById('Sub-Menu-Toggle').style.display = 'none';
-    document.getElementById('Tabs').style.display = 'none';
-    document.getElementById('Controls').style.display = 'none';
-    document.getElementById('Development').style.display = 'none';
-});
-document.querySelector('#Menu').addEventListener('mouseleave', () => {
-    //toggle element visability
-    //document.getElementById('Sub-Menu-Toggle').style.display = 'none';
-    document.getElementById('Tabs').style.display = 'none';
-    document.getElementById('Controls').style.display = 'none';
-    document.getElementById('Development').style.display = 'none';
-});
-document.querySelector('#menu-toggle').addEventListener('click', () => {
-    //toggle element visability
-    if (document.getElementById('Sub-Menu-Toggle').style.display == 'none') {
-        document.getElementById('Sub-Menu-Toggle').style.display = '';
-    } else {
-        document.getElementById('Sub-Menu-Toggle').style.display = 'none';
-    }
-});
-document.querySelector('#tab-toggle').addEventListener('mouseover', () => {
-    document.getElementById('Tabs').style.display = '';
-    document.getElementById('Controls').style.display = 'none';
-    document.getElementById('Development').style.display = 'none';
-});
-document.querySelector('#controls-toggle').addEventListener('mouseover', () => {
-    document.getElementById('Tabs').style.display = 'none';
-    document.getElementById('Controls').style.display = '';
-    document.getElementById('Development').style.display = 'none';
-});
-document.querySelector('#dev-toggle').addEventListener('mouseover', () => {
-    document.getElementById('Tabs').style.display = 'none';
-    document.getElementById('Controls').style.display = 'none';
-    document.getElementById('Development').style.display = '';
-});
+
+document.addEventListener('mousemove', (d) => { return visualizer.onDocumentMouseMove(event) }, false);
+document.addEventListener('mousedown', (d) => { return visualizer.onDocumentMouseDown(event) }, false);
+
 document.querySelector('#pause_simulation').addEventListener('click', () => {
     run_sim = false;
+});
+document.querySelector('#show_simulation_info').addEventListener('click', () => {
+
+    //toggle element visability
+    if (document.getElementById('info_box').style.zIndex == -1) {
+        document.getElementById('info_box').style.zIndex = 100;
+    } else {
+        document.getElementById('info_box').style.zIndex = -1;
+
+    }
 });
 document.querySelector('#run_simulation').addEventListener('click', () => {
     run_sim = true;
@@ -547,7 +524,3 @@ d3.select("#amount_chaos").on("input", function() {
     amount_chaos = this.value;
     update_all_sliders();
 });
-
-
-document.addEventListener('mousemove', (d) => { return visualizer.onDocumentMouseMove(event) }, false);
-document.addEventListener('mousedown', (d) => { return visualizer.onDocumentMouseDown(event) }, false);

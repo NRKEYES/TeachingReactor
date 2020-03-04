@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <link rel="icon" href="icon.png">
+<link href="https://fonts.googleapis.com/css?family=Oxanium|Source+Code+Pro&display=swap" rel="stylesheet">
 
 <title>NRKinetic Reactor</title>
 
@@ -9,9 +10,6 @@
 <head>
     <!-- Import Foriegn scripts here -->
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
-    <script src="JS/ammo/ammo.js"></script>
-    <script src="JS/ammo/cannon.js"></script>
-
 
     <!-- D3 dependencies-->
     <script src="https://d3js.org/d3.v5.min.js"></script>
@@ -19,8 +17,8 @@
 
     <!-- Threes dependencies -->
     <script src="JS/three/build/three.js"></script>
-
-
+    <script src="JS/ammo/ammo.js"></script>
+    <script src="JS/ammo/cannon.js"></script>
 
     <!-- Local Scripts here-->
     <script type=module src="/JS/PhysicsManager.js"></script>
@@ -28,134 +26,136 @@
 
 
 <body>
-    <div id='Menu' style='height: fit-content;'>
-        <p>
-            <a type="button" class='button ' id="menu-toggle">Menu</a>
-        </p>
 
-        <div id='Sub-Menu-Toggle' style='display: none;'>
-            <p>
-                <a type="button" class='button ' id="controls-toggle">Simulation Controls</a>
-            </p>
+    <nav class='menu menu-branch menu-root'>
 
-            <p>
-                <a type="button" class='button ' id="tab-toggle">Visualizations</a>
-            </p>
+        <span>Menu</span>
 
-            <p>
-                <a type="button" class='button ' id="dev-toggle">Developmental Features</a>
-            </p>
 
-            <a id='info_box' class='button '>
-            </a>
-        </div>
-        <div id='Sub-Menus'>
-            <div id='Controls' class="sub-menu" style='display: none;'>
+        <ul class='menu menu-branch' id="controls">
+            <span>Simulation Controls</span>
 
-                <p>
-                    <a type="button" class='button ' id="run_simulation">Start Simulation</a>
-                </p>
-                <p>
-                    <a type="button" class='button ' id="pause_simulation">Pause Simulation</a>
-                </p>
+            <li class='menu menu-button'>
+                <a type="button" class='button' id="run_simulation">
+                    <span>Start Simulation</span>
+                </a>
+            </li>
+            <li class='menu menu-button'>
+                <a type="button" class='button' id="show_simulation_info">
+                    <span>Show Sim. Info</span>
+                </a>
+            </li>
+            <li class='menu menu-button'>
+                <a type="button" class='button' id="pause_simulation">
+                    <span>Pause Simulation</span>
+                </a>
+            </li>
 
+            <li class='menu menu-slider'>
+                <span>Number of Particles (Exponent):</span>
+                <input type="range" min="0" max="3" class="slider" id="orders_of_magnitude">
+                <text id="slider_value"> </text>
+            </li>
+
+            <li class='menu menu-slider'>
+
+                Initial Proportion of Product:
+                <input type="range" min="1" max="100" class="slider" id="initial_ratio">
+                <text id="slider_value"> </text>
+
+            </li>
+
+
+            <li class='menu menu-slider'>
+                <span>Reactor Size (edge length in nm):</span>
+                <input type="range" min="1" max="50" class="slider" id="edge_length">
+                <text id="slider_value"></text>
+            </li>
+
+            <li class='menu menu-slider'>
+                <span>Time Step Equivalent (exponent):</span>
+                <input type="range" min="0" max="100" class="slider" id="time_step">
+                <text id="slider_value"> </text>
+            </li>
+
+
+        </ul>
+
+        <ul class='menu menu-branch' id='Graph Control'>
+            <span>Graph Controls</span>
+
+            <li class='menu menu-button'>
+                <a type="button" class='button' id="barchart_button"> Display Barchart</a>
+            </li>
+
+            <li class='menu menu-button'>
+                <a type="button" class='button' id="histogram_button"> Display Histogram</a>
+            </li>
+
+            <li class='menu menu-button'>
+                <a type="button" class='button' id="pop_button"> Population vs. Time</a>
+            </li>
+
+            <li class='menu menu-button'>
+                <a type="button" class='button' id="prop_button"> Proportion vs. Time</a>
+            </li>
+
+            <li class='menu menu-button'>
+                <a type="button" class='button' id="clear_graphs"> Clear Graphs</a>
+            </li>
+
+        </ul>
+
+        <ul class='menu menu-branch' id='Developmental'>
+            <span>Developmental</span>
+
+            <li class='menu menu-slider'>
+                Forward Reaction Rate (Exponent):
                 <div class="slidecontainer">
-                    Number of Particles (Exponent):
-                    <input type="range" min="0" max="3" class="slider" id="orders_of_magnitude">
+                    <input type="range" min="0" max="20" class="slider" id="forward_rate">
                     <text id="slider_value"> </text>
                 </div>
+            </li>
 
+            <li class='menu menu-slider'>
+                Equilibrium (K)onstant (Exponent):
                 <div class="slidecontainer">
-                    Initial Proportion of Product:
-                    <input type="range" min="1" max="100" class="slider" id="initial_ratio">
+                    <input type="range" min="-10" max="10" class="slider" id="equilibrium_constant">
                     <text id="slider_value"> </text>
                 </div>
+            </li>
 
+            <li class='menu menu-slider'>
+                Backwards Reaction Rate (Exponent):
                 <div class="slidecontainer">
-                    Reactor Size (edge length in nm):
-                    <input type="range" min="1" max="50" class="slider" id="edge_length">
+                    <input type="range" min="0" max="20" class="slider" id="backward_rate">
+                    <text id="slider_value"> </text>
+                </div>
+            </li>
+
+            <li class='menu menu-slider'>
+                Amount Chaos:
+                <div class="slidecontainer">
+                    <input type="range" min="1" max="100" class="slider" id="amount_chaos">
                     <text id="slider_value"></text>
                 </div>
+            </li>
 
-                <div class="slidecontainer">
-                    Time Step Equivalent (exponent):
-                    <input type="range" min="0" max="100" class="slider" id="time_step">
-                    <text id="slider_value"> </text>
-                </div>
-            </div>
-
-            <div id="Tabs" class='sub-menu' style='display: none;'>
+        </ul>
 
 
-                <p>
-                    <a type="button" class='button ' id="barchart_button"> Display Barchart</a>
-                </p>
-                <p>
-                    <a type="button" class='button ' id="histogram_button"> Display Histogram</a>
-                </p>
-                <p>
-                    <a type="button" class='button ' id="pop_button"> Population vs. Time</a>
-                </p>
-                <p>
-                    <a type="button" class='button ' id="prop_button"> Proportion vs. Time</a>
-                </p>
-
-                <p>
-                    <a type="button" class='button ' id="clear_graphs"> Clear Graphs</a>
-                </p>
-
-
-            </div>
-
-            <div id='Development' class='sub-menu' style='display: none; '>
-                <h3>Planned/Partially Implemented:</h3>
-
-
-
-                <p>Forward Reaction Rate (Exponent):
-                    <div class="slidecontainer">
-                        <input type="range" min="0" max="20" class="slider" id="forward_rate">
-                        <text id="slider_value"> </text>
-                    </div>
-                </p>
-                <p>Equilibrium (K)onstant (Exponent):
-                    <div class="slidecontainer">
-                        <input type="range" min="-10" max="10" class="slider" id="equilibrium_constant">
-                        <text id="slider_value"> </text>
-                    </div>
-                </p>
-                <p>Backwards Reaction Rate (Exponent):
-                    <div class="slidecontainer">
-                        <input type="range" min="0" max="20" class="slider" id="backward_rate">
-                        <text id="slider_value"> </text>
-                    </div>
-                </p>
-
-                <p>Amount Chaos:
-                    <div class="slidecontainer">
-                        <input type="range" min="1" max="100" class="slider" id="amount_chaos">
-                        <text id="slider_value"></text>
-                    </div>
-                </p>
-            </div>
-
-
-
-        </div>
-    </div>
+    </nav>
 
     <div id="Visuals">
         <div id='Visualization' class='render'></div>
-
-
-        <div id='floating_bar_chart' class='floating' style="width:30vw; height:50vh; z-index: -1;"></div>
         <div id='floating_histogram' class='floating' style="width:30vw; height:50vh; z-index: -1;"></div>
-
-
-
+        <div id='floating_bar_chart' class='floating' style="width:30vw; height:50vh; z-index: -1;"></div>
         <div id='PercentVsTime' class='floating' style="width:30vw; height:50vh; z-index: -1;"></div>
         <div id='CountVsTime' class='floating' style="width:30vw; height:50vh; z-index: -1;"></div>
         <div id='Barchart' class='floating' style="width:30vw; height:50vh; z-index: -1;"></div>
         <div id='SideView' class='floating' style="width:30vw; height:50vh; z-index: -1;"></div>
+        <div id='info_box' class='floating' style="width:30vw; height:50vh; z-index: -1;">
+            <span id='info_box'></span>
+        </div>
     </div>
 </body>

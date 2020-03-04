@@ -127,91 +127,26 @@ class Molecule {
         }
     }
 
-    merge(mol_1) {
-        //console.log('we hit!');
-        //console.log(mol_1.name.length)
+    reaction_check() {
+        // Two reactions are possible
+        // forward and backward
 
-        let mass_factor = this.name.length / mol_1.name.length;
+        // forward
+        // Check to see if the other hit molecule was the same species
+        // Spawn a product molecule
+        //      set approprate momentum after impact
+        // despawn two reactants
 
-        //console.log(mol_1.velocity);
-        mol_1.velocity.addScaledVector(mol_1.velocity, -2 * mass_factor);
-        //console.log(mol_1.velocity);
+        // backward
+        // despawn product
+        // spawn in two reactants with half momentum each.
 
-        mol_1.check = false;
-        this.velocity.addScaledVector(this.velocity, -2 * (1 / mass_factor));
-
-
-
-        //this.velocity = // multiply by factor based on mass
 
     }
 
-    check_neighbors(data) {
-        //console.log('check neighbors')
+    update() {
 
-        let hit_dist = .2;
-
-
-        let possible_x = [];
-        let possible_x_y = [];
-
-
-
-
-        for (let x = 0; x < data.instances.length; x++) {
-            //console.log(data.instances[x])
-
-            let aprox =
-                this.mesh.position.x -
-                data.instances[x].mesh.position.x;
-
-            //console.log(aprox);
-
-            if (Math.abs(aprox < hit_dist)) {
-                //console.log('we hit! X')
-                possible_x.push(data.instances[x])
-            }
-        }
-
-        for (let y = 0; y < possible_x.length; y++) {
-
-            let aprox =
-                this.mesh.position.y -
-                possible_x[y].mesh.position.y;
-
-            //console.log(aprox);
-
-            if (Math.abs(aprox < hit_dist)) {
-                //console.log('we hit Y!')
-                possible_x_y.push(possible_x[y])
-            }
-        }
-        //console.log(possible_x_y);
-        for (let z = 0; z < possible_x_y.length; z++) {
-
-            let aprox =
-                this.mesh.position.z -
-                possible_x_y[z].mesh.position.z;
-
-            //console.log(aprox);
-
-            if (Math.abs(aprox < hit_dist)) {
-
-                this.merge(possible_x_y[z]);
-            }
-        }
-
-    }
-
-    update(data, delta_t, chamber_edge_length) {
-
-        //this.velocity = this.body.getLinearVelocity()
-        console.log(this.velocity)
-
-        // this.mesh.position.addScaledVector(this.velocity, delta_t);
-        // this.mesh.rotateOnAxis(this.rotational_axis, .05);
-
-        //this.check_walls(chamber_edge_length);
+        this.reaction_check();
 
     }
 }

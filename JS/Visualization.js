@@ -43,22 +43,6 @@ var atom_radius = { // Van der walls from wiki https://en.wikipedia.org/wiki/Van
 
 
 class Visualization {
-
-    setupPhysicsWorld() {
-        this.collisionConfiguration = new Ammo.btDefaultCollisionConfiguration();
-        this.dispatcher = new Ammo.btCollisionDispatcher(this.collisionConfiguration);
-        this.broadphase = new Ammo.btDbvtBroadphase();
-        this.solver = new Ammo.btSequentialImpulseConstraintSolver();
-        this.overlappingPairCache = new Ammo.btDbvtBroadphase();
-        this.physicsWorld = new Ammo.btDiscreteDynamicsWorld(this.dispatcher, this.overlappingPairCache, this.solver, this.collisionConfiguration);
-        // this.physicsWorld.setGravity(new Ammo.btVector3(0, gravityConstant, 0));
-        // this.physicsWorld.getWorldInfo().set_m_gravity(new Ammo.btVector3(0, gravityConstant, 0));
-
-        // Currently I don't want gravity.
-        this.physicsWorld.setGravity(new Ammo.btVector3(0, 0, 0));
-    }
-
-
     constructor(incoming_data, chamber_edge_length) {
         // Initialize Ammo engine
         Ammo();
@@ -156,53 +140,6 @@ class Visualization {
         this.animate();
     }
 
-    createLights() {
-        // A hemisphere light is a gradient colored light; 
-        // the first parameter is the sky color, the second parameter is the ground color, 
-        // the third parameter is the intensity of the light
-        this.hemisphereLight = new THREE.HemisphereLight(0xaaaaaa, 0x000000, .9)
-
-        // A directional light shines from a specific direction. 
-        // It acts like the sun, that means that all the rays produced are parallel. 
-        this.shadowLight = new THREE.DirectionalLight(0xffffff, .5);
-        this.shadowLight_x = new THREE.DirectionalLight(0xffffff, .5);
-        this.shadowLight_y = new THREE.DirectionalLight(0xffffff, .5);
-        this.shadowLight_z = new THREE.DirectionalLight(0xffffff, .5);
-
-        // Set the direction of the light  
-        this.shadowLight.position.set(this.chamber_edge_length, this.chamber_edge_length / 2, this.chamber_edge_length / 2);
-        this.shadowLight_x.position.set(this.chamber_edge_length, 0, 0);
-        this.shadowLight_y.position.set(0, this.chamber_edge_length, 0);
-        this.shadowLight_z.position.set(0, 0, this.chamber_edge_length);
-        // Allow shadow casting 
-        this.shadowLight.castShadow = true;
-        this.shadowLight_x.castShadow = true;
-        this.shadowLight_y.castShadow = true;
-        this.shadowLight_z.castShadow = true;
-
-
-        // define the visible area of the projected shadow
-        this.shadowLight.shadow.camera.left = -this.chamber_edge_length;
-        this.shadowLight.shadow.camera.right = this.chamber_edge_length;
-        this.shadowLight.shadow.camera.top = this.chamber_edge_length;
-        this.shadowLight.shadow.camera.bottom = -this.chamber_edge_length;
-        this.shadowLight.shadow.camera.near = 1;
-        this.shadowLight.shadow.camera.far = 1000;
-
-        // define the resolution of the shadow; the higher the better, 
-        // but also the more expensive and less performant
-        this.shadowLight.shadow.mapSize.width = 2048;
-        this.shadowLight.shadow.mapSize.height = 2048;
-
-
-
-        // to activate the lights, just add them to the scene
-        this.scene.add(this.hemisphereLight);
-        this.scene.add(this.shadowLight);
-        //this.scene.add(this.shadowLight_y);
-        //this.scene.add(this.shadowLight_z);
-    }
-
     init(incoming_data, chamber_edge_length) {
 
         this.data = incoming_data;
@@ -272,6 +209,67 @@ class Visualization {
         //console.log(this.mouse_viewer)
         this.add_grid();
 
+    }
+
+    setupPhysicsWorld() {
+        this.collisionConfiguration = new Ammo.btDefaultCollisionConfiguration();
+        this.dispatcher = new Ammo.btCollisionDispatcher(this.collisionConfiguration);
+        this.broadphase = new Ammo.btDbvtBroadphase();
+        this.solver = new Ammo.btSequentialImpulseConstraintSolver();
+        this.overlappingPairCache = new Ammo.btDbvtBroadphase();
+        this.physicsWorld = new Ammo.btDiscreteDynamicsWorld(this.dispatcher, this.overlappingPairCache, this.solver, this.collisionConfiguration);
+        // this.physicsWorld.setGravity(new Ammo.btVector3(0, gravityConstant, 0));
+        // this.physicsWorld.getWorldInfo().set_m_gravity(new Ammo.btVector3(0, gravityConstant, 0));
+
+        // Currently I don't want gravity.
+        this.physicsWorld.setGravity(new Ammo.btVector3(0, 0, 0));
+    }
+
+    createLights() {
+        // A hemisphere light is a gradient colored light; 
+        // the first parameter is the sky color, the second parameter is the ground color, 
+        // the third parameter is the intensity of the light
+        this.hemisphereLight = new THREE.HemisphereLight(0xaaaaaa, 0x000000, .9)
+
+        // A directional light shines from a specific direction. 
+        // It acts like the sun, that means that all the rays produced are parallel. 
+        this.shadowLight = new THREE.DirectionalLight(0xffffff, .5);
+        this.shadowLight_x = new THREE.DirectionalLight(0xffffff, .5);
+        this.shadowLight_y = new THREE.DirectionalLight(0xffffff, .5);
+        this.shadowLight_z = new THREE.DirectionalLight(0xffffff, .5);
+
+        // Set the direction of the light  
+        this.shadowLight.position.set(this.chamber_edge_length, this.chamber_edge_length / 2, this.chamber_edge_length / 2);
+        this.shadowLight_x.position.set(this.chamber_edge_length, 0, 0);
+        this.shadowLight_y.position.set(0, this.chamber_edge_length, 0);
+        this.shadowLight_z.position.set(0, 0, this.chamber_edge_length);
+        // Allow shadow casting 
+        this.shadowLight.castShadow = true;
+        this.shadowLight_x.castShadow = true;
+        this.shadowLight_y.castShadow = true;
+        this.shadowLight_z.castShadow = true;
+
+
+        // define the visible area of the projected shadow
+        this.shadowLight.shadow.camera.left = -this.chamber_edge_length;
+        this.shadowLight.shadow.camera.right = this.chamber_edge_length;
+        this.shadowLight.shadow.camera.top = this.chamber_edge_length;
+        this.shadowLight.shadow.camera.bottom = -this.chamber_edge_length;
+        this.shadowLight.shadow.camera.near = 1;
+        this.shadowLight.shadow.camera.far = 1000;
+
+        // define the resolution of the shadow; the higher the better, 
+        // but also the more expensive and less performant
+        this.shadowLight.shadow.mapSize.width = 2048;
+        this.shadowLight.shadow.mapSize.height = 2048;
+
+
+
+        // to activate the lights, just add them to the scene
+        this.scene.add(this.hemisphereLight);
+        this.scene.add(this.shadowLight);
+        //this.scene.add(this.shadowLight_y);
+        //this.scene.add(this.shadowLight_z);
     }
 
     clean_all() {
@@ -487,20 +485,25 @@ class Visualization {
     }
 
     onDocumentMouseMove(event) {
-        event.preventDefault();
+        //event.preventDefault();
         //console.log(event.clientX, event.clientY);
         //this.mouse.x = event.clientX // / this.width_for_3d * 2;
         //this.mouse.y = -event.clientY // / this.height_for_3d * 2;
         //console.log(this.mouse.x)
 
-        this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        this.mouse.unproject(this.camera);
+        try {
+            this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            this.mouse.unproject(this.camera);
+        } catch (err) {
+
+        }
     }
 
     onDocumentMouseDown(event) {
 
-        event.preventDefault();
+        //event.preventDefault();
+        //this.mouse.unproject(this.camera);
         this.raycaster.setFromCamera(this.mouse, this.camera);
 
         let intersects = this.raycaster.intersectObjects(this.rigidBodies);
@@ -520,7 +523,6 @@ class Visualization {
             this.INTERSECTED = null;
         }
     }
-
 
     view_mouse() {
         //console.log('in this mouse')
@@ -573,8 +575,6 @@ class Visualization {
         this.scene.add(line)
     }
 
-
-
     animate() {
 
         //this.add_line();
@@ -584,22 +584,6 @@ class Visualization {
         //console.log(this.clock.getDelta());
         this.delta_t = this.clock.getDelta();
 
-        //console.log(this.mouse_viewer)
-        //this.chamber.position.set(this.mouse.x, this.mouse, y, 0)
-
-        // this.raycaster.setFromCamera(this.mouse, this.camera);
-
-        // let intersects = this.raycaster.intersectObjects(this.rigidBodies);
-
-        // if (intersects.length > 0) {
-        //     this.selectedObjects.pop();
-        //     console.log(intersects[0].object);
-        //     this.selectedObjects.push(intersects[0].object)
-
-
-        // } else {
-        //     this.INTERSECTED = null;
-        // }
 
         // Step world
         this.physicsWorld.stepSimulation(this.delta_t, 10);
@@ -619,37 +603,27 @@ class Visualization {
             }
         }
 
-        // for (var i = 0; i < this.rigidBodies.length; i++) {
-        //     var contactManifold = this.physicsWorld.getDispatcher().getManifoldByIndexInternal(i);
-        //     var obA = contactManifold.getBody0();
-        //     var obB = contactManifold.getBody1();
-        //     //contactManifold.refreshContactPoints(obA.getWorldTransform(), obB.getWorldTransform());
-        //     var numContacts = contactManifold.getNumContacts();
-
-        //     // For each contact point in that manifold 
-        //     for (var j = 0; j < numContacts; j++) {
-
-        //         // Get the contact information
-        //         var pt = contactManifold.getContactPoint(j);
-        //         var ptA = pt.getPositionWorldOnA();
-        //         var ptB = pt.getPositionWorldOnB();
-        //         var ptdist = pt.getDistance();
-        //         //console.log(ptdist)
-
-        //         // Do whatever else you need with the information...
-        //     }
-        // }
+        for (var i = 0; i < this.rigidBodies.length; i++) {
+            let contactManifold = this.physicsWorld.getDispatcher().getManifoldByIndexInternal(i);
+            let obA = contactManifold.getBody0();
+            let obB = contactManifold.getBody1();
+            //contactManifold.refreshContactPoints(obA.getWorldTransform(), obB.getWorldTransform());
+            var numContacts = contactManifold.getNumContacts();
 
 
-        // for (name in this.data) {
-        //     //console.log(this.data[name]);
-        //     for (let i = 0; i < this.data[name].instances.length; i++) {
-        //         //console.log(this.data[name].instances[i]);
-        //         this.data[name].instances[i].update(this.data, this.delta_t, this.chamber_edge_length);
-        //     }
-        // }
+            if (numContacts > 0) {
+                // console.log(numContacts);
+                // console.log('In the contact manifold checker');
+                // console.log(contactManifold);
+                // console.log('object being checked: ');
+                // console.log(this.rigidBodies[i]);
+                // console.log('Object a: ');
+                // console.log(obA);
+                // console.log('object b: ');
+                // console.log(obB);
+            }
 
-
+        }
         requestAnimationFrame(this.animate.bind(this));
         this.composer.render(this.scene, this.camera);
     };
@@ -661,8 +635,6 @@ class Visualization {
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(this.width_for_3d, this.height_for_3d);
     }
-
-
 }
 
 export default Visualization;

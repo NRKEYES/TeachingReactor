@@ -15,15 +15,16 @@ class Histogram {
         this.height = this.h - this.margin.top - this.margin.bottom;
 
         // MAIN
-        this.svg = d3.select("#" + element_id).append("svg")
-            .attr("width", this.w)
-            .attr("height", this.h)
+        this.svg = d3.select("#" + element_id)
+            .attr("viewBox", [0, 0, this.width, this.height]).append("svg")
+            // .attr("width", this.w)
+            // .attr("height", this.h)
             .append("g")
 
 
         this.x = d3.scaleLinear()
             .domain([0, 1])
-            .range([this.margin.left, this.width]);
+            .range([this.margin.left, this.width - this.margin.right]);
 
         this.y = d3.scaleLinear()
             .domain([1, 0])

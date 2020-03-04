@@ -274,3 +274,318 @@ add_reaction_chamber() {
     // material.dispose();
     //selectedObjects.push(chamber)
 }
+
+
+
+
+
+
+//this.velocity = this.body.getLinearVelocity()
+console.log(this.velocity)
+
+// this.mesh.position.addScaledVector(this.velocity, delta_t);
+// this.mesh.rotateOnAxis(this.rotational_axis, .05);
+
+//this.check_walls(chamber_edge_length);
+
+
+
+check_neighbors(data) {
+    //console.log('check neighbors')
+
+    let hit_dist = .2;
+
+
+    let possible_x = [];
+    let possible_x_y = [];
+
+
+
+
+    for (let x = 0; x < data.instances.length; x++) {
+        //console.log(data.instances[x])
+
+        let aprox =
+            this.mesh.position.x -
+            data.instances[x].mesh.position.x;
+
+        //console.log(aprox);
+
+        if (Math.abs(aprox < hit_dist)) {
+            //console.log('we hit! X')
+            possible_x.push(data.instances[x])
+        }
+    }
+
+    for (let y = 0; y < possible_x.length; y++) {
+
+        let aprox =
+            this.mesh.position.y -
+            possible_x[y].mesh.position.y;
+
+        //console.log(aprox);
+
+        if (Math.abs(aprox < hit_dist)) {
+            //console.log('we hit Y!')
+            possible_x_y.push(possible_x[y])
+        }
+    }
+    //console.log(possible_x_y);
+    for (let z = 0; z < possible_x_y.length; z++) {
+
+        let aprox =
+            this.mesh.position.z -
+            possible_x_y[z].mesh.position.z;
+
+        //console.log(aprox);
+
+        if (Math.abs(aprox < hit_dist)) {
+
+            this.merge(possible_x_y[z]);
+        }
+    }
+
+}
+
+
+
+//console.log('we hit!');
+//console.log(mol_1.name.length)
+
+let mass_factor = this.name.length / mol_1.name.length;
+
+//console.log(mol_1.velocity);
+mol_1.velocity.addScaledVector(mol_1.velocity, -2 * mass_factor);
+//console.log(mol_1.velocity);
+
+mol_1.check = false;
+this.velocity.addScaledVector(this.velocity, -2 * (1 / mass_factor));
+//this.velocity = // multiply by factor based on mass
+
+
+
+
+//console.log(this.mouse_viewer)
+//this.chamber.position.set(this.mouse.x, this.mouse, y, 0)
+
+// this.raycaster.setFromCamera(this.mouse, this.camera);
+
+// let intersects = this.raycaster.intersectObjects(this.rigidBodies);
+
+// if (intersects.length > 0) {
+//     this.selectedObjects.pop();
+//     console.log(intersects[0].object);
+//     this.selectedObjects.push(intersects[0].object)
+
+
+// } else {
+//     this.INTERSECTED = null;
+// }
+
+
+
+// for (var i = 0; i < this.rigidBodies.length; i++) {
+//     var contactManifold = this.physicsWorld.getDispatcher().getManifoldByIndexInternal(i);
+//     var obA = contactManifold.getBody0();
+//     var obB = contactManifold.getBody1();
+//     //contactManifold.refreshContactPoints(obA.getWorldTransform(), obB.getWorldTransform());
+//     var numContacts = contactManifold.getNumContacts();
+
+//     // For each contact point in that manifold 
+//     for (var j = 0; j < numContacts; j++) {
+
+//         // Get the contact information
+//         var pt = contactManifold.getContactPoint(j);
+//         var ptA = pt.getPositionWorldOnA();
+//         var ptB = pt.getPositionWorldOnB();
+//         var ptdist = pt.getDistance();
+//         //console.log(ptdist)
+
+//         // Do whatever else you need with the information...
+//     }
+// }
+
+
+// for (name in this.data) {
+//     //console.log(this.data[name]);
+//     for (let i = 0; i < this.data[name].instances.length; i++) {
+//         //console.log(this.data[name].instances[i]);
+//         this.data[name].instances[i].update(this.data, this.delta_t, this.chamber_edge_length);
+//     }
+// }
+
+
+#
+floating_bar_chart {
+    transition: .3 s;
+    opacity: .5;
+    top: 20 vh;
+    left: 60 vw;
+}
+
+#
+floating_bar_chart: hover {
+    opacity: 1.0;
+}
+
+#
+floating_histogram {
+    z - index: 100;
+    top: 20 vh;
+    left: 60 vw;
+}
+
+#
+PercentVsTime {
+    z - index: 100;
+    top: 20 vh;
+    left: 60 vw;
+}
+
+#
+CountVsTime {
+    top: 20 vh;
+    left: 60 vw;
+}
+
+ul,
+li {
+    display: flex;
+    flex - direction: column;
+    list - style - type: none;
+}
+
+
+.menu-branch:hover>* {
+    display: flex;
+    transition: .3s;
+    opacity: 1.0;
+    background-color: var(--menu-color-selected);
+}
+.menu:hover>* {
+    display: flex;
+    transition: .3s;
+    opacity: 1.0;
+    background-color: var(--menu-color-selected);
+}
+
+.menu-root:hover>.menu-branch {
+    display: flex;
+    position: inherit;
+    opacity: 1.0;
+}
+.menu-branch:hover * {
+    display: flex;
+    position: inherit;
+    opacity: 1.0;
+}
+.menu:last-child {
+    margin: auto;
+}
+
+
+ul,
+li {
+    padding: 10 px;
+    margin: 10 px;
+    border: medium;
+    display: none;
+    flex - direction: column;
+}
+
+#
+Menu {
+    z - index: 50;
+    background - color: var (--menu - color - main);
+    position: inherit;
+    display: flex;
+    width: fit - content;
+    flex - direction: column;
+    text - align: center;
+    justify - content: center;
+    transition: .3 s;
+    opacity: .8;
+    list - style: none;
+}
+
+.menu {}
+
+.menu - root {
+    display: flex;
+}
+
+.menu - root: hover > * {
+    display: flex;
+}
+
+.branch: hover * {
+    display: flex;
+}
+
+#
+Menu: last - child {
+    margin: auto;
+}
+
+span: hover {
+    background - color: var (--menu - color - selected);
+}
+
+.leaf: hover {
+    background - color: var (--menu - color - selected);
+    z - index: 100;
+}
+
+.menu span:hover {
+    background-color: var(--menu-color-selected);
+}
+
+
+
+
+
+// document.querySelector('#Menu').addEventListener('mouseleave', () => {
+//     //toggle element visability
+//     //document.getElementById('Sub-Menu-Toggle').style.display = 'none';
+//     document.getElementById('Tabs').style.display = 'none';
+//     document.getElementById('Controls').style.display = 'none';
+//     document.getElementById('Development').style.display = 'none';
+// });
+
+// document.querySelector('#Visuals').addEventListener('mouseenter', () => {
+//     //toggle element visability
+//     document.getElementById('Sub-Menu-Toggle').style.display = 'none';
+//     document.getElementById('Tabs').style.display = 'none';
+//     document.getElementById('Controls').style.display = 'none';
+//     document.getElementById('Development').style.display = 'none';
+// });
+// document.querySelector('#tab-toggle').addEventListener('mouseover', () => {
+//     document.getElementById('Tabs').style.display = '';
+//     document.getElementById('Controls').style.display = 'none';
+//     document.getElementById('Development').style.display = 'none';
+// });
+// document.querySelector('#controls-toggle').addEventListener('mouseover', () => {
+//     document.getElementById('Tabs').style.display = 'none';
+//     document.getElementById('Controls').style.display = '';
+//     document.getElementById('Development').style.display = 'none';
+// });
+// document.querySelector('#dev-toggle').addEventListener('mouseover', () => {
+//     document.getElementById('Tabs').style.display = 'none';
+//     document.getElementById('Controls').style.display = 'none';
+//     document.getElementById('Development').style.display = '';
+// });
+
+// document.querySelector('#menu-toggle').addEventListener('click', () => {
+//     //toggle element visability
+//     // if (document.getElementById('Sub-Menu-Toggle').style.display == 'none') {
+//     //     document.getElementById('Sub-Menu-Toggle').style.display = '';
+//     // } else {
+//     //     document.getElementById('Sub-Menu-Toggle').style.display = 'none';
+//     // }
+
+//     if (document.getElementById('Menu').childNodes.style.display == 'none') {
+//         document.getElementById('Menu').childNodes.style.display = '';
+//     } else {
+//         document.getElementById('Menu').childNodes.style.display = 'none';
+//     }
+// });
