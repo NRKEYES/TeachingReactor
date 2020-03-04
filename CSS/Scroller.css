@@ -149,12 +149,12 @@ body {
 }
 
 .floating {
-    position: inherit;
+    position: relative;
     top: 10vh;
-    right: 10vw;
+    left: 10vw;
     transition: var(--transition-speed);
     opacity: .3;
-    width: 50vw;
+    width: 70vw;
     height: 40vh;
 }
 
