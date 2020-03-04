@@ -198,7 +198,6 @@ class Visualization {
         // });
         // this.composer.addPass(this.bokehPass);
 
-
         for (name in this.data) {
             this.generate_species(name)
             for (let i = 0; i < this.data[name].count.slice(-1)[0]; i++) {
@@ -208,7 +207,7 @@ class Visualization {
         //this.mouse_viewer = this.view_mouse();
         //console.log(this.mouse_viewer)
         this.add_grid();
-
+        this.animate()
     }
 
     setupPhysicsWorld() {
@@ -378,6 +377,39 @@ class Visualization {
         this.rigidBodies.push(temp.mesh);
         // add to glow list
         //this.selectedObjects.push(temp.mesh)
+    }
+
+    remove_molecule(name) {
+
+        let temp = this.data[name].instances.pop();
+        //console.log(temp)
+        let object = this.scene.getObjectByProperty('uuid', temp.mesh.uuid);
+
+        object.geometry.dispose();
+        for (let mat in object.materials) {
+            mat.dispose();
+        }
+
+        this.scene.remove(object);
+        this.physicsWorld.removeRigidBody(object.userData.physicsBody)
+
+
+        for (let i = 0; i < this.selectedObjects.length; i++) {
+            if (this.selectedObjects[i].parent == null) {
+                delete(this.rigidBodies[i]);
+            }
+        }
+
+        console.log(object)
+        console.log(this.rigidBodies[1]);
+
+        for (let i = 0; i < this.rigidBodies.length; i++) {
+            if (this.rigidBodies[i].parent == null) {
+                delete(this.rigidBodies[i]);
+            }
+        }
+        //this.physicsWorld.removeRigidBody(temp.userData.physicsBody);
+        //this.rigidBodies.remove(temp.mesh);
     }
 
     add_grid() {
@@ -576,14 +608,10 @@ class Visualization {
     }
 
     animate() {
-
         //this.add_line();
 
-
         this.camera.updateMatrixWorld();
-        //console.log(this.clock.getDelta());
         this.delta_t = this.clock.getDelta();
-
 
         // Step world
         this.physicsWorld.stepSimulation(this.delta_t, 10);
@@ -591,6 +619,10 @@ class Visualization {
         // Update rigid bodies
         for (let i = 0; i < this.rigidBodies.length; i++) {
             let objThree = this.rigidBodies[i];
+            if (objThree == null) {
+                delete(this.rigidBodies[i]);
+                continue;
+            }
             let objAmmo = objThree.userData.physicsBody;
 
             let ms = objAmmo.getMotionState();
@@ -603,27 +635,83 @@ class Visualization {
             }
         }
 
-        for (var i = 0; i < this.rigidBodies.length; i++) {
+        // look for 
+        for (let i = 0; i < this.physicsWorld.getDispatcher().getNumManifolds(); i++) {
             let contactManifold = this.physicsWorld.getDispatcher().getManifoldByIndexInternal(i);
+            //dp.getManifoldByIndexInternal(i);
             let obA = contactManifold.getBody0();
             let obB = contactManifold.getBody1();
-            //contactManifold.refreshContactPoints(obA.getWorldTransform(), obB.getWorldTransform());
-            var numContacts = contactManifold.getNumContacts();
+            // console.log(obA);
+            // console.log(obA.getUserPointer());
+            // console.log(obA.threeObject);
 
-
-            if (numContacts > 0) {
-                // console.log(numContacts);
-                // console.log('In the contact manifold checker');
-                // console.log(contactManifold);
-                // console.log('object being checked: ');
-                // console.log(this.rigidBodies[i]);
-                // console.log('Object a: ');
-                // console.log(obA);
-                // console.log('object b: ');
-                // console.log(obB);
-            }
-
+            //let contactManifold = dispatcher.getManifoldByIndexInternal(i);
+            //let threeObject0 = obA.getUserPointer().threeObject;
+            //console.log(threeObject0)
         }
+
+        // cull molecular update on each molecule present
+        //console.log(this.data[name]);
+        //console.log(this.data[name].instances[i]);
+        for (name in this.data) {
+            this.generate_species(name)
+            let current_count = this.data[name].count.slice(-1)[0];
+
+            for (let i = 0; i < current_count; i++) {
+                //for each instance of a species check for reaction
+
+                if (this.data[name].instances[i] == null) continue;
+
+                let to_do = this.data[name].instances[i].update(this.data, this.delta_t);
+
+                // console.log('Current: ' + this.data[name].instances.length);
+                // console.log('Count: ' + this.data[name].count.slice(-1)[0]);
+
+                for (let i = 0; i < to_do.add.num; i++) {
+                    try {
+                        this.add_molecule(to_do.add.name);
+                    } catch (err) {
+                        console.log(err);
+                    }
+                }
+
+                for (let i = 0; i < to_do.remove.num; i++) {
+                    try {
+                        this.remove_molecule(to_do.remove.name);
+                    } catch (err) {
+                        console.log(err);
+                    }
+                }
+
+
+                // //contactManifold.refreshContactPoints(obA.getWorldTransform(), obB.getWorldTransform());
+                // var numContacts = contactManifold.getNumContacts();
+
+
+                // if (numContacts > 0) {
+                //     // console.log(numContacts);
+                //     // console.log('In the contact manifold checker');
+                //     // console.log(contactManifold);
+                //     // console.log('object being checked: ');
+                //     // console.log(this.rigidBodies[i]);
+                //     // console.log('Object a: ');
+                //     // console.log(obA);
+                //     // console.log('object b: ');
+                //     // console.log(obB);
+                // }
+
+
+                // while (this.data[name].instances.length > this.data[name].count.slice(-1)[0]) {
+                //     try {
+                //         console.log('I need to delete a molecule');
+                //         this.remove_molecule(name);
+                //     } catch (err) {
+                //         console.log(err);
+                //     }
+                // }
+            }
+        }
+
         requestAnimationFrame(this.animate.bind(this));
         this.composer.render(this.scene, this.camera);
     };

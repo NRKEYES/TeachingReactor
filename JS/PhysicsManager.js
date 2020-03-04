@@ -238,6 +238,21 @@ function simulation() {
     //console.log("Agent Based Physics")
     //console.log(species)
 
+
+    let A = species[0].instances.length;
+    let B = species[1].instances.length;
+    let percent_product = Math.abs(B) / (Math.abs(A) + Math.abs(B));
+
+
+    //percent_product = B / (A + B);
+    percent_product = Math.abs(B) / (Math.abs(A) + Math.abs(B));
+
+    species[0].percent.push(1 - percent_product);
+    species[1].percent.push(percent_product);
+
+    species[0].count.push(A);
+    species[1].count.push(B);
+
     // let delta_t = clock.getDelta();
 
     // for (name in species) {
@@ -248,13 +263,13 @@ function simulation() {
     //     }
     // }
 
-    for (name in species) {
-        //console.log(this.data[name]);
-        for (let i = 0; i < species[name].instances.length; i++) {
-            //console.log(this.data[name].instances[i]);
-            species[name].instances[i].tick(species[name]);
-        }
-    }
+    // for (name in species) {
+    //     //console.log(this.data[name]);
+    //     for (let i = 0; i < species[name].instances.length; i++) {
+    //         //console.log(this.data[name].instances[i]);
+    //         species[name].instances[i].tick(species[name]);
+    //     }
+    // }
 }
 
 function numerical_simulation() {
@@ -299,7 +314,6 @@ function numerical_simulation() {
 }
 
 function update_all_sliders() {
-    console.log(" in update")
     document.getElementById("orders_of_magnitude").value = orders_of_magnitude;
     document.getElementById("orders_of_magnitude").parentElement.lastElementChild.innerHTML = orders_of_magnitude;
 
@@ -332,8 +346,11 @@ function update_all_sliders() {
 
 function update_all() {
     if (run_sim) {
+
         // Run the differential equations numerically with appropriate discrete modifications.
-        numerical_simulation();
+        //numerical_simulation();
+
+
         // Actually move the particles around.
         simulation();
         count_v_time.tick(species, t);
@@ -344,6 +361,7 @@ function update_all() {
         visualizer.tick(); // Will add after render look?
 
     }
+    t++;
 }
 
 function start_simulation() {
@@ -443,7 +461,6 @@ document.querySelector('#barchart_button').addEventListener('click', () => {
     }
 });
 document.querySelector('#histogram_button').addEventListener('click', () => {
-
     //toggle element visability
     if (document.getElementById('floating_histogram').style.zIndex == -1) {
         document.getElementById('floating_histogram').style.zIndex = 100;
@@ -453,22 +470,20 @@ document.querySelector('#histogram_button').addEventListener('click', () => {
     }
 });
 document.querySelector('#pop_button').addEventListener('click', () => {
-
-    //toggle element visability
-    if (document.getElementById('PercentVsTime').style.zIndex == -1) {
-        document.getElementById('PercentVsTime').style.zIndex = 100;
-    } else {
-        document.getElementById('PercentVsTime').style.zIndex = -1;
-
-    }
-});
-document.querySelector('#prop_button').addEventListener('click', () => {
-
     //toggle element visability
     if (document.getElementById('CountVsTime').style.zIndex == -1) {
         document.getElementById('CountVsTime').style.zIndex = 100;
     } else {
         document.getElementById('CountVsTime').style.zIndex = -1;
+
+    }
+});
+document.querySelector('#prop_button').addEventListener('click', () => {
+    //toggle element visability
+    if (document.getElementById('PercentVsTime').style.zIndex == -1) {
+        document.getElementById('PercentVsTime').style.zIndex = 100;
+    } else {
+        document.getElementById('PercentVsTime').style.zIndex = -1;
 
     }
 });

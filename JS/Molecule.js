@@ -128,6 +128,12 @@ class Molecule {
     }
 
     reaction_check() {
+        // console.log('Reaction Checker');
+        // console.log(this.data[0]);
+
+        let to_do = { 'add': { 'name': 0, 'num': 0 }, 'remove': { 'name': 1, 'num': 0 } };
+
+
         // Two reactions are possible
         // forward and backward
 
@@ -142,12 +148,39 @@ class Molecule {
         // spawn in two reactants with half momentum each.
 
 
+        if (this.mass_factor < 3) {
+            return to_do;
+        } else {
+
+            let percent_decompose = .01;
+            percent_decompose = percent_decompose * this.delta_t;
+            let random_num = d3.randomUniform(0, 1)();
+
+            //console.log(random_num);
+            if (random_num < percent_decompose) {
+                //decompose
+                // console.log("we should decompose!")
+                // console.log(percent_decompose);
+                // console.log(this.data[0].count.slice(-1)[0] + 2)
+
+                //this.data[0].count.push(this.data[0].count.slice(-1)[0] + 2);
+
+                // number to add
+                let to_do = { 'add': { 'name': 0, 'num': 2 }, 'remove': { 'name': 1, 'num': 1 } };
+                return to_do;
+            }
+
+        }
+        return to_do;
     }
 
-    update() {
+    update(incoming_data, delta_t) {
+        this.data = incoming_data;
+        this.delta_t = delta_t;
 
-        this.reaction_check();
 
+
+        return this.reaction_check();
     }
 }
 

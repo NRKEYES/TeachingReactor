@@ -589,3 +589,28 @@ span: hover {
 //         document.getElementById('Menu').childNodes.style.display = 'none';
 //     }
 // });
+
+
+
+
+            // console.log('I need to add a molecule');
+
+            // for (let i = current_count - 1; i < this.data[name].count.slice(-1)[0]; i++) {
+            //     // Now add instances as needed
+            //     try {
+            //         this.add_molecule(name);
+            //     } catch (err) {
+            //         console.log(err);
+            //     }
+            // }
+
+
+            //remove extra instances
+            // for (let i = current_count; i < this.data[name].count.slice(-1)[0]; i++) {
+            //     try {
+            //         this.add_molecule(name);
+
+            //     } catch (err) {
+            //         console.log(err);
+            //     }
+            // }
