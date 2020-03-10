@@ -1,46 +1,47 @@
 // External Dependancies
 
-import { OrbitControls } from '/JS/three/examples/jsm/controls/OrbitControls.js';
-import { OBJLoader } from '/JS/three/examples/jsm/loaders/OBJLoader.js';
-import { EffectComposer } from '/JS/three/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from '/JS/three/examples/jsm/postprocessing/RenderPass.js';
-import { ShaderPass } from '/JS/three/examples/jsm/postprocessing/ShaderPass.js';
-import { OutlinePass } from '/JS/three/examples/jsm/postprocessing/OutlinePass.js';
-import { BokehPass } from '/JS/three/examples/jsm/postprocessing/BokehPass.js';
-import { BokehShader, BokehDepthShader } from '/JS/three/examples/jsm/shaders/BokehShader2.js';
+import { OrbitControls } from "/JS/three/examples/jsm/controls/OrbitControls.js";
+import { OBJLoader } from "/JS/three/examples/jsm/loaders/OBJLoader.js";
+import { EffectComposer } from "/JS/three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "/JS/three/examples/jsm/postprocessing/RenderPass.js";
+import { ShaderPass } from "/JS/three/examples/jsm/postprocessing/ShaderPass.js";
+import { OutlinePass } from "/JS/three/examples/jsm/postprocessing/OutlinePass.js";
+import { BokehPass } from "/JS/three/examples/jsm/postprocessing/BokehPass.js";
+import {
+    BokehShader,
+    BokehDepthShader
+} from "/JS/three/examples/jsm/shaders/BokehShader2.js";
 
-import { FXAAShader } from '/JS/three/examples/jsm/shaders/FXAAShader.js';
-import { BufferGeometryUtils } from '/JS/three/examples/jsm/utils/BufferGeometryUtils.js';
+import { FXAAShader } from "/JS/three/examples/jsm/shaders/FXAAShader.js";
+import { BufferGeometryUtils } from "/JS/three/examples/jsm/utils/BufferGeometryUtils.js";
 
 // Internal Dependancies
-import Molecule from '/JS/Molecule.js'
+import Molecule from "/JS/Molecule.js";
 //importScripts('/JS/ammo/ammo.js')
-
 
 let sphere_quality = 15;
 
 var COLORS = {
-    "H": 0xC0C0C0,
-    "C": 0x000000,
-    "Au": 0xD4AF37,
-    "Al": 0x00334d,
-    "V": 0xff26d4,
-    "O": 0xff0000,
-    "N": 0x0033cc
+    H: 0xc0c0c0,
+    C: 0x000000,
+    Au: 0xd4af37,
+    Al: 0x00334d,
+    V: 0xff26d4,
+    O: 0xff0000,
+    N: 0x0033cc
 };
 
 // In nanometers
-var atom_radius = { // Van der walls from wiki https://en.wikipedia.org/wiki/Van_der_Waals_radius
-    "H": .12,
-    "C": .17,
-    "Au": .166,
-    "Al": .184,
-    "V": .152,
-    "O": .152,
-    "N": .155
+var atom_radius = {
+    // Van der walls from wiki https://en.wikipedia.org/wiki/Van_der_Waals_radius
+    H: 0.12,
+    C: 0.17,
+    Au: 0.166,
+    Al: 0.184,
+    V: 0.152,
+    O: 0.152,
+    N: 0.155
 };
-
-
 
 class Visualization {
     constructor(incoming_data, chamber_edge_length) {
@@ -53,7 +54,7 @@ class Visualization {
         this.clock = new THREE.Clock();
         this.tmpTrans = new Ammo.btTransform();
         this.physicsWorld;
-        this.setupPhysicsWorld()
+        this.setupPhysicsWorld();
 
         this.chamber_edge_length = chamber_edge_length;
         this.camera_displacement = chamber_edge_length * 2;
@@ -75,7 +76,6 @@ class Visualization {
 
         //this.line = [];
 
-
         //Create renderer
         this.renderer = new THREE.WebGLRenderer({
             antialias: true,
@@ -83,10 +83,9 @@ class Visualization {
         });
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.shadowMap.enabled = true;
-        this.renderer.setClearColor(this.background_and_emis, 0.0)
+        this.renderer.setClearColor(this.background_and_emis, 0.0);
         this.renderer.setSize(this.width_for_3d, this.height_for_3d);
         this.renderer.shadowMap.enabled = true;
-
 
         // Setup scene, camera, lighting
         this.scene = new THREE.Scene();
@@ -95,18 +94,24 @@ class Visualization {
         this.scene.position.z = 0;
         this.scene.overrideMaterial = { color: 0xffff00 };
 
-
-        this.camera = new THREE.PerspectiveCamera(30, this.width_for_3d / this.height_for_3d, 1, 1000);
+        this.camera = new THREE.PerspectiveCamera(
+            30,
+            this.width_for_3d / this.height_for_3d,
+            1,
+            1000
+        );
         this.camera.position.x = this.camera_displacement; //camera.lookAt(scene.position)
-        this.camera.position.y = this.chamber_edge_length * 3 / 2; //camera.lookAt(scene.position)
+        this.camera.position.y = (this.chamber_edge_length * 3) / 2; //camera.lookAt(scene.position)
         this.camera.position.z = this.chamber_edge_length * 3; //camera.lookAt(scene.position)
-
-
 
         this.renderPass = new RenderPass(this.scene, this.camera);
 
         // Configure outline shader
-        this.outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), this.scene, this.camera);
+        this.outlinePass = new OutlinePass(
+            new THREE.Vector2(window.innerWidth, window.innerHeight),
+            this.scene,
+            this.camera
+        );
         this.outlinePass.selectedObjects = this.selectedObjects;
         this.outlinePass.renderToScreen = true;
         this.outlinePass.edgeStrength = this.outline_params.edgeStrength;
@@ -116,12 +121,11 @@ class Visualization {
         this.outlinePass.hiddenEdgeColor.set(0xffffff);
 
         // Add rendering to everything that needs it
-        this.container = document.getElementById('Visualization');
+        this.container = document.getElementById("Visualization");
         this.container.appendChild(this.renderer.domElement);
         this.composer = new EffectComposer(this.renderer);
         this.composer.addPass(this.renderPass);
         this.composer.addPass(this.outlinePass);
-
 
         // Setup all the controls
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -132,13 +136,7 @@ class Visualization {
         this.controls.maxDistance = this.chamber_edge_length * 4;
         this.controls.maxPolarAngle = Math.PI;
 
-
-
         this.mouse = new THREE.Vector2();
-        //console.log(this.mouse);
-
-        //this.mouse_viewer = this.view_mouse();
-
         this.should_animate = true;
         this.animate();
     }
@@ -155,20 +153,19 @@ class Visualization {
         this.tmpTrans = new Ammo.btTransform();
         this.physicsWorld;
         this.rigidBodies = [];
-        this.setupPhysicsWorld()
-
+        this.setupPhysicsWorld();
 
         this.chamber_edge_length = chamber_edge_length;
         this.controls.maxDistance = this.chamber_edge_length * 4;
         this.selectedObjects = [];
 
-
-
         this.composer = new EffectComposer(this.renderer);
 
-
         this.effectFXAA = new ShaderPass(FXAAShader);
-        this.effectFXAA.uniforms['resolution'].value.set(1 / window.innerWidth, 1 / window.innerHeight);
+        this.effectFXAA.uniforms["resolution"].value.set(
+            1 / window.innerWidth,
+            1 / window.innerHeight
+        );
         this.composer.addPass(this.effectFXAA);
 
         // Setup scene, camera, lighting
@@ -187,7 +184,11 @@ class Visualization {
         this.composer.addPass(this.renderPass);
 
         // Configure outline shader
-        this.outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), this.scene, this.camera);
+        this.outlinePass = new OutlinePass(
+            new THREE.Vector2(window.innerWidth, window.innerHeight),
+            this.scene,
+            this.camera
+        );
         this.outlinePass.selectedObjects = this.selectedObjects;
         this.outlinePass.renderToScreen = true;
         this.outlinePass.edgeStrength = this.outline_params.edgeStrength;
@@ -208,7 +209,7 @@ class Visualization {
         // this.composer.addPass(this.bokehPass);
 
         for (name in this.data) {
-            this.generate_species(name)
+            this.generate_species(name);
             for (let i = 0; i < this.data[name].count.slice(-1)[0]; i++) {
                 this.add_molecule(name);
             }
@@ -221,40 +222,50 @@ class Visualization {
 
     setupPhysicsWorld() {
         this.collisionConfiguration = new Ammo.btDefaultCollisionConfiguration();
-        this.dispatcher = new Ammo.btCollisionDispatcher(this.collisionConfiguration);
+        this.dispatcher = new Ammo.btCollisionDispatcher(
+            this.collisionConfiguration
+        );
         this.broadphase = new Ammo.btDbvtBroadphase();
         this.solver = new Ammo.btSequentialImpulseConstraintSolver();
         this.overlappingPairCache = new Ammo.btDbvtBroadphase();
-        this.physicsWorld = new Ammo.btDiscreteDynamicsWorld(this.dispatcher, this.overlappingPairCache, this.solver, this.collisionConfiguration);
+        this.physicsWorld = new Ammo.btDiscreteDynamicsWorld(
+            this.dispatcher,
+            this.overlappingPairCache,
+            this.solver,
+            this.collisionConfiguration
+        );
 
         // Currently I don't want gravity.
         this.physicsWorld.setGravity(new Ammo.btVector3(0, 0, 0));
     }
 
     createLights() {
-        // A hemisphere light is a gradient colored light; 
-        // the first parameter is the sky color, the second parameter is the ground color, 
+        // A hemisphere light is a gradient colored light;
+        // the first parameter is the sky color, the second parameter is the ground color,
         // the third parameter is the intensity of the light
-        this.hemisphereLight = new THREE.HemisphereLight(0xaaaaaa, 0x000000, .9)
+        this.hemisphereLight = new THREE.HemisphereLight(0xaaaaaa, 0x000000, 0.9);
 
-        // A directional light shines from a specific direction. 
-        // It acts like the sun, that means that all the rays produced are parallel. 
-        this.shadowLight = new THREE.DirectionalLight(0xffffff, .5);
-        this.shadowLight_x = new THREE.DirectionalLight(0xffffff, .5);
-        this.shadowLight_y = new THREE.DirectionalLight(0xffffff, .5);
-        this.shadowLight_z = new THREE.DirectionalLight(0xffffff, .5);
+        // A directional light shines from a specific direction.
+        // It acts like the sun, that means that all the rays produced are parallel.
+        this.shadowLight = new THREE.DirectionalLight(0xffffff, 0.5);
+        this.shadowLight_x = new THREE.DirectionalLight(0xffffff, 0.5);
+        this.shadowLight_y = new THREE.DirectionalLight(0xffffff, 0.5);
+        this.shadowLight_z = new THREE.DirectionalLight(0xffffff, 0.5);
 
-        // Set the direction of the light  
-        this.shadowLight.position.set(this.chamber_edge_length, this.chamber_edge_length / 2, this.chamber_edge_length / 2);
+        // Set the direction of the light
+        this.shadowLight.position.set(
+            this.chamber_edge_length,
+            this.chamber_edge_length / 2,
+            this.chamber_edge_length / 2
+        );
         this.shadowLight_x.position.set(this.chamber_edge_length, 0, 0);
         this.shadowLight_y.position.set(0, this.chamber_edge_length, 0);
         this.shadowLight_z.position.set(0, 0, this.chamber_edge_length);
-        // Allow shadow casting 
+        // Allow shadow casting
         this.shadowLight.castShadow = true;
         this.shadowLight_x.castShadow = true;
         this.shadowLight_y.castShadow = true;
         this.shadowLight_z.castShadow = true;
-
 
         // define the visible area of the projected shadow
         this.shadowLight.shadow.camera.left = -this.chamber_edge_length;
@@ -264,12 +275,10 @@ class Visualization {
         this.shadowLight.shadow.camera.near = 1;
         this.shadowLight.shadow.camera.far = 1000;
 
-        // define the resolution of the shadow; the higher the better, 
+        // define the resolution of the shadow; the higher the better,
         // but also the more expensive and less performant
         this.shadowLight.shadow.mapSize.width = 2048;
         this.shadowLight.shadow.mapSize.height = 2048;
-
-
 
         // to activate the lights, just add them to the scene
         this.scene.add(this.hemisphereLight);
@@ -278,38 +287,8 @@ class Visualization {
         //this.scene.add(this.shadowLight_z);
     }
 
-    clean_all() {
-        // Clean up old scene molecules and chamber
-
-        // for (name in this.data) {
-        //     while (this.data[name].instances.length > 0) {
-        //         let temp = this.data[name].instances.pop();
-        //         //console.log(temp)
-        //         let object = this.scene.getObjectByProperty('uuid', temp.mesh.uuid);
-        //         //console.log(object)
-        //         object.geometry.dispose();
-        //         for (let mat in object.materials) {
-        //             mat.dispose();
-        //         }
-        //         this.scene.remove(object);
-        //     }
-        // }
-
-        //console.log(this.chamber)
-        // if (this.chamber != null) {
-        //     this.chamber.geometry.dispose()
-        //     this.chamber.material.dispose();
-        //     this.scene.remove(this.chamber);
-        // }
-
-
-        this.renderer.renderLists.dispose();
-
-    }
-
     generate_species(name) {
-
-        let envMap = new THREE.TextureLoader().load('Images/envMap.png');
+        let envMap = new THREE.TextureLoader().load("Images/envMap.png");
         envMap.mapping = THREE.SphericalReflectionMapping;
 
         let geometry = this.data[name].coords; // Setting up to import different geometries
@@ -317,18 +296,17 @@ class Visualization {
         let materials = [];
         let mergedGeometry = [];
         // basic monochromatic energy preservation
-        let roughness = .4;
-        let diffuseColor = new THREE.Color().setHSL(0.0, 0.0, .9);
+        let roughness = 0.4;
+        let diffuseColor = new THREE.Color().setHSL(0.0, 0.0, 0.9);
 
         for (let i = 0; i < geometry.length; i++) {
-
             //For atom i set up correct material
             let material = new THREE.MeshPhysicalMaterial({
                 //let material = new THREE.MeshDepthMaterial({
                 color: COLORS[geometry[i][0]],
                 emissive: COLORS[geometry[i][0]],
                 envMap: envMap,
-                metalness: .0,
+                metalness: 0.0,
                 roughness: 0.1,
                 reflectivity: 1.0,
                 color: 0xa8f4f7,
@@ -339,26 +317,32 @@ class Visualization {
                 // metalness: .9,
                 // roughness: roughness,
             });
-            materials.push(material)
+            materials.push(material);
 
             // for atom I create the correct geometry
-            let sphereGeometry = new THREE.SphereBufferGeometry(atom_radius[geometry[i][0]], sphere_quality, sphere_quality);
+            let sphereGeometry = new THREE.SphereBufferGeometry(
+                atom_radius[geometry[i][0]],
+                sphere_quality,
+                sphere_quality
+            );
 
-            sphereGeometry.translate(geometry[i][1].x, geometry[i][1].y, geometry[i][1].z);
+            sphereGeometry.translate(
+                geometry[i][1].x,
+                geometry[i][1].y,
+                geometry[i][1].z
+            );
 
-            mergedGeometry.push(sphereGeometry)
-
-        };
+            mergedGeometry.push(sphereGeometry);
+        }
 
         // This information is now stored in the main data structure.
 
         //console.log(mergedGeometry)
 
-        this.data[name]['graphics'] = {
-            'geom': BufferGeometryUtils.mergeBufferGeometries(mergedGeometry, true),
-            'material': materials
-        }
-
+        this.data[name]["graphics"] = {
+            geom: BufferGeometryUtils.mergeBufferGeometries(mergedGeometry, true),
+            material: materials
+        };
 
         //mergedGeometry.dispose();
         for (let geo of mergedGeometry) {
@@ -373,14 +357,15 @@ class Visualization {
     add_molecule(name) {
         // This will turn into a many molecule method
         if (name == null) {
-            name = 'Reactant'
+            name = "Reactant";
         }
 
-        let temp = new Molecule(this.data[name].coords,
+        let temp = new Molecule(
+            this.data[name].coords,
             this.data[name].graphics.geom,
             this.data[name].graphics.material,
-            this.chamber_edge_length);
-
+            this.chamber_edge_length
+        );
 
         this.data[name].instances.push(temp);
         this.scene.add(temp.mesh);
@@ -393,10 +378,9 @@ class Visualization {
     }
 
     remove_molecule(name) {
-
         let temp = this.data[name].instances.pop();
         //console.log(temp)
-        let object = this.scene.getObjectByProperty('uuid', temp.mesh.uuid);
+        let object = this.scene.getObjectByProperty("uuid", temp.mesh.uuid);
 
         object.geometry.dispose();
         for (let mat in object.materials) {
@@ -404,8 +388,7 @@ class Visualization {
         }
 
         this.scene.remove(object);
-        this.physicsWorld.removeRigidBody(object.userData.physicsBody)
-
+        this.physicsWorld.removeRigidBody(object.userData.physicsBody);
 
         for (let i = 0; i < this.selectedObjects.length; i++) {
             if (this.selectedObjects[i].parent == null) {
@@ -437,52 +420,52 @@ class Visualization {
         // ADD GRIDS
 
         //Top and bottom   - along Y axis
-        gridHelper = new THREE.GridHelper(size, divisions, 'grey', 'grey');
+        gridHelper = new THREE.GridHelper(size, divisions, "grey", "grey");
         gridHelper.geometry.rotateY(Math.PI / 2);
         pos.set(0, -this.chamber_edge_length / 2, 0);
-        dim.set(this.chamber_edge_length, .1, this.chamber_edge_length);
+        dim.set(this.chamber_edge_length, 0.1, this.chamber_edge_length);
         gridHelper.position.copy(pos);
         this.scene.add(gridHelper);
         this.createRigidBody(dim, mass, pos);
 
-        gridHelper = new THREE.GridHelper(size, divisions, 'grey', 'grey');
+        gridHelper = new THREE.GridHelper(size, divisions, "grey", "grey");
         gridHelper.geometry.rotateY(Math.PI / 2);
         pos.set(0, this.chamber_edge_length / 2, 0);
-        dim.set(this.chamber_edge_length, .1, this.chamber_edge_length);
+        dim.set(this.chamber_edge_length, 0.1, this.chamber_edge_length);
         gridHelper.position.copy(pos);
         this.scene.add(gridHelper);
         this.createRigidBody(dim, mass, pos);
 
         // Front and back - along X
-        gridHelper = new THREE.GridHelper(size, divisions, 'grey', 'grey');
+        gridHelper = new THREE.GridHelper(size, divisions, "grey", "grey");
         gridHelper.geometry.rotateZ(Math.PI / 2);
         pos.set(-this.chamber_edge_length / 2, 0, 0);
-        dim.set(.1, this.chamber_edge_length, this.chamber_edge_length);
+        dim.set(0.1, this.chamber_edge_length, this.chamber_edge_length);
         gridHelper.position.copy(pos);
         this.scene.add(gridHelper);
         this.createRigidBody(dim, mass, pos);
 
-        gridHelper = new THREE.GridHelper(size, divisions, 'grey', 'grey');
+        gridHelper = new THREE.GridHelper(size, divisions, "grey", "grey");
         gridHelper.geometry.rotateZ(Math.PI / 2);
         pos.set(this.chamber_edge_length / 2, 0, 0);
-        dim.set(.1, this.chamber_edge_length, this.chamber_edge_length);
+        dim.set(0.1, this.chamber_edge_length, this.chamber_edge_length);
         gridHelper.position.copy(pos);
         this.scene.add(gridHelper);
         this.createRigidBody(dim, mass, pos);
 
         // Front and back - along Z
-        gridHelper = new THREE.GridHelper(size, divisions, 'grey', 'grey');
+        gridHelper = new THREE.GridHelper(size, divisions, "grey", "grey");
         gridHelper.geometry.rotateX(Math.PI / 2);
         pos.set(0, 0, -this.chamber_edge_length / 2);
-        dim.set(this.chamber_edge_length, this.chamber_edge_length, .1);
+        dim.set(this.chamber_edge_length, this.chamber_edge_length, 0.1);
         gridHelper.position.copy(pos);
         this.scene.add(gridHelper);
         this.createRigidBody(dim, mass, pos);
 
-        gridHelper = new THREE.GridHelper(size, divisions, 'grey', 'grey');
+        gridHelper = new THREE.GridHelper(size, divisions, "grey", "grey");
         gridHelper.geometry.rotateX(Math.PI / 2);
         pos.set(0, 0, this.chamber_edge_length / 2);
-        dim.set(this.chamber_edge_length, this.chamber_edge_length, .1);
+        dim.set(this.chamber_edge_length, this.chamber_edge_length, 0.1);
         gridHelper.position.copy(pos);
         this.scene.add(gridHelper);
         this.createRigidBody(dim, mass, pos);
@@ -517,18 +500,198 @@ class Visualization {
         let localInertia = new Ammo.btVector3(0, 0, 0);
         colShape.calculateLocalInertia(mass, localInertia);
 
-        let rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, colShape, localInertia);
+        let rbInfo = new Ammo.btRigidBodyConstructionInfo(
+            mass,
+            motionState,
+            colShape,
+            localInertia
+        );
         let body = new Ammo.btRigidBody(rbInfo);
 
-        body.setFriction(0)
+        body.setFriction(0);
         body.setRestitution(1.0);
         body.setDamping(0.0, 0.0); // void 	setDamping (btScalar lin_damping, btScalar ang_damping)
 
         this.physicsWorld.addRigidBody(body);
     }
 
-    tick(incoming_data) {
+    clean_all() {
+        // Clean up old scene molecules and chamber
 
+        // for (name in this.data) {
+        //     while (this.data[name].instances.length > 0) {
+        //         let temp = this.data[name].instances.pop();
+        //         //console.log(temp)
+        //         let object = this.scene.getObjectByProperty('uuid', temp.mesh.uuid);
+        //         //console.log(object)
+        //         object.geometry.dispose();
+        //         for (let mat in object.materials) {
+        //             mat.dispose();
+        //         }
+        //         this.scene.remove(object);
+        //     }
+        // }
+
+        //console.log(this.chamber)
+        // if (this.chamber != null) {
+        //     this.chamber.geometry.dispose()
+        //     this.chamber.material.dispose();
+        //     this.scene.remove(this.chamber);
+        // }
+
+        this.renderer.renderLists.dispose();
+    }
+
+    tick(incoming_data) {}
+
+    add_to_pass(id, pass) {
+        let object = this.scene.getObjectByProperty("uuid", id);
+        pass.push(object);
+    }
+
+    remove_from_pass(id, pass) {
+        let object = this.scene.getObjectByProperty("uuid", id);
+        //splice out target mesh
+    }
+
+    physics_updater() {
+        // Step world
+        this.physicsWorld.stepSimulation(this.delta_t, 10);
+
+        // Update rigid bodies positions based on their physics update.
+        for (let i = 0; i < this.rigidBodies.length; i++) {
+            let objThree = this.rigidBodies[i];
+            if (objThree == null) {
+                this.rigidBodies.splice(i, 1);
+                continue;
+            }
+            let objAmmo = objThree.userData.physicsBody;
+
+            // I believe this is saying:
+            // if the object involved is a movable object => bounce
+            // else => ignore
+            let ms = objAmmo.getMotionState();
+            if (ms) {
+                ms.getWorldTransform(this.tmpTrans);
+                let p = this.tmpTrans.getOrigin();
+                let q = this.tmpTrans.getRotation();
+                objThree.position.set(p.x(), p.y(), p.z());
+                objThree.quaternion.set(q.x(), q.y(), q.z(), q.w());
+            }
+        }
+
+        // combine hitting molecules
+        let num_manifold = this.physicsWorld.getDispatcher().getNumManifolds();
+
+        for (let i = 0; i < num_manifold; i++) {
+            let contactManifold = this.physicsWorld
+                .getDispatcher()
+                .getManifoldByIndexInternal(i);
+
+            let num_contacts = contactManifold.getNumContacts();
+            if (num_contacts > 0) {
+                // if (this.selectedObjects.length > 0) {
+                //this.selectedObjects.length = 0
+            }
+
+            for (let j = 0; j < num_contacts; j++) {
+                let obA = contactManifold.getBody0();
+                let obB = contactManifold.getBody1();
+
+                // console.log(obA);
+                // console.log(obB);
+                // console.log(this.scene);
+                // console.log(num_manifold);
+                // console.log(contactManifold);
+
+                let meshA = this.scene.getObjectByProperty("name", obA.H);
+                // console.log(meshA);
+                let meshB = this.scene.getObjectByProperty("name", obB.H);
+                // console.log(meshB);
+                if (meshA != null && meshB != null) {
+                    console.log("two molecules smacked.");
+                    //this.pause_animate();
+                    this.toggle_animate();
+
+                    let molA = meshA.userData.molecule;
+                    let molB = meshB.userData.molecule;
+
+                    console.log(molA);
+                    console.log(molB);
+
+                    this.add_to_pass(meshA.uuid, this.selectedObjects);
+                    this.add_to_pass(meshB.uuid, this.selectedObjects);
+                    // this.selectedObjects.push(meshA);
+                    // this.selectedObjects.push(meshB);
+                }
+            }
+        }
+
+        for (name in this.data) {
+            this.generate_species(name);
+            let current_count = this.data[name].count.slice(-1)[0];
+
+            for (let i = 0; i < current_count; i++) {
+                //for each instance of a species check for reaction
+
+                if (this.data[name].instances[i] == null) continue;
+
+                let to_do = this.data[name].instances[i].update(
+                    this.data,
+                    this.delta_t
+                );
+
+                // console.log('Current: ' + this.data[name].instances.length);
+                // console.log('Count: ' + this.data[name].count.slice(-1)[0]);
+
+                for (let j = 0; j < to_do.add.num; j++) {
+                    try {
+                        this.add_molecule(to_do.add.name);
+                    } catch (err) {
+                        console.log(err);
+                    }
+                }
+
+                for (let j = 0; j < to_do.remove.num; j++) {
+                    try {
+                        this.remove_molecule(to_do.remove.name);
+                    } catch (err) {
+                        console.log(err);
+                    }
+                }
+
+                if (to_do.add.num > 0 || to_do.remove.num > 0) {
+                    break;
+                }
+            }
+        }
+    }
+
+    animate() {
+        //this.add_line();
+
+        this.camera.updateMatrixWorld();
+        this.delta_t = this.clock.getDelta();
+
+        if (this.should_animate) this.physics_updater();
+
+        requestAnimationFrame(this.animate.bind(this));
+        this.composer.render(this.scene, this.camera);
+    }
+    toggle_animate() {
+        this.should_animate = this.should_animate == false;
+
+        if (this.should_animate) {
+            document.getElementById("pause_simulation").innerHTML = "Pause";
+        } else {
+            document.getElementById("pause_simulation").innerHTML = "Resume";
+        }
+    }
+    pause_animate() {
+        this.should_animate = false;
+    }
+    resume_animate() {
+        this.should_animate = true;
     }
 
     onDocumentMouseMove(event) {
@@ -542,13 +705,10 @@ class Visualization {
             this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
             this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
             this.mouse.unproject(this.camera);
-        } catch (err) {
-
-        }
+        } catch (err) {}
     }
 
     onDocumentMouseDown(event) {
-
         //event.preventDefault();
         //this.mouse.unproject(this.camera);
         this.raycaster.setFromCamera(this.mouse, this.camera);
@@ -556,41 +716,47 @@ class Visualization {
         let intersects = this.raycaster.intersectObjects(this.rigidBodies);
 
         if (intersects.length > 0) {
-
             if (this.selectedObjects.length > 0) {
-                console.log('shrinking!')
+                console.log("shrinking!");
                 this.selectedObjects.pop().scale.setScalar(1.0);
             }
 
-            this.add_to_pass(intersects[0].object.uuid, this.selectedObjects)
-                // this.selectedObjects.push(intersects[0].object)
+            this.add_to_pass(intersects[0].object.uuid, this.selectedObjects);
+            // this.selectedObjects.push(intersects[0].object)
             intersects[0].object.scale.setScalar(3.0);
             console.log(intersects[0].object);
-
         } else {
             this.INTERSECTED = null;
+            this.selectedObjects = [];
         }
     }
 
     onDocumentKeyDown(event) {
-        if (event.key == ' ') {
-            this.toggle_animate()
+        if (event.key == " ") {
+            this.toggle_animate();
         }
     }
 
+    onWindowResize() {
+        this.height_for_3d = document.getElementById("Visualization").clientHeight;
+        this.width_for_3d = document.getElementById("Visualization").clientWidth;
+        this.camera.aspect = this.width_for_3d / this.height_for_3d;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(this.width_for_3d, this.height_for_3d);
+    }
 
     view_mouse() {
         //console.log('in this mouse')
         // for visualizaton purposes:
         let material = new THREE.MeshPhysicalMaterial({
-            color: 'grey',
-            emissive: 'grey',
+            color: "grey",
+            emissive: "grey",
             reflectivity: 0,
-            metalness: .9,
+            metalness: 0.9,
             roughness: 1,
-            tranparency: .5
+            tranparency: 0.5
         });
-        let geometry = new THREE.SphereBufferGeometry(.1, 10, 10);
+        let geometry = new THREE.SphereBufferGeometry(0.1, 10, 10);
 
         let temp = new THREE.Mesh(geometry, material);
         temp.position.set(0, 0, 0);
@@ -624,175 +790,7 @@ class Visualization {
 
         let geometry = new THREE.BufferGeometry().setFromPoints(points);
         let line = new THREE.Line(geometry, material);
-        this.scene.add(line)
-    }
-
-    toggle_animate() {
-        this.should_animate = (this.should_animate == false);
-
-        if (this.should_animate) {
-            document.getElementById('pause_simulation').innerHTML = ('Pause');
-        } else {
-            document.getElementById('pause_simulation').innerHTML = ('Resume')
-        }
-
-
-    }
-    pause_animate() {
-        this.should_animate = false;
-    }
-
-    resume_animate() {
-        this.should_animate = true;
-    }
-
-    add_to_pass(id, pass) {
-        let object = this.scene.getObjectByProperty('uuid', id);
-        pass.push(object);
-    }
-
-    remove_from_pass(id, pass) {
-
-        let object = this.scene.getObjectByProperty('uuid', id);
-        //splice out target mesh
-
-
-
-    }
-
-    physics_updater() {
-        // Step world
-        this.physicsWorld.stepSimulation(this.delta_t, 10);
-
-        // Update rigid bodies positions based on their physics update.
-        for (let i = 0; i < this.rigidBodies.length; i++) {
-            let objThree = this.rigidBodies[i];
-            if (objThree == null) {
-                this.rigidBodies.splice(i, 1);
-                continue;
-            }
-            let objAmmo = objThree.userData.physicsBody;
-
-            // I believe this is saying:
-            // if the object involved is a movable object => bounce
-            // else => ignore
-            let ms = objAmmo.getMotionState();
-            if (ms) {
-                ms.getWorldTransform(this.tmpTrans);
-                let p = this.tmpTrans.getOrigin();
-                let q = this.tmpTrans.getRotation();
-                objThree.position.set(p.x(), p.y(), p.z());
-                objThree.quaternion.set(q.x(), q.y(), q.z(), q.w());
-            }
-        }
-
-        // combine hitting molecules
-        let num_manifold = this.physicsWorld.getDispatcher().getNumManifolds();
-
-        for (let i = 0; i < num_manifold; i++) {
-            let contactManifold = this.physicsWorld.getDispatcher().getManifoldByIndexInternal(i);
-
-
-            let num_contacts = contactManifold.getNumContacts();
-            if (num_contacts > 0) {
-                // if (this.selectedObjects.length > 0) {
-                //this.selectedObjects.length = 0
-
-
-            }
-
-            for (let j = 0; j < num_contacts; j++) {
-                let obA = contactManifold.getBody0();
-                let obB = contactManifold.getBody1();
-
-
-                // console.log(obA);
-                // console.log(obB);
-                // console.log(this.scene);
-                // console.log(num_manifold);
-                // console.log(contactManifold);
-
-
-                let meshA = this.scene.getObjectByProperty('name', obA.H);
-                // console.log(meshA);
-                let meshB = this.scene.getObjectByProperty('name', obB.H);
-                // console.log(meshB);
-                if ((meshA != null) && (meshB != null)) {
-                    console.log("two molecules smacked.")
-                        //this.pause_animate();
-                    this.toggle_animate();
-
-                    let molA = meshA.userData.molecule;
-                    let molB = meshB.userData.molecule;
-
-                    console.log(molA);
-                    console.log(molB);
-
-                    this.add_to_pass(meshA.uuid, this.selectedObjects);
-                    this.add_to_pass(meshB.uuid, this.selectedObjects);
-                    // this.selectedObjects.push(meshA);
-                    // this.selectedObjects.push(meshB);
-                }
-            }
-        }
-
-
-        for (name in this.data) {
-            this.generate_species(name)
-            let current_count = this.data[name].count.slice(-1)[0];
-
-            for (let i = 0; i < current_count; i++) {
-                //for each instance of a species check for reaction
-
-                if (this.data[name].instances[i] == null) continue;
-
-                let to_do = this.data[name].instances[i].update(this.data, this.delta_t);
-
-                // console.log('Current: ' + this.data[name].instances.length);
-                // console.log('Count: ' + this.data[name].count.slice(-1)[0]);
-
-                for (let j = 0; j < to_do.add.num; j++) {
-                    try {
-                        this.add_molecule(to_do.add.name);
-                    } catch (err) {
-                        console.log(err);
-                    }
-                }
-
-                for (let j = 0; j < to_do.remove.num; j++) {
-                    try {
-                        this.remove_molecule(to_do.remove.name);
-                    } catch (err) {
-                        console.log(err);
-                    }
-                }
-
-                if ((to_do.add.num > 0) || (to_do.remove.num > 0)) {
-                    break;
-                }
-
-            }
-        }
-    }
-
-    animate() {
-        //this.add_line();
-
-        this.camera.updateMatrixWorld();
-        this.delta_t = this.clock.getDelta();
-
-        if (this.should_animate) this.physics_updater();
-
-        requestAnimationFrame(this.animate.bind(this));
-        this.composer.render(this.scene, this.camera);
-    };
-
-    onWindowResize() {
-        this.height_for_3d = document.getElementById("Visualization").clientHeight;
-        this.width_for_3d = document.getElementById("Visualization").clientWidth;
-        this.camera.aspect = this.width_for_3d / this.height_for_3d;
-        this.camera.updateProjectionMatrix();
-        this.renderer.setSize(this.width_for_3d, this.height_for_3d);
+        this.scene.add(line);
     }
 }
 

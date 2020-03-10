@@ -77,7 +77,7 @@ class Histogram {
     tick(incoming_data) {
         // TODO clean this up more
         // TODO add KDE - density plots
-        //TODO make sure this can take more than 2 categories??
+        // TODO make sure this can take more than 2 categories??
 
 
         this.svg.selectAll(".bar").remove();
@@ -85,8 +85,8 @@ class Histogram {
         this.data = incoming_data;
 
         // TODO
-        // This can probably all be optimized out by just calling a function 
-        // on each velocity vector stored in the incoming_data
+        // TODO This can probably all be optimized out by just calling a function 
+        // TODO on each velocity vector stored in the incoming_data
         let velocities = [];
 
         for (let i = 0; i < this.data.length; i++) {
@@ -190,7 +190,7 @@ class Histogram {
             .remove();
 
 
-        //TODO Add this kind of thing to other classes as well
+        // TODO Add this kind of thing to other classes as well
         let diag = false;
         if (diag == true) {
             console.log('In Histrogram Tick.------------------------------')
