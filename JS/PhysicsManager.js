@@ -8,7 +8,7 @@ import SideView from "/JS/SideView.js";
 
 // raw starting numbers
 let orders_of_magnitude = 0;
-let OoM_factor = 3;
+let OoM_factor = 5;
 console.log(orders_of_magnitude);
 let total_molecules = OoM_factor * Math.pow(10, orders_of_magnitude);
 console.log(total_molecules);
@@ -44,7 +44,8 @@ let species = [{
             ["N", new THREE.Vector3(0, 0, 0)],
             ["O", new THREE.Vector3(-0.07, 0.12, 0)],
             ["O", new THREE.Vector3(-0.07, -0.12, 0)]
-        ]
+        ],
+        mass: "46.0055 " // g/mol
     },
     {
         name: "Products",
@@ -58,7 +59,8 @@ let species = [{
             ["N", new THREE.Vector3(0.3, 0, 0)],
             ["O", new THREE.Vector3(0.37, 0.12, 0)],
             ["O", new THREE.Vector3(0.37, -0.12, 0)]
-        ]
+        ],
+        mass: "92.011", // g/mol
     }
 ];
 
@@ -479,6 +481,9 @@ document
     });
 document.querySelector("#run_simulation").addEventListener("click", () => {
     run_sim = true;
+
+
+
     species = [{
             name: "Reactants",
             percent: [r_to_p_ratio],
@@ -488,7 +493,8 @@ document.querySelector("#run_simulation").addEventListener("click", () => {
                 ["N", new THREE.Vector3(0, 0, 0)],
                 ["O", new THREE.Vector3(-0.07, 0.12, 0)],
                 ["O", new THREE.Vector3(-0.07, -0.12, 0)]
-            ]
+            ],
+            mass: "46.0055 "
         },
         {
             name: "Products",
@@ -502,7 +508,8 @@ document.querySelector("#run_simulation").addEventListener("click", () => {
                 ["N", new THREE.Vector3(0.3, 0, 0)],
                 ["O", new THREE.Vector3(0.37, 0.12, 0)],
                 ["O", new THREE.Vector3(0.37, -0.12, 0)]
-            ]
+            ],
+            mass: "92.011", // g/mol
         }
     ];
 

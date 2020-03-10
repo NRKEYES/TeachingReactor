@@ -19,7 +19,7 @@ import { BufferGeometryUtils } from "/JS/three/examples/jsm/utils/BufferGeometry
 import Molecule from "/JS/Molecule.js";
 //importScripts('/JS/ammo/ammo.js')
 
-let sphere_quality = 15;
+let sphere_quality = 4;
 
 var COLORS = {
     H: 0xc0c0c0,
@@ -61,18 +61,17 @@ class Visualization {
 
         this.rigidBodies = []; // for ammo
         this.selectedObjects = [];
+        this.impactObjects = [];
         // for glow
         this.outline_params = {
             edgeStrength: 20,
             edgeGlow: 2,
             edgeThickness: 1.0,
             pulsePeriod: 1.0,
-            usePatternTexture: true
+            usePatternTexture: false
         };
 
         this.raycaster = new THREE.Raycaster();
-
-        this.INTERSECTED;
 
         //this.line = [];
 
@@ -157,7 +156,7 @@ class Visualization {
 
         this.chamber_edge_length = chamber_edge_length;
         this.controls.maxDistance = this.chamber_edge_length * 4;
-        this.selectedObjects = [];
+
 
         this.composer = new EffectComposer(this.renderer);
 
@@ -183,21 +182,39 @@ class Visualization {
         this.renderPass = new RenderPass(this.scene, this.camera);
         this.composer.addPass(this.renderPass);
 
+
+
+        this.impactObjects = [];
         // Configure outline shader
-        this.outlinePass = new OutlinePass(
+        this.impactPass = new OutlinePass(
             new THREE.Vector2(window.innerWidth, window.innerHeight),
             this.scene,
             this.camera
         );
-        this.outlinePass.selectedObjects = this.selectedObjects;
-        this.outlinePass.renderToScreen = true;
-        this.outlinePass.edgeStrength = this.outline_params.edgeStrength;
-        this.outlinePass.edgeGlow = this.outline_params.edgeGlow;
-        this.outlinePass.pulsePeriod = this.outline_params.pulsePeriod;
+        this.impactPass.selectedObjects = this.impactObjects;
+        this.impactPass.renderToScreen = true;
+        this.impactPass.edgeStrength = this.outline_params.edgeStrength;
+        this.impactPass.edgeGlow = this.outline_params.edgeGlow;
+        this.impactPass.pulsePeriod = this.outline_params.pulsePeriod;
+        this.impactPass.visibleEdgeColor.set('green');
+        this.impactPass.hiddenEdgeColor.set('white');
+        this.composer.addPass(this.impactPass);
 
-        this.outlinePass.visibleEdgeColor.set(0x01cdfe);
-        this.outlinePass.hiddenEdgeColor.set(0x01cdfe);
-        this.composer.addPass(this.outlinePass);
+        this.selectedObjects = [];
+        // Configure outline shader
+        this.selectedPass = new OutlinePass(
+            new THREE.Vector2(window.innerWidth, window.innerHeight),
+            this.scene,
+            this.camera
+        );
+        this.selectedPass.selectedObjects = this.selectedObjects;
+        this.selectedPass.renderToScreen = true;
+        this.selectedPass.edgeStrength = this.outline_params.edgeStrength;
+        this.selectedPass.edgeGlow = this.outline_params.edgeGlow;
+        this.selectedPass.pulsePeriod = this.outline_params.pulsePeriod;
+        this.selectedPass.visibleEdgeColor.set('red');
+        this.selectedPass.hiddenEdgeColor.set('white');
+        this.composer.addPass(this.selectedPass);
 
         // this.bokehPass = new BokehPass(this.scene, this.camera, {
         //     focus: this.chamber_edge_length,
@@ -302,20 +319,14 @@ class Visualization {
         for (let i = 0; i < geometry.length; i++) {
             //For atom i set up correct material
             let material = new THREE.MeshPhysicalMaterial({
-                //let material = new THREE.MeshDepthMaterial({
+                // wireframe: true
                 color: COLORS[geometry[i][0]],
                 emissive: COLORS[geometry[i][0]],
+                color: diffuseColor,
                 envMap: envMap,
-                metalness: 0.0,
-                roughness: 0.1,
+                metalness: 0.0, // metalness: .9,
+                roughness: 0.1, // roughness: roughness,
                 reflectivity: 1.0,
-                color: 0xa8f4f7,
-                wireframe: true
-
-                // color: diffuseColor,
-                // reflectivity: 1.0,
-                // metalness: .9,
-                // roughness: roughness,
             });
             materials.push(material);
 
@@ -345,26 +356,53 @@ class Visualization {
         };
 
         //mergedGeometry.dispose();
-        for (let geo of mergedGeometry) {
-            geo.dispose();
-        }
+        // for (let geo of mergedGeometry) {
+        //     geo.dispose();
+        // }
 
-        for (let mat of materials) {
-            mat.dispose();
-        }
+        // for (let mat of materials) {
+        //     mat.dispose();
+        // }
     }
 
-    add_molecule(name) {
+    add_molecule(name, starting_info = {}) {
         // This will turn into a many molecule method
         if (name == null) {
             name = "Reactant";
         }
 
+        if (Object.keys(starting_info).length == 0) {
+            starting_info.starting_position = {
+                x: d3.randomUniform(-this.chamber_edge_length / 2, this.chamber_edge_length / 2)(),
+                y: d3.randomUniform(-this.chamber_edge_length / 2, this.chamber_edge_length / 2)(),
+                z: d3.randomUniform(-this.chamber_edge_length / 2, this.chamber_edge_length / 2)()
+            };
+
+            starting_info.velocity = {
+                x: d3.randomNormal(0.0)(1),
+                y: d3.randomNormal(0.0)(1),
+                z: d3.randomNormal(0.0)(1)
+            };
+
+            starting_info.rotational_velocity = {
+                x: d3.randomNormal(0.0)(3.14),
+                y: d3.randomNormal(0.0)(3.14),
+                z: d3.randomNormal(0.0)(3.14)
+            };
+        }
+
+        // console.log(starting_info)
+
+
         let temp = new Molecule(
+            name,
+            this.data[name].mass,
             this.data[name].coords,
             this.data[name].graphics.geom,
             this.data[name].graphics.material,
-            this.chamber_edge_length
+            starting_info.starting_position,
+            starting_info.velocity,
+            starting_info.rotational_velocity
         );
 
         this.data[name].instances.push(temp);
@@ -375,37 +413,6 @@ class Visualization {
         this.rigidBodies.push(temp.mesh);
         // add to glow list
         //this.selectedObjects.push(temp.mesh)
-    }
-
-    remove_molecule(name) {
-        let temp = this.data[name].instances.pop();
-        //console.log(temp)
-        let object = this.scene.getObjectByProperty("uuid", temp.mesh.uuid);
-
-        object.geometry.dispose();
-        for (let mat in object.materials) {
-            mat.dispose();
-        }
-
-        this.scene.remove(object);
-        this.physicsWorld.removeRigidBody(object.userData.physicsBody);
-
-        for (let i = 0; i < this.selectedObjects.length; i++) {
-            if (this.selectedObjects[i].parent == null) {
-                this.rigidBodies.splice(i, 1);
-            }
-        }
-
-        // console.log(object)
-        // console.log(this.rigidBodies[1]);
-
-        for (let i = 0; i < this.rigidBodies.length; i++) {
-            if (this.rigidBodies[i].parent == null) {
-                this.rigidBodies.splice(i, 1);
-            }
-        }
-        //this.physicsWorld.removeRigidBody(temp.userData.physicsBody);
-        //this.rigidBodies.remove(temp.mesh);
     }
 
     add_grid() {
@@ -532,7 +539,7 @@ class Visualization {
         //     }
         // }
 
-        //console.log(this.chamber)
+        // console.log(this.chamber)
         // if (this.chamber != null) {
         //     this.chamber.geometry.dispose()
         //     this.chamber.material.dispose();
@@ -550,8 +557,63 @@ class Visualization {
     }
 
     remove_from_pass(id, pass) {
+
+
+        if (id == 'all') {
+            pass.length = 0;
+            return;
+        }
+
+        for (let i = 0; i < pass.length; i++) {
+            if (pass[i].uuid == id) {
+                pass.splice(i, 1);
+            }
+
+        }
+
+    }
+
+    remove_from_scene(id) {
         let object = this.scene.getObjectByProperty("uuid", id);
-        //splice out target mesh
+        this.scene.remove(object);
+        this.physicsWorld.removeRigidBody(object.userData.physicsBody);
+
+
+        this.remove_from_pass(id, this.selectedObjects);
+        this.remove_from_pass(id, this.impactObjects);
+        this.remove_from_pass(id, this.rigidBodies);
+
+    }
+
+    remove_molecule(name) {
+        // let temp = this.data[name].instances.pop();
+        //console.log(temp)
+        let object = this.scene.getObjectByProperty("uuid", temp.mesh.uuid);
+
+        object.geometry.dispose();
+        for (let mat in object.materials) {
+            mat.dispose();
+        }
+
+        this.scene.remove(object);
+        this.physicsWorld.removeRigidBody(object.userData.physicsBody);
+
+        for (let i = 0; i < this.selectedObjects.length; i++) {
+            if (this.selectedObjects[i].parent == null) {
+                this.rigidBodies.splice(i, 1);
+            }
+        }
+
+        // console.log(object)
+        // console.log(this.rigidBodies[1]);
+
+        for (let i = 0; i < this.rigidBodies.length; i++) {
+            if (this.rigidBodies[i].parent == null) {
+                this.rigidBodies.splice(i, 1);
+            }
+        }
+        //this.physicsWorld.removeRigidBody(temp.userData.physicsBody);
+        //this.rigidBodies.remove(temp.mesh);
     }
 
     physics_updater() {
@@ -609,26 +671,43 @@ class Visualization {
                 let meshB = this.scene.getObjectByProperty("name", obB.H);
                 // console.log(meshB);
                 if (meshA != null && meshB != null) {
-                    console.log("two molecules smacked.");
-                    //this.pause_animate();
-                    this.toggle_animate();
+                    console.log("Two molecules colided.");
+                    //this.toggle_animate();
 
                     let molA = meshA.userData.molecule;
                     let molB = meshB.userData.molecule;
 
-                    console.log(molA);
-                    console.log(molB);
+                    // TODO find a way to remove this after a period of time.
+                    console.log(this.impactObjects);
+                    this.remove_from_pass(meshA.uuid, this.impactObjects);
+                    this.remove_from_pass(meshB.uuid, this.impactObjects);
+                    this.add_to_pass(meshA.uuid, this.impactObjects);
+                    this.add_to_pass(meshB.uuid, this.impactObjects);
 
-                    this.add_to_pass(meshA.uuid, this.selectedObjects);
-                    this.add_to_pass(meshB.uuid, this.selectedObjects);
-                    // this.selectedObjects.push(meshA);
-                    // this.selectedObjects.push(meshB);
+
+                    if (molA.name == molB.name) {
+                        console.log("Same species impact.")
+                        console.log(molA, molB);
+                        console.log(molA.name);
+                        // this.remove_molecule()
+
+                        if (molA.name == 0) {
+                            this.add_molecule(1);
+                            this.remove_from_scene(meshA.uuid);
+                            this.remove_from_scene(meshB.uuid);
+                        }
+                        if (molA.name == 1) {
+                            this.add_molecule(0);
+                            this.add_molecule(0)
+                            this.remove_from_scene(meshA.uuid);
+                        }
+                    }
                 }
             }
         }
 
         for (name in this.data) {
-            this.generate_species(name);
+            // this.generate_species(name);
             let current_count = this.data[name].count.slice(-1)[0];
 
             for (let i = 0; i < current_count; i++) {
@@ -636,33 +715,13 @@ class Visualization {
 
                 if (this.data[name].instances[i] == null) continue;
 
-                let to_do = this.data[name].instances[i].update(
-                    this.data,
-                    this.delta_t
-                );
+                let decompose = this.data[name].instances[i].update();
+                if (decompose) {
+                    console.log(this.data[name].instances[i]);
+                    this.remove_from_scene(this.data[name].instances[i].mesh.uuid);
 
-                // console.log('Current: ' + this.data[name].instances.length);
-                // console.log('Count: ' + this.data[name].count.slice(-1)[0]);
-
-                for (let j = 0; j < to_do.add.num; j++) {
-                    try {
-                        this.add_molecule(to_do.add.name);
-                    } catch (err) {
-                        console.log(err);
-                    }
                 }
 
-                for (let j = 0; j < to_do.remove.num; j++) {
-                    try {
-                        this.remove_molecule(to_do.remove.name);
-                    } catch (err) {
-                        console.log(err);
-                    }
-                }
-
-                if (to_do.add.num > 0 || to_do.remove.num > 0) {
-                    break;
-                }
             }
         }
     }
@@ -716,18 +775,18 @@ class Visualization {
         let intersects = this.raycaster.intersectObjects(this.rigidBodies);
 
         if (intersects.length > 0) {
-            if (this.selectedObjects.length > 0) {
-                console.log("shrinking!");
-                this.selectedObjects.pop().scale.setScalar(1.0);
-            }
+            // while (this.selectedObjects.length > 0) {
+            //     console.log("shrinking!");
+            //     this.selectedObjects[this.selectedObjects.length - 1].scale.setScalar(1.0);
+            // }
+            // interse   cts[0].object.scale.setScalar(3.0);
 
+            this.remove_from_pass('all', this.selectedObjects);
             this.add_to_pass(intersects[0].object.uuid, this.selectedObjects);
             // this.selectedObjects.push(intersects[0].object)
-            intersects[0].object.scale.setScalar(3.0);
-            console.log(intersects[0].object);
+            // c  onsole.log(intersects[0].object);
         } else {
-            this.INTERSECTED = null;
-            this.selectedObjects = [];
+            this.remove_from_pass('all', this.selectedObjects);
         }
     }
 

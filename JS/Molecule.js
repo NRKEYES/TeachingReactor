@@ -1,36 +1,26 @@
 class Molecule {
-    constructor(coords, geometry, material, chamber_edge_length) {
+    constructor(name = 'molecule', mass = 0, coords, geometry, material, starting_position, velocity, rotational_velocity) {
+        this.name = name;
+        this.velocity = velocity;
+        this.starting_position = starting_position;
+        this.rotational_velocity = rotational_velocity;
+
+        // console.log(velocity)
+
         //console.log(coords.length);
         this.coords = coords;
-        this.mass_factor = this.coords.length;
-        this.mass = this.mass_factor;
+        this.mass = mass;
+        this.velocity_mag = Math.sqrt(Math.pow(velocity.x, 2) + Math.pow(velocity.y, 2) + Math.pow(velocity.z, 2));;
+        this.translational_energy = .5 * this.mass * Math.pow(this.velocity_mag, 2);
+        this.rotational_energy = 0.0;
+        this.total_energy = this.translational_energy + this.rotational_energy;
+
+
+
+
+
         this.radius = .1 * (this.coords.length - 1);
 
-        let pos = {
-            x: d3.randomUniform(-chamber_edge_length / 2, chamber_edge_length / 2)(),
-            y: d3.randomUniform(-chamber_edge_length / 2, chamber_edge_length / 2)(),
-            z: d3.randomUniform(-chamber_edge_length / 2, chamber_edge_length / 2)()
-        };
-
-
-        let velocity = {
-            x: d3.randomNormal(0.0)(1),
-            y: d3.randomNormal(0.0)(1),
-            z: d3.randomNormal(0.0)(1)
-        };
-
-        let quat = {
-            x: d3.randomNormal(0.0)(1),
-            y: d3.randomNormal(0.0)(1),
-            z: d3.randomNormal(0.0)(1),
-            w: 1
-        };
-
-        let rot = {
-            x: d3.randomNormal(0.0)(3, 14),
-            y: d3.randomNormal(0.0)(3.14),
-            z: d3.randomNormal(0.0)(3.14)
-        };
         // geometry.computeFaceNormals();
         geometry.computeBoundingSphere();
         geometry.center();
@@ -60,7 +50,7 @@ class Molecule {
         this.mesh = new THREE.Mesh(geom, material);
         this.mesh.castShadow = true;
         this.mesh.receiveShadow = true;
-        this.mesh.position.set(pos.x, pos.y, pos.z);
+        this.mesh.position.set(starting_position.x, starting_position.y, starting_position.z);
         this.mesh.castShadow = true;
         this.mesh.receiveShadow = true;
 
@@ -69,7 +59,7 @@ class Molecule {
 
         this.transform = new Ammo.btTransform();
         this.transform.setIdentity();
-        this.transform.setOrigin(new Ammo.btVector3(pos.x, pos.y, pos.z));
+        this.transform.setOrigin(new Ammo.btVector3(starting_position.x, starting_position.y, starting_position.z));
         //this.transform.setRotation(new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
         this.motionState = new Ammo.btDefaultMotionState(this.transform);
 
@@ -83,11 +73,11 @@ class Molecule {
         // this.colShape = new Ammo.btConvexHullShape(geom, true, true);
         this.colShape = new Ammo.btConvexHullShape(trig_mesh, true, true);
         // this.colShape = new Ammo.btSphereShape(this.radius);
-        this.colShape.setMargin(0.1);
+        this.colShape.setMargin(0.15);
 
 
         //Don't really know what this is useful for...
-        this.localInertia = new Ammo.btVector3(1.0, 0, 0);
+        this.localInertia = new Ammo.btVector3(0.0, 0.0, 0.0);
         this.colShape.calculateLocalInertia(this.mass, this.localInertia);
         this.rbInfo = new Ammo.btRigidBodyConstructionInfo(this.mass, this.motionState, this.colShape, this.localInertia);
         this.body = new Ammo.btRigidBody(this.rbInfo);
@@ -100,7 +90,7 @@ class Molecule {
         // Something here may be causing acceleration(excessive acceleration)
         let vel_vec = new Ammo.btVector3(velocity.x, velocity.y, velocity.z);
         this.body.setLinearVelocity(vel_vec);
-        let rot_vec = new Ammo.btVector3(rot.x, rot.y, rot.z);
+        let rot_vec = new Ammo.btVector3(rotational_velocity.x, rotational_velocity.y, rotational_velocity.z);
         this.body.setAngularVelocity(rot_vec);
         this.body.setFriction(0);
         this.body.setRestitution(0.99);
@@ -113,7 +103,7 @@ class Molecule {
         //set the mesh name to be searchable by 'pointer'
         this.mesh.name = this.body.H;
 
-        console.log(this);
+        // console.log(this);
 
         return this;
     }
@@ -158,9 +148,6 @@ class Molecule {
         // console.log('Reaction Checker');
         // console.log(this.data[0]);
 
-        let to_do = { 'add': { 'name': 0, 'num': 0 }, 'remove': { 'name': 1, 'num': 0 } };
-
-
         // Two reactions are possible
         // forward and backward
 
@@ -175,9 +162,9 @@ class Molecule {
         // spawn in two reactants with half momentum each.
 
 
-        if (this.mass_factor <= 3) {
+        if (this.mass <= 47) {
             //console.log('Small Fry!')
-            return to_do;
+            return false;
         } else {
 
             let percent_decompose = .01;
@@ -186,21 +173,12 @@ class Molecule {
 
             //console.log(random_num);
             if (random_num < percent_decompose) {
-                //decompose
-                // console.log("we should decompose!")
-                // console.log(percent_decompose);
-                // console.log(this.data[0].count.slice(-1)[0] + 2)
-
-                //this.data[0].count.push(this.data[0].count.slice(-1)[0] + 2);
-
-                // number to add
-                //console.log(this.mass_factor)
-                let to_do = { 'add': { 'name': 0, 'num': 2 }, 'remove': { 'name': 1, 'num': 1 } };
-                return to_do;
+                console.log('Decompose.')
+                return true;
             }
 
         }
-        return to_do;
+        return false;
     }
 
     update(incoming_data, delta_t) {
