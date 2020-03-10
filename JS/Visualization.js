@@ -17,7 +17,7 @@ import Molecule from '/JS/Molecule.js'
 //importScripts('/JS/ammo/ammo.js')
 
 
-let sphere_quality = 30;
+let sphere_quality = 15;
 
 var COLORS = {
     "H": 0xC0C0C0,
@@ -59,13 +59,14 @@ class Visualization {
         this.camera_displacement = chamber_edge_length * 2;
 
         this.rigidBodies = []; // for ammo
-        this.selectedObjects = [] // for glow
+        this.selectedObjects = [];
+        // for glow
         this.outline_params = {
             edgeStrength: 20,
             edgeGlow: 2,
             edgeThickness: 1.0,
-            pulsePeriod: 0,
-            usePatternTexture: false
+            pulsePeriod: 1.0,
+            usePatternTexture: true
         };
 
         this.raycaster = new THREE.Raycaster();
@@ -110,6 +111,7 @@ class Visualization {
         this.outlinePass.renderToScreen = true;
         this.outlinePass.edgeStrength = this.outline_params.edgeStrength;
         this.outlinePass.edgeGlow = this.outline_params.edgeGlow;
+        this.outlinePass.pulsePeriod = this.outline_params.pulsePeriod;
         this.outlinePass.visibleEdgeColor.set(0xffffff);
         this.outlinePass.hiddenEdgeColor.set(0xffffff);
 
@@ -164,6 +166,11 @@ class Visualization {
 
         this.composer = new EffectComposer(this.renderer);
 
+
+        this.effectFXAA = new ShaderPass(FXAAShader);
+        this.effectFXAA.uniforms['resolution'].value.set(1 / window.innerWidth, 1 / window.innerHeight);
+        this.composer.addPass(this.effectFXAA);
+
         // Setup scene, camera, lighting
         this.scene = new THREE.Scene();
         this.scene.position.x = 0;
@@ -185,9 +192,10 @@ class Visualization {
         this.outlinePass.renderToScreen = true;
         this.outlinePass.edgeStrength = this.outline_params.edgeStrength;
         this.outlinePass.edgeGlow = this.outline_params.edgeGlow;
+        this.outlinePass.pulsePeriod = this.outline_params.pulsePeriod;
+
         this.outlinePass.visibleEdgeColor.set(0x01cdfe);
         this.outlinePass.hiddenEdgeColor.set(0x01cdfe);
-
         this.composer.addPass(this.outlinePass);
 
         // this.bokehPass = new BokehPass(this.scene, this.camera, {
@@ -319,18 +327,17 @@ class Visualization {
                 //let material = new THREE.MeshDepthMaterial({
                 color: COLORS[geometry[i][0]],
                 emissive: COLORS[geometry[i][0]],
-                // reflectivity: 1.0,
-                // color: diffuseColor,
-                // metalness: .9,
-                // roughness: roughness,
                 envMap: envMap,
-
                 metalness: .0,
                 roughness: 0.1,
-                clearCoat: 1.0,
-                clearCoatRoughness: 0.0,
                 reflectivity: 1.0,
                 color: 0xa8f4f7,
+                wireframe: true
+
+                // color: diffuseColor,
+                // reflectivity: 1.0,
+                // metalness: .9,
+                // roughness: roughness,
             });
             materials.push(material)
 
@@ -565,6 +572,13 @@ class Visualization {
         }
     }
 
+    onDocumentKeyDown(event) {
+        if (event.key == ' ') {
+            this.toggle_animate()
+        }
+    }
+
+
     view_mouse() {
         //console.log('in this mouse')
         // for visualizaton purposes:
@@ -613,6 +627,17 @@ class Visualization {
         this.scene.add(line)
     }
 
+    toggle_animate() {
+        this.should_animate = (this.should_animate == false);
+
+        if (this.should_animate) {
+            document.getElementById('pause_simulation').innerHTML = ('Pause');
+        } else {
+            document.getElementById('pause_simulation').innerHTML = ('Resume')
+        }
+
+
+    }
     pause_animate() {
         this.should_animate = false;
     }
@@ -620,7 +645,6 @@ class Visualization {
     resume_animate() {
         this.should_animate = true;
     }
-
 
     add_to_pass(id, pass) {
         let object = this.scene.getObjectByProperty('uuid', id);
@@ -635,6 +659,7 @@ class Visualization {
 
 
     }
+
     physics_updater() {
         // Step world
         this.physicsWorld.stepSimulation(this.delta_t, 10);
@@ -694,7 +719,8 @@ class Visualization {
                 // console.log(meshB);
                 if ((meshA != null) && (meshB != null)) {
                     console.log("two molecules smacked.")
-                    this.pause_animate();
+                        //this.pause_animate();
+                    this.toggle_animate();
 
                     let molA = meshA.userData.molecule;
                     let molB = meshB.userData.molecule;

@@ -29,6 +29,7 @@ console.log(reactant_initial)
 // unused info ATM
 let starting_concentration = total_molecules / chamber_volume;
 let amount_chaos = 1;
+let temperature = 300; //in kelvin
 
 
 const species_present = {
@@ -236,6 +237,22 @@ function thermostat() {
 
 
 
+    // Get two sets of velocities
+    let velocities = [];
+
+    for (let i = 0; i < species.length; i++) {
+        let temp_data_set = { 'name': incoming_data[i].name, 'mag': [] };
+        for (let j = 0; j < species[i].instances.length; j++) {
+            let vec = species[i].instances[j].mesh.userData.physicsBody.getLinearVelocity();
+            let magnitude = Math.sqrt(Math.pow(vec.x(), 2) + Math.pow(vec.y(), 2) + Math.pow(vec.z(), 2));
+            temp_data_set.mag.push(magnitude);
+        }
+        velocities.push(temp_data_set);
+    }
+
+
+
+
 
 }
 
@@ -400,6 +417,8 @@ window.addEventListener('resize', () => visualizer.onWindowResize(), false);
 
 document.addEventListener('mousemove', (d) => { return visualizer.onDocumentMouseMove(event) }, false);
 document.addEventListener('mousedown', (d) => { return visualizer.onDocumentMouseDown(event) }, false);
+document.addEventListener('keydown', (d) => { return visualizer.onDocumentKeyDown(event) }, false);
+
 
 document.querySelector('#pause_simulation').addEventListener('click', () => {
 

@@ -35,21 +35,16 @@ class Molecule {
         geometry.computeBoundingSphere();
         geometry.center();
 
-
+        //Convert Geometry into a triangle mesh that can be used in ammo for colision
         let geom = new THREE.Geometry().fromBufferGeometry(geometry)
-        geom.mergeVertices();
-        //console.log(geom);
+        geom.mergeVertices(); // duplicate vertices are created with fromBufferGeometry()
         const vertices = geom.vertices;
-        // const indices = geom.indices;
-        const indices = geom.vertices.length;
         const scale = [1, 1, 1];
 
-
-
-        const mesh = new Ammo.btTriangleMesh(true, true);
-        mesh.setScaling(new Ammo.btVector3(scale[0], scale[1], scale[2]));
-        for (let i = 0; i < indices; i = i + 3) {
-            mesh.addTriangle(
+        const trig_mesh = new Ammo.btTriangleMesh(true, true);
+        trig_mesh.setScaling(new Ammo.btVector3(scale[0], scale[1], scale[2]));
+        for (let i = 0; i < geom.vertices.length; i = i + 3) {
+            trig_mesh.addTriangle(
                 new Ammo.btVector3(vertices[i].x, vertices[i].y, vertices[i].z),
                 new Ammo.btVector3(vertices[i + 1].x, vertices[i + 1].y, vertices[i + 1].z),
                 new Ammo.btVector3(vertices[i + 2].x, vertices[i + 2].y, vertices[i + 2].z),
@@ -58,8 +53,10 @@ class Molecule {
 
         }
 
+
         geom.computeBoundingSphere();
         geom.center();
+        geom.verticesNeedUpdate = true;
         this.mesh = new THREE.Mesh(geom, material);
         this.mesh.castShadow = true;
         this.mesh.receiveShadow = true;
@@ -70,7 +67,6 @@ class Molecule {
 
 
 
-        //Ammojs Section
         this.transform = new Ammo.btTransform();
         this.transform.setIdentity();
         this.transform.setOrigin(new Ammo.btVector3(pos.x, pos.y, pos.z));
@@ -78,39 +74,36 @@ class Molecule {
         this.motionState = new Ammo.btDefaultMotionState(this.transform);
 
 
+        //TODO
+        //add aditional colshape method based on multiple spheres
+        // this might require a bit of a rewrite
 
 
         //this.colShape = new Ammo.btBvhTriangleMeshShape(mesh, true, true);
         // this.colShape = new Ammo.btConvexHullShape(geom, true, true);
-        this.colShape = new Ammo.btConvexHullShape(mesh, true, true);
-
+        this.colShape = new Ammo.btConvexHullShape(trig_mesh, true, true);
         // this.colShape = new Ammo.btSphereShape(this.radius);
-        //this.colShape.setMargin(0.5);
+        this.colShape.setMargin(0.1);
 
+
+        //Don't really know what this is useful for...
         this.localInertia = new Ammo.btVector3(1.0, 0, 0);
-
         this.colShape.calculateLocalInertia(this.mass, this.localInertia);
-
         this.rbInfo = new Ammo.btRigidBodyConstructionInfo(this.mass, this.motionState, this.colShape, this.localInertia);
         this.body = new Ammo.btRigidBody(this.rbInfo);
         //prevents physics deactivation
-        // haven't explored this much
         this.body.setActivationState(4);
-
-        let vel_vec = new Ammo.btVector3(velocity.x, velocity.y, velocity.z);
-        this.body.setLinearVelocity(vel_vec);
-
-        let rot_vec = new Ammo.btVector3(rot.x, rot.y, rot.z);
-        this.body.setAngularVelocity(rot_vec);
-
-
 
 
 
         // Very basic collision parameters
         // Something here may be causing acceleration(excessive acceleration)
+        let vel_vec = new Ammo.btVector3(velocity.x, velocity.y, velocity.z);
+        this.body.setLinearVelocity(vel_vec);
+        let rot_vec = new Ammo.btVector3(rot.x, rot.y, rot.z);
+        this.body.setAngularVelocity(rot_vec);
         this.body.setFriction(0);
-        this.body.setRestitution(0.95);
+        this.body.setRestitution(0.99);
         this.body.setDamping(0.0, 0.0);
 
 
@@ -121,8 +114,8 @@ class Molecule {
         this.mesh.name = this.body.H;
 
         console.log(this);
-        return this;
 
+        return this;
     }
 
     tick(data) {
