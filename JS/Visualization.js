@@ -54,6 +54,7 @@ class Visualization {
         this.clock = new THREE.Clock();
         this.tmpTrans = new Ammo.btTransform();
         this.physicsWorld;
+        this.data = incoming_data;
         this.setupPhysicsWorld();
 
         this.chamber_edge_length = chamber_edge_length;
@@ -368,7 +369,7 @@ class Visualization {
     add_molecule(name, starting_info = {}) {
         // This will turn into a many molecule method
         if (name == null) {
-            name = "Reactant";
+            name = 0;
         }
 
         if (Object.keys(starting_info).length == 0) {
@@ -405,7 +406,12 @@ class Visualization {
             starting_info.rotational_velocity
         );
 
-        this.data[name].instances.push(temp);
+        try {
+            this.data[name].instances.push(temp);
+        } catch (err) {
+            console.log(err)
+        }
+
         this.scene.add(temp.mesh);
         //add to simulation
         this.physicsWorld.addRigidBody(temp.mesh.userData.physicsBody);
@@ -413,6 +419,8 @@ class Visualization {
         this.rigidBodies.push(temp.mesh);
         // add to glow list
         //this.selectedObjects.push(temp.mesh)
+
+        console.log(this.data[name])
     }
 
     add_grid() {
@@ -575,9 +583,19 @@ class Visualization {
 
     remove_from_scene(id) {
         let object = this.scene.getObjectByProperty("uuid", id);
+
+        for (name in this.data) {
+            for (let i = 0; i < this.data[name].instances.length; i++) {
+                //for each instance of a species check for reaction
+
+                if (this.data[name].instances[i].mesh.uuid == id) {
+                    this.data[name].instances.splice(i, 1);
+                }
+            }
+        }
+
         this.scene.remove(object);
         this.physicsWorld.removeRigidBody(object.userData.physicsBody);
-
 
         this.remove_from_pass(id, this.selectedObjects);
         this.remove_from_pass(id, this.impactObjects);
@@ -678,7 +696,7 @@ class Visualization {
                     let molB = meshB.userData.molecule;
 
                     // TODO find a way to remove this after a period of time.
-                    console.log(this.impactObjects);
+                    // console.log(this.impactObjects);
                     this.remove_from_pass(meshA.uuid, this.impactObjects);
                     this.remove_from_pass(meshB.uuid, this.impactObjects);
                     this.add_to_pass(meshA.uuid, this.impactObjects);
@@ -698,7 +716,7 @@ class Visualization {
                         }
                         if (molA.name == 1) {
                             this.add_molecule(0);
-                            this.add_molecule(0)
+                            this.add_molecule(0);
                             this.remove_from_scene(meshA.uuid);
                         }
                     }
