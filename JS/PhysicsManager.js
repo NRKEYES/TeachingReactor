@@ -421,29 +421,7 @@ document.addEventListener('keydown', (d) => { return visualizer.onDocumentKeyDow
 
 
 document.querySelector('#pause_simulation').addEventListener('click', () => {
-
-    if (run_sim) {
-        run_sim = false;
-        visualizer.pause_animate();
-        document.getElementById('pause_simulation').innerHTML = ('Resume');
-    } else {
-        run_sim = true;
-        visualizer.resume_animate();
-        document.getElementById('pause_simulation').innerHTML = ('Pause')
-    }
-
-    // the testing continues
-    // okay so,
-    // for some reason it appears that the search key is my cmd key when interacting with my mac.in a weird way that actually makes total sense.
-
-
-    // well now, this is just a test to see how well this remote stuff.weirdly it seems to not have undo shortcuts.
-    // Nor does it seem to
-    // let me save...now that is rather curious.Or at least it is
-    // if you ask me!!!!
-    //     I can 't really pretend that it maters too much. I am sure I can fix it with enough googling.
-
-
+    visualizer.toggle_animate();
 });
 document.querySelector('#show_simulation_info').addEventListener('click', () => {
 
