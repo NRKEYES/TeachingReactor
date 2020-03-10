@@ -634,10 +634,7 @@ class Visualization {
         //this.rigidBodies.remove(temp.mesh);
     }
 
-    physics_updater() {
-        // Step world
-        this.physicsWorld.stepSimulation(this.delta_t, 10);
-
+    update_rigid_bodies() {
         // Update rigid bodies positions based on their physics update.
         for (let i = 0; i < this.rigidBodies.length; i++) {
             let objThree = this.rigidBodies[i];
@@ -659,10 +656,10 @@ class Visualization {
                 objThree.quaternion.set(q.x(), q.y(), q.z(), q.w());
             }
         }
+    }
 
-        // combine hitting molecules
+    molecular_colision_checker() {
         let num_manifold = this.physicsWorld.getDispatcher().getNumManifolds();
-
         for (let i = 0; i < num_manifold; i++) {
             let contactManifold = this.physicsWorld
                 .getDispatcher()
@@ -723,7 +720,9 @@ class Visualization {
                 }
             }
         }
+    }
 
+    molecular_decomposer() {
         for (name in this.data) {
             // this.generate_species(name);
             let current_count = this.data[name].count.slice(-1)[0];
@@ -742,6 +741,17 @@ class Visualization {
 
             }
         }
+    }
+    physics_updater() {
+        // Step world
+        this.physicsWorld.stepSimulation(this.delta_t, 10);
+
+        this.update_rigid_bodies();
+
+        // combine hitting molecules
+        this.molecular_colision_checker();
+
+        this.molecular_decomposer
     }
 
     animate() {
