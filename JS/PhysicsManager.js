@@ -8,14 +8,14 @@ import SideView from '/JS/SideView.js';
 
 
 // raw starting numbers
-let orders_of_magnitude = 1;
-let OoM_factor = 1;
+let orders_of_magnitude = 0;
+let OoM_factor = 3;
 console.log(orders_of_magnitude)
 let total_molecules = OoM_factor * Math.pow(10, orders_of_magnitude);
 console.log(total_molecules);
 
 //chamber settings
-let chamber_edge_length = 5; // this should be in nm
+let chamber_edge_length = 2; // this should be in nm
 let chamber_volume = Math.pow(chamber_edge_length, 3); // convert to nm3
 
 // molecule and species counts
@@ -30,6 +30,11 @@ console.log(reactant_initial)
 let starting_concentration = total_molecules / chamber_volume;
 let amount_chaos = 1;
 
+
+const species_present = {
+    'Reactants': 0,
+    'Products': 1,
+}
 
 let species = [{
         'name': 'Reactants',
@@ -397,7 +402,29 @@ document.addEventListener('mousemove', (d) => { return visualizer.onDocumentMous
 document.addEventListener('mousedown', (d) => { return visualizer.onDocumentMouseDown(event) }, false);
 
 document.querySelector('#pause_simulation').addEventListener('click', () => {
-    run_sim = false;
+
+    if (run_sim) {
+        run_sim = false;
+        visualizer.pause_animate();
+        document.getElementById('pause_simulation').innerHTML = ('Resume');
+    } else {
+        run_sim = true;
+        visualizer.resume_animate();
+        document.getElementById('pause_simulation').innerHTML = ('Pause')
+    }
+
+    // the testing continues
+    // okay so,
+    // for some reason it appears that the search key is my cmd key when interacting with my mac.in a weird way that actually makes total sense.
+
+
+    // well now, this is just a test to see how well this remote stuff.weirdly it seems to not have undo shortcuts.
+    // Nor does it seem to
+    // let me save...now that is rather curious.Or at least it is
+    // if you ask me!!!!
+    //     I can 't really pretend that it maters too much. I am sure I can fix it with enough googling.
+
+
 });
 document.querySelector('#show_simulation_info').addEventListener('click', () => {
 

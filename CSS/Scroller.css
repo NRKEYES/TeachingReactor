@@ -152,7 +152,7 @@ body {
     top: 10vh;
     left: 10vw;
     transition: var(--transition-speed);
-    opacity: .3;
+    opacity: 1;
     width: 70vw;
     height: 40vh;
 }

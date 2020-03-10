@@ -17,7 +17,7 @@ import Molecule from '/JS/Molecule.js'
 //importScripts('/JS/ammo/ammo.js')
 
 
-let sphere_quality = 10;
+let sphere_quality = 30;
 
 var COLORS = {
     "H": 0xC0C0C0,
@@ -133,15 +133,16 @@ class Visualization {
 
 
         this.mouse = new THREE.Vector2();
-        console.log(this.mouse);
+        //console.log(this.mouse);
 
         //this.mouse_viewer = this.view_mouse();
 
+        this.should_animate = true;
         this.animate();
     }
 
     init(incoming_data, chamber_edge_length) {
-
+        this.should_animate = false;
         this.data = incoming_data;
         this.chamber = this.view_mouse();
 
@@ -207,7 +208,7 @@ class Visualization {
         //this.mouse_viewer = this.view_mouse();
         //console.log(this.mouse_viewer)
         this.add_grid();
-        this.animate()
+        this.should_animate = true;
     }
 
     setupPhysicsWorld() {
@@ -217,8 +218,6 @@ class Visualization {
         this.solver = new Ammo.btSequentialImpulseConstraintSolver();
         this.overlappingPairCache = new Ammo.btDbvtBroadphase();
         this.physicsWorld = new Ammo.btDiscreteDynamicsWorld(this.dispatcher, this.overlappingPairCache, this.solver, this.collisionConfiguration);
-        // this.physicsWorld.setGravity(new Ammo.btVector3(0, gravityConstant, 0));
-        // this.physicsWorld.getWorldInfo().set_m_gravity(new Ammo.btVector3(0, gravityConstant, 0));
 
         // Currently I don't want gravity.
         this.physicsWorld.setGravity(new Ammo.btVector3(0, 0, 0));
@@ -320,11 +319,18 @@ class Visualization {
                 //let material = new THREE.MeshDepthMaterial({
                 color: COLORS[geometry[i][0]],
                 emissive: COLORS[geometry[i][0]],
-                reflectivity: 1.0,
-                color: diffuseColor,
-                metalness: .9,
-                roughness: roughness,
+                // reflectivity: 1.0,
+                // color: diffuseColor,
+                // metalness: .9,
+                // roughness: roughness,
                 envMap: envMap,
+
+                metalness: .0,
+                roughness: 0.1,
+                clearCoat: 1.0,
+                clearCoatRoughness: 0.0,
+                reflectivity: 1.0,
+                color: 0xa8f4f7,
             });
             materials.push(material)
 
@@ -396,16 +402,16 @@ class Visualization {
 
         for (let i = 0; i < this.selectedObjects.length; i++) {
             if (this.selectedObjects[i].parent == null) {
-                delete(this.rigidBodies[i]);
+                this.rigidBodies.splice(i, 1);
             }
         }
 
-        console.log(object)
-        console.log(this.rigidBodies[1]);
+        // console.log(object)
+        // console.log(this.rigidBodies[1]);
 
         for (let i = 0; i < this.rigidBodies.length; i++) {
             if (this.rigidBodies[i].parent == null) {
-                delete(this.rigidBodies[i]);
+                this.rigidBodies.splice(i, 1);
             }
         }
         //this.physicsWorld.removeRigidBody(temp.userData.physicsBody);
@@ -506,8 +512,10 @@ class Visualization {
 
         let rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, colShape, localInertia);
         let body = new Ammo.btRigidBody(rbInfo);
+
+        body.setFriction(0)
         body.setRestitution(1.0);
-        //body.setDamping(0.8, 0);
+        body.setDamping(0.0, 0.0); // void 	setDamping (btScalar lin_damping, btScalar ang_damping)
 
         this.physicsWorld.addRigidBody(body);
     }
@@ -547,7 +555,8 @@ class Visualization {
                 this.selectedObjects.pop().scale.setScalar(1.0);
             }
 
-            this.selectedObjects.push(intersects[0].object)
+            this.add_to_pass(intersects[0].object.uuid, this.selectedObjects)
+                // this.selectedObjects.push(intersects[0].object)
             intersects[0].object.scale.setScalar(3.0);
             console.log(intersects[0].object);
 
@@ -574,9 +583,6 @@ class Visualization {
         this.scene.add(temp);
         return temp;
         //End geometry helper block
-
-
-
     }
 
     add_line() {
@@ -607,24 +613,44 @@ class Visualization {
         this.scene.add(line)
     }
 
-    animate() {
-        //this.add_line();
+    pause_animate() {
+        this.should_animate = false;
+    }
 
-        this.camera.updateMatrixWorld();
-        this.delta_t = this.clock.getDelta();
+    resume_animate() {
+        this.should_animate = true;
+    }
 
+
+    add_to_pass(id, pass) {
+        let object = this.scene.getObjectByProperty('uuid', id);
+        pass.push(object);
+    }
+
+    remove_from_pass(id, pass) {
+
+        let object = this.scene.getObjectByProperty('uuid', id);
+        //splice out target mesh
+
+
+
+    }
+    physics_updater() {
         // Step world
         this.physicsWorld.stepSimulation(this.delta_t, 10);
 
-        // Update rigid bodies
+        // Update rigid bodies positions based on their physics update.
         for (let i = 0; i < this.rigidBodies.length; i++) {
             let objThree = this.rigidBodies[i];
             if (objThree == null) {
-                delete(this.rigidBodies[i]);
+                this.rigidBodies.splice(i, 1);
                 continue;
             }
             let objAmmo = objThree.userData.physicsBody;
 
+            // I believe this is saying:
+            // if the object involved is a movable object => bounce
+            // else => ignore
             let ms = objAmmo.getMotionState();
             if (ms) {
                 ms.getWorldTransform(this.tmpTrans);
@@ -635,24 +661,56 @@ class Visualization {
             }
         }
 
-        // look for 
-        for (let i = 0; i < this.physicsWorld.getDispatcher().getNumManifolds(); i++) {
-            let contactManifold = this.physicsWorld.getDispatcher().getManifoldByIndexInternal(i);
-            //dp.getManifoldByIndexInternal(i);
-            let obA = contactManifold.getBody0();
-            let obB = contactManifold.getBody1();
-            // console.log(obA);
-            // console.log(obA.getUserPointer());
-            // console.log(obA.threeObject);
+        // combine hitting molecules
+        let num_manifold = this.physicsWorld.getDispatcher().getNumManifolds();
 
-            //let contactManifold = dispatcher.getManifoldByIndexInternal(i);
-            //let threeObject0 = obA.getUserPointer().threeObject;
-            //console.log(threeObject0)
+        for (let i = 0; i < num_manifold; i++) {
+            let contactManifold = this.physicsWorld.getDispatcher().getManifoldByIndexInternal(i);
+
+
+            let num_contacts = contactManifold.getNumContacts();
+            if (num_contacts > 0) {
+                // if (this.selectedObjects.length > 0) {
+                //this.selectedObjects.length = 0
+
+
+            }
+
+            for (let j = 0; j < num_contacts; j++) {
+                let obA = contactManifold.getBody0();
+                let obB = contactManifold.getBody1();
+
+
+                // console.log(obA);
+                // console.log(obB);
+                // console.log(this.scene);
+                // console.log(num_manifold);
+                // console.log(contactManifold);
+
+
+                let meshA = this.scene.getObjectByProperty('name', obA.H);
+                // console.log(meshA);
+                let meshB = this.scene.getObjectByProperty('name', obB.H);
+                // console.log(meshB);
+                if ((meshA != null) && (meshB != null)) {
+                    console.log("two molecules smacked.")
+                    this.pause_animate();
+
+                    let molA = meshA.userData.molecule;
+                    let molB = meshB.userData.molecule;
+
+                    console.log(molA);
+                    console.log(molB);
+
+                    this.add_to_pass(meshA.uuid, this.selectedObjects);
+                    this.add_to_pass(meshB.uuid, this.selectedObjects);
+                    // this.selectedObjects.push(meshA);
+                    // this.selectedObjects.push(meshB);
+                }
+            }
         }
 
-        // cull molecular update on each molecule present
-        //console.log(this.data[name]);
-        //console.log(this.data[name].instances[i]);
+
         for (name in this.data) {
             this.generate_species(name)
             let current_count = this.data[name].count.slice(-1)[0];
@@ -667,7 +725,7 @@ class Visualization {
                 // console.log('Current: ' + this.data[name].instances.length);
                 // console.log('Count: ' + this.data[name].count.slice(-1)[0]);
 
-                for (let i = 0; i < to_do.add.num; i++) {
+                for (let j = 0; j < to_do.add.num; j++) {
                     try {
                         this.add_molecule(to_do.add.name);
                     } catch (err) {
@@ -675,7 +733,7 @@ class Visualization {
                     }
                 }
 
-                for (let i = 0; i < to_do.remove.num; i++) {
+                for (let j = 0; j < to_do.remove.num; j++) {
                     try {
                         this.remove_molecule(to_do.remove.name);
                     } catch (err) {
@@ -683,34 +741,21 @@ class Visualization {
                     }
                 }
 
+                if ((to_do.add.num > 0) || (to_do.remove.num > 0)) {
+                    break;
+                }
 
-                // //contactManifold.refreshContactPoints(obA.getWorldTransform(), obB.getWorldTransform());
-                // var numContacts = contactManifold.getNumContacts();
-
-
-                // if (numContacts > 0) {
-                //     // console.log(numContacts);
-                //     // console.log('In the contact manifold checker');
-                //     // console.log(contactManifold);
-                //     // console.log('object being checked: ');
-                //     // console.log(this.rigidBodies[i]);
-                //     // console.log('Object a: ');
-                //     // console.log(obA);
-                //     // console.log('object b: ');
-                //     // console.log(obB);
-                // }
-
-
-                // while (this.data[name].instances.length > this.data[name].count.slice(-1)[0]) {
-                //     try {
-                //         console.log('I need to delete a molecule');
-                //         this.remove_molecule(name);
-                //     } catch (err) {
-                //         console.log(err);
-                //     }
-                // }
             }
         }
+    }
+
+    animate() {
+        //this.add_line();
+
+        this.camera.updateMatrixWorld();
+        this.delta_t = this.clock.getDelta();
+
+        if (this.should_animate) this.physics_updater();
 
         requestAnimationFrame(this.animate.bind(this));
         this.composer.render(this.scene, this.camera);

@@ -1,7 +1,10 @@
 class Molecule {
-    constructor(name, geometry, material, chamber_edge_length) {
-        this.name = name;
-        this.radius = .01 * (this.name.length - 1);
+    constructor(coords, geometry, material, chamber_edge_length) {
+        //console.log(coords.length);
+        this.coords = coords;
+        this.mass_factor = this.coords.length;
+        this.mass = this.mass_factor;
+        this.radius = .1 * (this.coords.length - 1);
 
         let pos = {
             x: d3.randomUniform(-chamber_edge_length / 2, chamber_edge_length / 2)(),
@@ -33,61 +36,92 @@ class Molecule {
         geometry.center();
 
 
+        let geom = new THREE.Geometry().fromBufferGeometry(geometry)
+        geom.mergeVertices();
+        //console.log(geom);
+        const vertices = geom.vertices;
+        // const indices = geom.indices;
+        const indices = geom.vertices.length;
+        const scale = [1, 1, 1];
 
-        this.mesh = new THREE.Mesh(geometry, material);
+
+
+        const mesh = new Ammo.btTriangleMesh(true, true);
+        mesh.setScaling(new Ammo.btVector3(scale[0], scale[1], scale[2]));
+        for (let i = 0; i < indices; i = i + 3) {
+            mesh.addTriangle(
+                new Ammo.btVector3(vertices[i].x, vertices[i].y, vertices[i].z),
+                new Ammo.btVector3(vertices[i + 1].x, vertices[i + 1].y, vertices[i + 1].z),
+                new Ammo.btVector3(vertices[i + 2].x, vertices[i + 2].y, vertices[i + 2].z),
+                true
+            );
+
+        }
+
+        geom.computeBoundingSphere();
+        geom.center();
+        this.mesh = new THREE.Mesh(geom, material);
         this.mesh.castShadow = true;
         this.mesh.receiveShadow = true;
         this.mesh.position.set(pos.x, pos.y, pos.z);
         this.mesh.castShadow = true;
         this.mesh.receiveShadow = true;
 
-        let mass_factor = this.name.length;
-        this.mass = mass_factor;
+
+
 
         //Ammojs Section
         this.transform = new Ammo.btTransform();
         this.transform.setIdentity();
         this.transform.setOrigin(new Ammo.btVector3(pos.x, pos.y, pos.z));
-        this.transform.setRotation(new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
+        //this.transform.setRotation(new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
         this.motionState = new Ammo.btDefaultMotionState(this.transform);
 
-        this.colShape = new Ammo.btSphereShape(this.radius);
-        this.colShape.setMargin(0.5);
 
-        this.localInertia = new Ammo.btVector3(0, 0, 0);
+
+
+        //this.colShape = new Ammo.btBvhTriangleMeshShape(mesh, true, true);
+        // this.colShape = new Ammo.btConvexHullShape(geom, true, true);
+        this.colShape = new Ammo.btConvexHullShape(mesh, true, true);
+
+        // this.colShape = new Ammo.btSphereShape(this.radius);
+        //this.colShape.setMargin(0.5);
+
+        this.localInertia = new Ammo.btVector3(1.0, 0, 0);
 
         this.colShape.calculateLocalInertia(this.mass, this.localInertia);
 
         this.rbInfo = new Ammo.btRigidBodyConstructionInfo(this.mass, this.motionState, this.colShape, this.localInertia);
         this.body = new Ammo.btRigidBody(this.rbInfo);
-
-        this.mesh.userData.physicsBody = this.body;
-
-
-
-        let vel_vec = new Ammo.btVector3(velocity.x, velocity.y, velocity.z);
-        this.body.setLinearVelocity(vel_vec);
-        this.body.setFriction(0)
-            //this.body.setLinearFactor(vel_vec);
-            //this.body.applyCentralImpulse(vel_vec);
-            //this.body.applyImpulse(vel_vec);
-        let rot_vec = new Ammo.btVector3(rot.x, rot.y, rot.z);
-        this.body.setAngularVelocity(rot_vec);
-
-
         //prevents physics deactivation
         // haven't explored this much
         this.body.setActivationState(4);
 
+        let vel_vec = new Ammo.btVector3(velocity.x, velocity.y, velocity.z);
+        this.body.setLinearVelocity(vel_vec);
+
+        let rot_vec = new Ammo.btVector3(rot.x, rot.y, rot.z);
+        this.body.setAngularVelocity(rot_vec);
+
+
+
+
 
         // Very basic collision parameters
         // Something here may be causing acceleration(excessive acceleration)
-        this.body.setRestitution(0.9);
-        this.body.setDamping(0.0, 0);
+        this.body.setFriction(0);
+        this.body.setRestitution(0.95);
+        this.body.setDamping(0.0, 0.0);
 
 
 
+        this.mesh.userData.physicsBody = this.body;
+        this.mesh.userData.molecule = this;
+        //set the mesh name to be searchable by 'pointer'
+        this.mesh.name = this.body.H;
 
+        console.log(this);
+        return this;
 
     }
 
@@ -148,7 +182,8 @@ class Molecule {
         // spawn in two reactants with half momentum each.
 
 
-        if (this.mass_factor < 3) {
+        if (this.mass_factor <= 3) {
+            //console.log('Small Fry!')
             return to_do;
         } else {
 
@@ -166,6 +201,7 @@ class Molecule {
                 //this.data[0].count.push(this.data[0].count.slice(-1)[0] + 2);
 
                 // number to add
+                //console.log(this.mass_factor)
                 let to_do = { 'add': { 'name': 0, 'num': 2 }, 'remove': { 'name': 1, 'num': 1 } };
                 return to_do;
             }
