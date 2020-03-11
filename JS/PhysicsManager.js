@@ -7,10 +7,12 @@ import SideView from "/JS/SideView.js";
 //import ammo from '/JS/ammo/ammo.js'
 
 // raw starting numbers
-let orders_of_magnitude = 0;
-let OoM_factor = 5;
+let orders_of_magnitude = 20;
+var scale = d3.scaleLog()
+    .domain([1, 6000])
+    .range([1, 100]);
 console.log(orders_of_magnitude);
-let total_molecules = OoM_factor * Math.pow(10, orders_of_magnitude);
+let total_molecules = parseInt(scale.invert(orders_of_magnitude));
 console.log(total_molecules);
 
 //chamber settings
@@ -21,8 +23,8 @@ let chamber_volume = Math.pow(chamber_edge_length, 3); // convert to nm3
 let p_to_r_ratio = 0.1;
 let r_to_p_ratio = 1 - p_to_r_ratio;
 
-let reactant_initial = Math.trunc(total_molecules * r_to_p_ratio);
-let product_initial = Math.trunc(total_molecules * p_to_r_ratio);
+let reactant_initial = parseInt(Math.trunc(total_molecules * r_to_p_ratio));
+let product_initial = parseInt(Math.trunc(total_molecules * p_to_r_ratio));
 console.log(reactant_initial);
 
 // unused info ATM
@@ -45,7 +47,7 @@ let species = [{
             ["O", new THREE.Vector3(-0.07, 0.12, 0)],
             ["O", new THREE.Vector3(-0.07, -0.12, 0)]
         ],
-        mass: "46.0055 " // g/mol
+        mass: 46.0055 // g/mol
     },
     {
         name: "Products",
@@ -60,7 +62,7 @@ let species = [{
             ["O", new THREE.Vector3(0.37, 0.12, 0)],
             ["O", new THREE.Vector3(0.37, -0.12, 0)]
         ],
-        mass: "92.011", // g/mol
+        mass: 92.011, // g/mol
     }
 ];
 
@@ -266,13 +268,9 @@ function thermostat() {
     for (let i = 0; i < species.length; i++) {
         let temp_data_set = { name: incoming_data[i].name, mag: [] };
         for (let j = 0; j < species[i].instances.length; j++) {
-            let vec = species[i].instances[
-                j
-            ].mesh.userData.physicsBody.getLinearVelocity();
-            let magnitude = Math.sqrt(
-                Math.pow(vec.x(), 2) + Math.pow(vec.y(), 2) + Math.pow(vec.z(), 2)
-            );
-            temp_data_set.mag.push(magnitude);
+            // let vec = species[i].instances[j].mesh.userData.physicsBody.getLinearVelocity();
+            // let magnitude = Math.sqrt(Math.pow(vec.x(), 2) + Math.pow(vec.y(), 2) + Math.pow(vec.z(), 2));
+            temp_data_set.mag.push(species[i].instances[j].velocity_mag);
         }
         velocities.push(temp_data_set);
     }
@@ -357,7 +355,7 @@ function update_all_sliders() {
     document.getElementById("orders_of_magnitude").value = orders_of_magnitude;
     document.getElementById(
         "orders_of_magnitude"
-    ).parentElement.lastElementChild.innerHTML = orders_of_magnitude;
+    ).parentElement.lastElementChild.innerHTML = total_molecules;
 
     document.getElementById("initial_ratio").value = p_to_r_ratio * 100;
     document.getElementById(
@@ -421,9 +419,8 @@ function start_simulation() {
     print_info_block();
     t = 0;
 
-    visualizer.clean_all();
-    visualizer.init(species, chamber_edge_length);
 
+    visualizer.init(species, chamber_edge_length);
     count_v_time.init(species, t_step, steps);
     percent_v_time.init(species, t_step, steps);
     percent_bar.init(species);
@@ -557,12 +554,14 @@ document.querySelector("#prop_button").addEventListener("click", () => {
 });
 
 d3.select("#orders_of_magnitude").on("input", function() {
+
+
     orders_of_magnitude = this.value;
     // raw starting numbers
-    total_molecules = OoM_factor * Math.pow(10, orders_of_magnitude);
+    total_molecules = parseInt(scale.invert(this.value));
     console.log(total_molecules);
 
-    reactant_initial = total_molecules * r_to_p_ratio;
+    reactant_initial = Math.trunc(total_molecules * r_to_p_ratio);
     product_initial = Math.trunc(total_molecules * p_to_r_ratio);
     console.log(reactant_initial);
 

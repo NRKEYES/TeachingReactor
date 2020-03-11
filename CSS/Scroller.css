@@ -149,8 +149,8 @@ body {
 
 .floating {
     position: fixed;
-    top: 10vh;
-    left: 10vw;
+    top: 48vh;
+    left: 1vw;
     transition: var(--transition-speed);
     opacity: 1;
     width: 70vw;

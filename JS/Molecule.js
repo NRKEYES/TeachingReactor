@@ -4,6 +4,7 @@ class Molecule {
         this.velocity = velocity;
         this.starting_position = starting_position;
         this.rotational_velocity = rotational_velocity;
+        this.lifetime = 0;
 
         // console.log(velocity)
 
@@ -162,30 +163,32 @@ class Molecule {
         // spawn in two reactants with half momentum each.
 
 
-        if (this.mass <= 47) {
-            //console.log('Small Fry!')
-            return false;
-        } else {
 
-            let percent_decompose = .01;
-            percent_decompose = percent_decompose * this.delta_t;
-            let random_num = d3.randomUniform(0, 1)();
 
-            //console.log(random_num);
-            if (random_num < percent_decompose) {
-                console.log('Decompose.')
-                return true;
-            }
+        let percent_decompose = .01;
+        percent_decompose = percent_decompose * this.delta_t;
+        let random_num = d3.randomUniform(0, 1)();
 
+        //console.log(random_num);
+        if (random_num < percent_decompose) {
+            console.log('Decompose.')
+            return true;
         }
+
+
         return false;
     }
 
-    update(incoming_data, delta_t) {
-        this.data = incoming_data;
+    update(delta_t) {
+
+        this.lifetime += delta_t;
         this.delta_t = delta_t;
 
-
+        this.velocity_mag = Math.sqrt(
+            Math.pow(this.mesh.userData.physicsBody.getLinearVelocity().x(), 2) +
+            Math.pow(this.mesh.userData.physicsBody.getLinearVelocity().y(), 2) +
+            Math.pow(this.mesh.userData.physicsBody.getLinearVelocity().z(), 2)
+        );
 
         return this.reaction_check();
     }

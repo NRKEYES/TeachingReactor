@@ -74,9 +74,11 @@ class Visualization {
 
         this.raycaster = new THREE.Raycaster();
 
-        //this.line = [];
+        this.line = [];
+        this.mouse = new THREE.Vector2();
 
-        //Create renderer
+        // Create renderer
+
         this.renderer = new THREE.WebGLRenderer({
             antialias: true,
             alpha: true
@@ -86,65 +88,15 @@ class Visualization {
         this.renderer.setClearColor(this.background_and_emis, 0.0);
         this.renderer.setSize(this.width_for_3d, this.height_for_3d);
         this.renderer.shadowMap.enabled = true;
-
-        // Setup scene, camera, lighting
-        this.scene = new THREE.Scene();
-        this.scene.position.x = 0;
-        this.scene.position.y = 0;
-        this.scene.position.z = 0;
-        this.scene.overrideMaterial = { color: 0xffff00 };
-
-        this.camera = new THREE.PerspectiveCamera(
-            30,
-            this.width_for_3d / this.height_for_3d,
-            1,
-            1000
-        );
-        this.camera.position.x = this.camera_displacement; //camera.lookAt(scene.position)
-        this.camera.position.y = (this.chamber_edge_length * 3) / 2; //camera.lookAt(scene.position)
-        this.camera.position.z = this.chamber_edge_length * 3; //camera.lookAt(scene.position)
-
-        this.renderPass = new RenderPass(this.scene, this.camera);
-
-        // Configure outline shader
-        this.outlinePass = new OutlinePass(
-            new THREE.Vector2(window.innerWidth, window.innerHeight),
-            this.scene,
-            this.camera
-        );
-        this.outlinePass.selectedObjects = this.selectedObjects;
-        this.outlinePass.renderToScreen = true;
-        this.outlinePass.edgeStrength = this.outline_params.edgeStrength;
-        this.outlinePass.edgeGlow = this.outline_params.edgeGlow;
-        this.outlinePass.pulsePeriod = this.outline_params.pulsePeriod;
-        this.outlinePass.visibleEdgeColor.set(0xffffff);
-        this.outlinePass.hiddenEdgeColor.set(0xffffff);
-
-        // Add rendering to everything that needs it
         this.container = document.getElementById("Visualization");
         this.container.appendChild(this.renderer.domElement);
-        this.composer = new EffectComposer(this.renderer);
-        this.composer.addPass(this.renderPass);
-        this.composer.addPass(this.outlinePass);
 
-        // Setup all the controls
-        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-        this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
-        this.controls.dampingFactor = 0.25;
-        this.controls.screenSpacePanning = false;
-        this.controls.minDistance = 1;
-        this.controls.maxDistance = this.chamber_edge_length * 4;
-        this.controls.maxPolarAngle = Math.PI;
-
-        this.mouse = new THREE.Vector2();
-        this.should_animate = true;
-        this.animate();
     }
 
     init(incoming_data, chamber_edge_length) {
         this.should_animate = false;
         this.data = incoming_data;
-        this.chamber = this.view_mouse();
+        // this.chamber = this.view_mouse();
 
         for (name in this.data) {
             this.data[name].instances = [];
@@ -156,8 +108,6 @@ class Visualization {
         this.setupPhysicsWorld();
 
         this.chamber_edge_length = chamber_edge_length;
-        this.controls.maxDistance = this.chamber_edge_length * 4;
-
 
         this.composer = new EffectComposer(this.renderer);
 
@@ -180,10 +130,18 @@ class Visualization {
 
         this.createLights();
 
+        this.camera = new THREE.PerspectiveCamera(
+            70,
+            this.width_for_3d / this.height_for_3d,
+            0.1,
+            1000
+        );
+        this.camera.position.x = this.camera_displacement; //camera.lookAt(scene.position)
+        this.camera.position.y = (this.chamber_edge_length * 2) / 2; //camera.lookAt(scene.position)
+        this.camera.position.z = this.chamber_edge_length * 2; //camera.lookAt(scene.position)
+
         this.renderPass = new RenderPass(this.scene, this.camera);
         this.composer.addPass(this.renderPass);
-
-
 
         this.impactObjects = [];
         // Configure outline shader
@@ -197,7 +155,7 @@ class Visualization {
         this.impactPass.edgeStrength = this.outline_params.edgeStrength;
         this.impactPass.edgeGlow = this.outline_params.edgeGlow;
         this.impactPass.pulsePeriod = this.outline_params.pulsePeriod;
-        this.impactPass.visibleEdgeColor.set('green');
+        this.impactPass.visibleEdgeColor.set('red');
         this.impactPass.hiddenEdgeColor.set('white');
         this.composer.addPass(this.impactPass);
 
@@ -213,9 +171,28 @@ class Visualization {
         this.selectedPass.edgeStrength = this.outline_params.edgeStrength;
         this.selectedPass.edgeGlow = this.outline_params.edgeGlow;
         this.selectedPass.pulsePeriod = this.outline_params.pulsePeriod;
-        this.selectedPass.visibleEdgeColor.set('red');
+        this.selectedPass.visibleEdgeColor.set('green');
         this.selectedPass.hiddenEdgeColor.set('white');
         this.composer.addPass(this.selectedPass);
+
+
+        this.newObjects = [];
+        // Configure outline shader
+        this.newbornPass = new OutlinePass(
+            new THREE.Vector2(window.innerWidth, window.innerHeight),
+            this.scene,
+            this.camera
+        );
+        this.newbornPass.selectedObjects = this.newObjects;
+        this.newbornPass.renderToScreen = true;
+        this.newbornPass.edgeStrength = this.outline_params.edgeStrength;
+        this.newbornPass.edgeGlow = this.outline_params.edgeGlow;
+        this.newbornPass.pulsePeriod = this.outline_params.pulsePeriod;
+        this.newbornPass.visibleEdgeColor.set('blue');
+        this.newbornPass.hiddenEdgeColor.set('white');
+        this.composer.addPass(this.newbornPass);
+
+
 
         // this.bokehPass = new BokehPass(this.scene, this.camera, {
         //     focus: this.chamber_edge_length,
@@ -225,6 +202,15 @@ class Visualization {
         //     height: this.height
         // });
         // this.composer.addPass(this.bokehPass);
+
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+        this.controls.dampingFactor = 0.25;
+        this.controls.screenSpacePanning = true;
+        this.controls.minDistance = 1;
+        this.controls.maxDistance = this.chamber_edge_length * 4;
+        this.controls.maxPolarAngle = Math.PI;
+
 
         for (name in this.data) {
             this.generate_species(name);
@@ -236,6 +222,7 @@ class Visualization {
         //console.log(this.mouse_viewer)
         this.add_grid();
         this.should_animate = true;
+        this.animate();
     }
 
     setupPhysicsWorld() {
@@ -366,31 +353,25 @@ class Visualization {
         // }
     }
 
-    add_molecule(name, starting_info = {}) {
-        // This will turn into a many molecule method
-        if (name == null) {
-            name = 0;
-        }
-
-        if (Object.keys(starting_info).length == 0) {
-            starting_info.starting_position = {
+    add_molecule(name,
+        starting_info = {
+            starting_position: {
                 x: d3.randomUniform(-this.chamber_edge_length / 2, this.chamber_edge_length / 2)(),
                 y: d3.randomUniform(-this.chamber_edge_length / 2, this.chamber_edge_length / 2)(),
                 z: d3.randomUniform(-this.chamber_edge_length / 2, this.chamber_edge_length / 2)()
-            };
-
-            starting_info.velocity = {
+            },
+            velocity: {
                 x: d3.randomNormal(0.0)(1),
                 y: d3.randomNormal(0.0)(1),
                 z: d3.randomNormal(0.0)(1)
-            };
-
-            starting_info.rotational_velocity = {
+            },
+            rotational_velocity: {
                 x: d3.randomNormal(0.0)(3.14),
                 y: d3.randomNormal(0.0)(3.14),
                 z: d3.randomNormal(0.0)(3.14)
-            };
-        }
+            }
+        }) {
+
 
         // console.log(starting_info)
 
@@ -418,9 +399,10 @@ class Visualization {
         //add to update list
         this.rigidBodies.push(temp.mesh);
         // add to glow list
-        //this.selectedObjects.push(temp.mesh)
+        this.newObjects.push(temp.mesh);
 
-        console.log(this.data[name])
+        return temp.mesh.uuid;
+        // console.log(this.data[name])
     }
 
     add_grid() {
@@ -554,7 +536,7 @@ class Visualization {
         //     this.scene.remove(this.chamber);
         // }
 
-        this.renderer.renderLists.dispose();
+        // this.renderer.renderLists.dispose();
     }
 
     tick(incoming_data) {}
@@ -600,6 +582,7 @@ class Visualization {
         this.remove_from_pass(id, this.selectedObjects);
         this.remove_from_pass(id, this.impactObjects);
         this.remove_from_pass(id, this.rigidBodies);
+        this.remove_from_pass(id, this.newObjects)
 
     }
 
@@ -702,9 +685,9 @@ class Visualization {
 
                     if (molA.name == molB.name) {
                         console.log("Same species impact.")
-                        console.log(molA, molB);
-                        console.log(molA.name);
-                        // this.remove_molecule()
+                            // console.log(molA, molB);
+                            // console.log(molA.name);
+                            // this.remove_molecule()
 
                         if (molA.name == 0) {
                             this.add_molecule(1);
@@ -716,6 +699,22 @@ class Visualization {
                             this.add_molecule(0);
                             this.remove_from_scene(meshA.uuid);
                         }
+                    } else {
+
+                        if (molA.name == 0) {
+
+                            this.add_to_pass(this.add_molecule(0), this.impactObjects);
+
+                            this.add_to_pass(this.add_molecule(0), this.impactObjects);
+                            this.remove_from_scene(meshB.uuid);
+                        }
+                        if (molB.name == 0) {
+
+                            this.add_to_pass(this.add_molecule(0), this.impactObjects);
+
+                            this.add_to_pass(this.add_molecule(0), this.impactObjects);
+                            this.remove_from_scene(meshA.uuid);
+                        }
                     }
                 }
             }
@@ -723,25 +722,66 @@ class Visualization {
     }
 
     molecular_decomposer() {
-        for (name in this.data) {
-            // this.generate_species(name);
-            let current_count = this.data[name].count.slice(-1)[0];
+        // console.log(this.data[1])
 
-            for (let i = 0; i < current_count; i++) {
-                //for each instance of a species check for reaction
+        for (let i = 0; i < this.data[1].instances.length; i++) {
+            //for each instance of a species check for reaction
 
-                if (this.data[name].instances[i] == null) continue;
+            if (this.data[1].instances[i].mass <= 47) { continue; }
+            if (this.data[1].instances[i] == null) { continue; }
 
-                let decompose = this.data[name].instances[i].update();
-                if (decompose) {
-                    console.log(this.data[name].instances[i]);
-                    this.remove_from_scene(this.data[name].instances[i].mesh.uuid);
+            let decompose = this.data[1].instances[i].update(this.delta_t);
+            // console.log(decompose);
+            if (decompose) {
+                console.log(this.data[1].instances[i]);
+                let current_velocity = this.data[1].instances[i].mesh.userData.physicsBody.getLinearVelocity();
+                let current_posistion = this.data[1].instances[i].mesh.position;
 
+                this.remove_from_scene(this.data[1].instances[i].mesh.uuid);
+
+                let atom_shift = .1;
+                let starting_info = {
+                    starting_position: {
+                        x: current_posistion.x + atom_shift, //current_velocity.x(),
+                        y: current_posistion.y + atom_shift, //current_velocity.y(),
+                        z: current_posistion.z + atom_shift //current_velocity.z()
+                    },
+                    velocity: {
+                        x: current_velocity.x() * 1,
+                        y: current_velocity.y() * 1,
+                        z: current_velocity.z() * 1
+                    },
+                    rotational_velocity: {
+                        x: d3.randomNormal(0.0)(3.14),
+                        y: d3.randomNormal(0.0)(3.14),
+                        z: d3.randomNormal(0.0)(3.14)
+                    }
                 }
+                let starting_info_2 = {
+                    starting_position: {
+                        x: current_posistion.x - atom_shift, //current_velocity.x(),
+                        y: current_posistion.y - atom_shift, //current_velocity.y(),
+                        z: current_posistion.z - atom_shift //current_velocity.z()
+                    },
+                    velocity: {
+                        x: current_velocity.x() * -1,
+                        y: current_velocity.y() * -1,
+                        z: current_velocity.z() * -1
+                    },
+                    rotational_velocity: {
+                        x: d3.randomNormal(0.0)(3.14),
+                        y: d3.randomNormal(0.0)(3.14),
+                        z: d3.randomNormal(0.0)(3.14)
+                    }
+                }
+
+                this.add_molecule(0, starting_info);
+                this.add_molecule(0, starting_info_2);
 
             }
         }
     }
+
     physics_updater() {
         // Step world
         this.physicsWorld.stepSimulation(this.delta_t, 10);
@@ -751,16 +791,26 @@ class Visualization {
         // combine hitting molecules
         this.molecular_colision_checker();
 
-        this.molecular_decomposer
+        this.molecular_decomposer();
     }
 
     animate() {
         //this.add_line();
 
+        this.controls.update();
         this.camera.updateMatrixWorld();
         this.delta_t = this.clock.getDelta();
 
-        if (this.should_animate) this.physics_updater();
+        if (this.should_animate) {
+            this.physics_updater();
+            for (let temp of this.newObjects) {
+                // console.log(temp)
+                if (temp.userData.molecule.lifetime > 5.0) {
+                    this.remove_from_pass(temp.uuid, this.newObjects);
+                }
+
+            }
+        }
 
         requestAnimationFrame(this.animate.bind(this));
         this.composer.render(this.scene, this.camera);
