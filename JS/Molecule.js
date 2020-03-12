@@ -5,6 +5,10 @@ class Molecule {
         this.starting_position = starting_position;
         this.rotational_velocity = rotational_velocity;
         this.lifetime = 0;
+        this.can_decompose = false;
+        if (this.mass > 50) {
+            this.can_decompose = true;
+        }
 
         // console.log(velocity)
 
@@ -94,7 +98,7 @@ class Molecule {
         let rot_vec = new Ammo.btVector3(rotational_velocity.x, rotational_velocity.y, rotational_velocity.z);
         this.body.setAngularVelocity(rot_vec);
         this.body.setFriction(0);
-        this.body.setRestitution(0.99);
+        this.body.setRestitution(1.0);
         this.body.setDamping(0.0, 0.0);
 
 
@@ -181,7 +185,7 @@ class Molecule {
 
     update(delta_t) {
 
-        this.lifetime += delta_t;
+        this.lifetime = this.lifetime + delta_t;
         this.delta_t = delta_t;
 
         this.velocity_mag = Math.sqrt(
@@ -190,7 +194,8 @@ class Molecule {
             Math.pow(this.mesh.userData.physicsBody.getLinearVelocity().z(), 2)
         );
 
-        return this.reaction_check();
+        if (this.can_decompose) return this.reaction_check();
+        return false;
     }
 }
 

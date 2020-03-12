@@ -14,7 +14,7 @@ body {
     height: var(--height);
     background-color: var(--main-background-color);
     font-family: var(--font);
-    font-size: 1em;
+    font-size: 2vh;
     font-style: normal;
     text-decoration: none;
     position: fixed;
@@ -23,85 +23,86 @@ body {
 }
 
 .menu {
-    /* transition-delay: 5s; */
-    background-color: var(--menu-color-main);
-    border: 3px solid var(--highlight-color);
+    /* padding: 2%; */
+    /* border: 3px solid var(--highlight-color); */
+    /* visibility: hidden; */
+    /* text-decoration: none; */
+    /* justify-content: center; */
     position: relative;
     display: none;
-    visibility: hidden;
-    opacity: 0;
-    /* top: 0;
-    left: 50%; */
+    flex-direction: column;
     z-index: 100;
-    color: white;
-    padding: 2%;
+    opacity: 0;
     margin: 0;
-    width: 200%;
-    height: fit-content;
     list-style: none;
-    text-decoration: none;
+    text-align: center;
+    transition: all 0.5s ease 0.1s;
+    background-color: var(--menu-color-main);
+    color: white;
+    height: 5vh;
+    width: 20vw;
 }
 
 .menu:hover {
+    /* border: 3px dotted var(--highlight-color); */
+    transition: all 0.5s ease 0s;
     background-color: var(--menu-color-selected);
-    border: 3px dotted var(--highlight-color);
-    opacity: 1.0;
+    left: 1vw;
 }
 
 .menu:hover>* {
-    visibility: visible;
-    display: flex;
-    flex-direction: column;
     opacity: 1.0;
+    display: flex;
 }
 
-.menu-branch {
-    left: 50%
+.menu-branch {}
+
+.menu-branch:hover {
+    height: 75vh;
+    z-index: 2;
 }
 
 .menu-branch:hover~.menu {
-    display: none;
+    z-index: 1;
 }
 
 .menu-button {
-    /* width: 100%; */
-    left: 10%;
-    justify-content: center;
-    text-align: center;
+    background-color: #4e93b4;
 }
 
-.menu-root {
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    visibility: visible;
-    opacity: 1.0;
-    left: 0;
-    top: 0;
-    width: 5%;
-    height: fit-content;
-}
-
-.menu-root:hover {
-    left: 0;
-    top: 0;
-    width: 5%;
-    height: fit-content;
+.menu-button:hover {
+    background-color: #56c1d8;
 }
 
 .menu-slider {
-    font-size: .8em;
-    left: 10%;
-    /* justify-content: right;
-    text-align: right; */
+    /* font-size: .8em; */
+    text-align: left;
     background-color: var(--menu-color-main);
+    height: fit-content;
 }
 
+.menu-root {
+    /* transition: all 1.5s ease 4s; */
+    /* justify-content: flex-end; */
+    display: flex;
+    flex-direction: column;
+    opacity: 1.0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5vw;
+}
 
-/* .slidecontainer {
+.menu-root:hover {
+    /* justify-content: flex-end; */
+    left: 0;
+    height: 98vh;
+}
+
+.slidecontainer {
     width: 100%;
     background-color: var(--menu-color-main);
-} */
+}
 
 .slider {
     -webkit-appearance: none;
@@ -174,10 +175,7 @@ body {
 #info_box:hover {
     flex-direction: column;
     list-style: square;
-    font-size: .5em;
     height: fit-content;
-    left: 1em;
-    top: 1em;
     justify-content: right;
     text-align: right;
 }

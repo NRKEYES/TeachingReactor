@@ -19,7 +19,7 @@ import { BufferGeometryUtils } from "/JS/three/examples/jsm/utils/BufferGeometry
 import Molecule from "/JS/Molecule.js";
 //importScripts('/JS/ammo/ammo.js')
 
-let sphere_quality = 4;
+let sphere_quality = 10;
 
 var COLORS = {
     H: 0xc0c0c0,
@@ -60,9 +60,6 @@ class Visualization {
         this.chamber_edge_length = chamber_edge_length;
         this.camera_displacement = chamber_edge_length * 2;
 
-        this.rigidBodies = []; // for ammo
-        this.selectedObjects = [];
-        this.impactObjects = [];
         // for glow
         this.outline_params = {
             edgeStrength: 20,
@@ -73,9 +70,14 @@ class Visualization {
         };
 
         this.raycaster = new THREE.Raycaster();
-
-        this.line = [];
         this.mouse = new THREE.Vector2();
+        this.new_molecule_glow_time = .5;
+        this.rigidBodies = []; // for ammo
+        this.selectedObjects = [];
+        this.impactObjects = [];
+        this.newObjects = [];
+        this.line = [];
+        this.grid_cube = [];
 
         // Create renderer
 
@@ -84,10 +86,11 @@ class Visualization {
             alpha: true
         });
         this.renderer.setPixelRatio(window.devicePixelRatio);
-        this.renderer.shadowMap.enabled = true;
         this.renderer.setClearColor(this.background_and_emis, 0.0);
         this.renderer.setSize(this.width_for_3d, this.height_for_3d);
-        this.renderer.shadowMap.enabled = true;
+        // this.renderer.shadowMap.enabled = true;
+        this.renderer.toneMappingExposure = 1.0;
+
         this.container = document.getElementById("Visualization");
         this.container.appendChild(this.renderer.domElement);
 
@@ -143,6 +146,8 @@ class Visualization {
         this.renderPass = new RenderPass(this.scene, this.camera);
         this.composer.addPass(this.renderPass);
 
+
+
         this.impactObjects = [];
         // Configure outline shader
         this.impactPass = new OutlinePass(
@@ -157,7 +162,6 @@ class Visualization {
         this.impactPass.pulsePeriod = this.outline_params.pulsePeriod;
         this.impactPass.visibleEdgeColor.set('red');
         this.impactPass.hiddenEdgeColor.set('white');
-        this.composer.addPass(this.impactPass);
 
         this.selectedObjects = [];
         // Configure outline shader
@@ -173,7 +177,6 @@ class Visualization {
         this.selectedPass.pulsePeriod = this.outline_params.pulsePeriod;
         this.selectedPass.visibleEdgeColor.set('green');
         this.selectedPass.hiddenEdgeColor.set('white');
-        this.composer.addPass(this.selectedPass);
 
 
         this.newObjects = [];
@@ -190,18 +193,14 @@ class Visualization {
         this.newbornPass.pulsePeriod = this.outline_params.pulsePeriod;
         this.newbornPass.visibleEdgeColor.set('blue');
         this.newbornPass.hiddenEdgeColor.set('white');
+
+        this.renderPass = new RenderPass(this.scene, this.camera);
+        this.composer.addPass(this.renderPass);
+        // this.composer.addPass(this.impactPass);
+        // this.composer.addPass(this.selectedPass);
         this.composer.addPass(this.newbornPass);
 
 
-
-        // this.bokehPass = new BokehPass(this.scene, this.camera, {
-        //     focus: this.chamber_edge_length,
-        //     aperture: 0.000009,
-        //     maxblur: 1.0,
-        //     width: this.width,
-        //     height: this.height
-        // });
-        // this.composer.addPass(this.bokehPass);
 
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
@@ -293,7 +292,12 @@ class Visualization {
     }
 
     generate_species(name) {
-        let envMap = new THREE.TextureLoader().load("Images/envMap.png");
+        // let envMap = new THREE.TextureLoader().load("Images/envMap.png");
+        let envMap = new THREE.TextureLoader().load("Images/moon_1024.jpg");
+        // let envMap = new THREE.TextureLoader().load("Images/glassbw.jpg");
+        let normMap = new THREE.TextureLoader().load("Images/moon_1024.jpg");
+
+
         envMap.mapping = THREE.SphericalReflectionMapping;
 
         let geometry = this.data[name].coords; // Setting up to import different geometries
@@ -310,11 +314,15 @@ class Visualization {
                 // wireframe: true
                 color: COLORS[geometry[i][0]],
                 emissive: COLORS[geometry[i][0]],
-                color: diffuseColor,
-                envMap: envMap,
                 metalness: 0.0, // metalness: .9,
                 roughness: 0.1, // roughness: roughness,
                 reflectivity: 1.0,
+                // color: diffuseColor,
+                envMap: envMap,
+                normalMap: normMap,
+                normalScale: new THREE.Vector2(0.15, 0.15),
+                clearcoatNormalMap: normMap,
+                premultipliedAlpha: true,
             });
             materials.push(material);
 
@@ -343,14 +351,13 @@ class Visualization {
             material: materials
         };
 
-        //mergedGeometry.dispose();
-        // for (let geo of mergedGeometry) {
-        //     geo.dispose();
-        // }
+        for (let geo of mergedGeometry) {
+            geo.dispose();
+        }
 
-        // for (let mat of materials) {
-        //     mat.dispose();
-        // }
+        for (let mat of materials) {
+            mat.dispose();
+        }
     }
 
     add_molecule(name,
@@ -371,11 +378,6 @@ class Visualization {
                 z: d3.randomNormal(0.0)(3.14)
             }
         }) {
-
-
-        // console.log(starting_info)
-
-
         let temp = new Molecule(
             name,
             this.data[name].mass,
@@ -417,20 +419,23 @@ class Visualization {
         // ADD GRIDS
 
         //Top and bottom   - along Y axis
+        //Bottom
         gridHelper = new THREE.GridHelper(size, divisions, "grey", "grey");
         gridHelper.geometry.rotateY(Math.PI / 2);
         pos.set(0, -this.chamber_edge_length / 2, 0);
         dim.set(this.chamber_edge_length, 0.1, this.chamber_edge_length);
         gridHelper.position.copy(pos);
         this.scene.add(gridHelper);
+        // this.grid_cube.push(gridHelper);
         this.createRigidBody(dim, mass, pos);
-
+        //top
         gridHelper = new THREE.GridHelper(size, divisions, "grey", "grey");
         gridHelper.geometry.rotateY(Math.PI / 2);
         pos.set(0, this.chamber_edge_length / 2, 0);
         dim.set(this.chamber_edge_length, 0.1, this.chamber_edge_length);
         gridHelper.position.copy(pos);
         this.scene.add(gridHelper);
+        this.grid_cube.push(gridHelper);
         this.createRigidBody(dim, mass, pos);
 
         // Front and back - along X
@@ -440,6 +445,7 @@ class Visualization {
         dim.set(0.1, this.chamber_edge_length, this.chamber_edge_length);
         gridHelper.position.copy(pos);
         this.scene.add(gridHelper);
+        this.grid_cube.push(gridHelper);
         this.createRigidBody(dim, mass, pos);
 
         gridHelper = new THREE.GridHelper(size, divisions, "grey", "grey");
@@ -448,6 +454,7 @@ class Visualization {
         dim.set(0.1, this.chamber_edge_length, this.chamber_edge_length);
         gridHelper.position.copy(pos);
         this.scene.add(gridHelper);
+        this.grid_cube.push(gridHelper);
         this.createRigidBody(dim, mass, pos);
 
         // Front and back - along Z
@@ -457,6 +464,7 @@ class Visualization {
         dim.set(this.chamber_edge_length, this.chamber_edge_length, 0.1);
         gridHelper.position.copy(pos);
         this.scene.add(gridHelper);
+        this.grid_cube.push(gridHelper);
         this.createRigidBody(dim, mass, pos);
 
         gridHelper = new THREE.GridHelper(size, divisions, "grey", "grey");
@@ -465,6 +473,7 @@ class Visualization {
         dim.set(this.chamber_edge_length, this.chamber_edge_length, 0.1);
         gridHelper.position.copy(pos);
         this.scene.add(gridHelper);
+        this.grid_cube.push(gridHelper);
         this.createRigidBody(dim, mass, pos);
 
         // END ADD GRIDS
@@ -539,8 +548,6 @@ class Visualization {
         // this.renderer.renderLists.dispose();
     }
 
-    tick(incoming_data) {}
-
     add_to_pass(id, pass) {
         let object = this.scene.getObjectByProperty("uuid", id);
         pass.push(object);
@@ -550,7 +557,8 @@ class Visualization {
 
 
         if (id == 'all') {
-            pass.length = 0;
+            // pass.length = 0;
+            pass.length = [];
             return;
         }
 
@@ -578,6 +586,13 @@ class Visualization {
 
         this.scene.remove(object);
         this.physicsWorld.removeRigidBody(object.userData.physicsBody);
+        Ammo.destroy(object.userData.physicsBody);
+
+        object.geometry.dispose();
+
+        // object.material.dispose();
+
+        // object.dispose();
 
         this.remove_from_pass(id, this.selectedObjects);
         this.remove_from_pass(id, this.impactObjects);
@@ -641,7 +656,7 @@ class Visualization {
         }
     }
 
-    molecular_colision_checker() {
+    molecular_collision_checker() {
         let num_manifold = this.physicsWorld.getDispatcher().getNumManifolds();
         for (let i = 0; i < num_manifold; i++) {
             let contactManifold = this.physicsWorld
@@ -669,8 +684,7 @@ class Visualization {
                 let meshB = this.scene.getObjectByProperty("name", obB.H);
                 // console.log(meshB);
                 if (meshA != null && meshB != null) {
-                    console.log("Two molecules colided.");
-                    //this.toggle_animate();
+                    // console.log("Two molecules colided.");
 
                     let molA = meshA.userData.molecule;
                     let molB = meshB.userData.molecule;
@@ -684,36 +698,23 @@ class Visualization {
 
 
                     if (molA.name == molB.name) {
-                        console.log("Same species impact.")
-                            // console.log(molA, molB);
-                            // console.log(molA.name);
-                            // this.remove_molecule()
+                        // console.log("Same species impact.")
+                        // console.log(molA, molB);
+                        // console.log(molA.name);
 
                         if (molA.name == 0) {
-                            this.add_molecule(1);
-                            this.remove_from_scene(meshA.uuid);
-                            this.remove_from_scene(meshB.uuid);
+                            this.merge(molA, molB);
+
+                        } else {
+                            this.split(molA);
                         }
-                        if (molA.name == 1) {
-                            this.add_molecule(0);
-                            this.add_molecule(0);
-                            this.remove_from_scene(meshA.uuid);
-                        }
+
                     } else {
-
                         if (molA.name == 0) {
-
-                            this.add_to_pass(this.add_molecule(0), this.impactObjects);
-
-                            this.add_to_pass(this.add_molecule(0), this.impactObjects);
-                            this.remove_from_scene(meshB.uuid);
+                            this.split(molB);
                         }
                         if (molB.name == 0) {
-
-                            this.add_to_pass(this.add_molecule(0), this.impactObjects);
-
-                            this.add_to_pass(this.add_molecule(0), this.impactObjects);
-                            this.remove_from_scene(meshA.uuid);
+                            this.split(molA);
                         }
                     }
                 }
@@ -721,65 +722,101 @@ class Visualization {
         }
     }
 
-    molecular_decomposer() {
-        // console.log(this.data[1])
+    molecular_updater() {
+        // console.log(this.data.length)
 
-        for (let i = 0; i < this.data[1].instances.length; i++) {
-            //for each instance of a species check for reaction
 
-            if (this.data[1].instances[i].mass <= 47) { continue; }
-            if (this.data[1].instances[i] == null) { continue; }
+        for (let i = 0; i < this.data.length; i++) {
+            // console.log(this.data[i])
+            // console.log(this.data[i].instances)
+            // console.log(this.data[i].instances.length)
 
-            let decompose = this.data[1].instances[i].update(this.delta_t);
-            // console.log(decompose);
-            if (decompose) {
-                console.log(this.data[1].instances[i]);
-                let current_velocity = this.data[1].instances[i].mesh.userData.physicsBody.getLinearVelocity();
-                let current_posistion = this.data[1].instances[i].mesh.position;
+            for (let j = 0; j < this.data[i].instances.length; j++) {
+                //for each instance of a species check for reaction
 
-                this.remove_from_scene(this.data[1].instances[i].mesh.uuid);
+                if (this.data[i].instances[j] == null) { continue; }
 
-                let atom_shift = .1;
-                let starting_info = {
-                    starting_position: {
-                        x: current_posistion.x + atom_shift, //current_velocity.x(),
-                        y: current_posistion.y + atom_shift, //current_velocity.y(),
-                        z: current_posistion.z + atom_shift //current_velocity.z()
-                    },
-                    velocity: {
-                        x: current_velocity.x() * 1,
-                        y: current_velocity.y() * 1,
-                        z: current_velocity.z() * 1
-                    },
-                    rotational_velocity: {
-                        x: d3.randomNormal(0.0)(3.14),
-                        y: d3.randomNormal(0.0)(3.14),
-                        z: d3.randomNormal(0.0)(3.14)
-                    }
+                let decompose = this.data[i].instances[j].update(this.delta_t);
+                if (decompose) {
+                    this.split(this.data[i].instances[j]);
                 }
-                let starting_info_2 = {
-                    starting_position: {
-                        x: current_posistion.x - atom_shift, //current_velocity.x(),
-                        y: current_posistion.y - atom_shift, //current_velocity.y(),
-                        z: current_posistion.z - atom_shift //current_velocity.z()
-                    },
-                    velocity: {
-                        x: current_velocity.x() * -1,
-                        y: current_velocity.y() * -1,
-                        z: current_velocity.z() * -1
-                    },
-                    rotational_velocity: {
-                        x: d3.randomNormal(0.0)(3.14),
-                        y: d3.randomNormal(0.0)(3.14),
-                        z: d3.randomNormal(0.0)(3.14)
-                    }
-                }
-
-                this.add_molecule(0, starting_info);
-                this.add_molecule(0, starting_info_2);
-
             }
         }
+    }
+
+    split(instance) {
+        let current_velocity = instance.mesh.userData.physicsBody.getLinearVelocity();
+        let current_posistion = instance.mesh.position;
+
+        this.remove_from_scene(instance.mesh.uuid);
+
+        let atom_shift = .1;
+        let starting_info = {
+            starting_position: {
+                x: current_posistion.x + atom_shift, //current_velocity.x(),
+                y: current_posistion.y + atom_shift, //current_velocity.y(),
+                z: current_posistion.z + atom_shift //current_velocity.z()
+            },
+            velocity: {
+                x: current_velocity.x() * 1,
+                y: current_velocity.y() * 1,
+                z: current_velocity.z() * 1
+            },
+            rotational_velocity: {
+                x: d3.randomNormal(0.0)(3.14),
+                y: d3.randomNormal(0.0)(3.14),
+                z: d3.randomNormal(0.0)(3.14)
+            }
+        }
+        let starting_info_2 = {
+            starting_position: {
+                x: current_posistion.x - atom_shift, //current_velocity.x(),
+                y: current_posistion.y - atom_shift, //current_velocity.y(),
+                z: current_posistion.z - atom_shift //current_velocity.z()
+            },
+            velocity: {
+                x: current_velocity.x() * -1,
+                y: current_velocity.y() * -1,
+                z: current_velocity.z() * -1
+            },
+            rotational_velocity: {
+                x: d3.randomNormal(0.0)(3.14),
+                y: d3.randomNormal(0.0)(3.14),
+                z: d3.randomNormal(0.0)(3.14)
+            }
+        }
+
+        this.add_molecule(0, starting_info);
+        this.add_molecule(0, starting_info_2);
+
+
+    }
+
+    merge(instance_1, instance_2) {
+        let current_velocity = instance_1.mesh.userData.physicsBody.getLinearVelocity();
+        let current_posistion = instance_1.mesh.position;
+        let current_rotation = instance_1.mesh.userData.physicsBody.getAngularVelocity();
+
+        let starting_info = {
+            starting_position: {
+                x: current_posistion.x, //current_velocity.x(),
+                y: current_posistion.y, //current_velocity.y(),
+                z: current_posistion.z //current_velocity.z()
+            },
+            velocity: {
+                x: current_velocity.x() * .5,
+                y: current_velocity.y() * .5,
+                z: current_velocity.z() * .5
+            },
+            rotational_velocity: {
+                x: current_rotation.x() * .5,
+                y: current_rotation.y() * .5,
+                z: current_rotation.z() * .5
+            }
+        }
+        this.add_molecule(1, starting_info);
+        this.remove_from_scene(instance_1.mesh.uuid);
+        this.remove_from_scene(instance_2.mesh.uuid);
     }
 
     physics_updater() {
@@ -789,10 +826,12 @@ class Visualization {
         this.update_rigid_bodies();
 
         // combine hitting molecules
-        this.molecular_colision_checker();
+        this.molecular_collision_checker();
 
-        this.molecular_decomposer();
+        this.molecular_updater();
     }
+
+    tick(incoming_data) {}
 
     animate() {
         //this.add_line();
@@ -805,7 +844,7 @@ class Visualization {
             this.physics_updater();
             for (let temp of this.newObjects) {
                 // console.log(temp)
-                if (temp.userData.molecule.lifetime > 5.0) {
+                if (temp.userData.molecule.lifetime > this.new_molecule_glow_time) {
                     this.remove_from_pass(temp.uuid, this.newObjects);
                 }
 
@@ -815,6 +854,7 @@ class Visualization {
         requestAnimationFrame(this.animate.bind(this));
         this.composer.render(this.scene, this.camera);
     }
+
     toggle_animate() {
         this.should_animate = this.should_animate == false;
 
@@ -829,6 +869,23 @@ class Visualization {
     }
     resume_animate() {
         this.should_animate = true;
+    }
+
+    toggle_grid_visability() {
+        console.log('Called grid toggle.')
+        for (let side of this.grid_cube) {
+            side.visible = side.visible == false;
+            console.log(side);
+        }
+    }
+
+    toggle_camera_auto_rotate() {
+        console.log('Called camera toggle.')
+        this.controls.autoRotate = this.controls.autoRotate == false;
+    }
+
+    set_new_molecule_glow_time(new_time) {
+        this.new_molecule_glow_time = new_time;
     }
 
     onDocumentMouseMove(event) {

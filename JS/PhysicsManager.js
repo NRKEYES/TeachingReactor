@@ -7,16 +7,14 @@ import SideView from "/JS/SideView.js";
 //import ammo from '/JS/ammo/ammo.js'
 
 // raw starting numbers
-let orders_of_magnitude = 20;
+let molecular_count_slider_value = 35;
 var scale = d3.scaleLog()
     .domain([1, 6000])
     .range([1, 100]);
-console.log(orders_of_magnitude);
-let total_molecules = parseInt(scale.invert(orders_of_magnitude));
-console.log(total_molecules);
+let total_molecules = parseInt(scale.invert(molecular_count_slider_value));
 
 //chamber settings
-let chamber_edge_length = 2; // this should be in nm
+let chamber_edge_length = 4; // this should be in nm
 let chamber_volume = Math.pow(chamber_edge_length, 3); // convert to nm3
 
 // molecule and species counts
@@ -25,7 +23,6 @@ let r_to_p_ratio = 1 - p_to_r_ratio;
 
 let reactant_initial = parseInt(Math.trunc(total_molecules * r_to_p_ratio));
 let product_initial = parseInt(Math.trunc(total_molecules * p_to_r_ratio));
-console.log(reactant_initial);
 
 // unused info ATM
 let starting_concentration = total_molecules / chamber_volume;
@@ -65,6 +62,7 @@ let species = [{
         mass: 92.011, // g/mol
     }
 ];
+
 
 let cm_to_nm = Math.pow(10, 21);
 //Reaction Details
@@ -352,10 +350,12 @@ function numerical_simulation() {
 }
 
 function update_all_sliders() {
-    document.getElementById("orders_of_magnitude").value = orders_of_magnitude;
-    document.getElementById(
-        "orders_of_magnitude"
-    ).parentElement.lastElementChild.innerHTML = total_molecules;
+    document.getElementById("orders_of_magnitude").value = molecular_count_slider_value;
+    document.getElementById("orders_of_magnitude").parentElement.lastElementChild.innerHTML = total_molecules;
+
+    document.getElementById("time_for_new_glow").value = visualizer.new_molecule_glow_time;
+    document.getElementById("time_for_new_glow").parentElement.lastElementChild.innerHTML = visualizer.new_molecule_glow_time;;
+
 
     document.getElementById("initial_ratio").value = p_to_r_ratio * 100;
     document.getElementById(
@@ -415,6 +415,8 @@ function update_all() {
 }
 
 function start_simulation() {
+    console.log(species)
+
     find_time_step();
     print_info_block();
     t = 0;
@@ -432,32 +434,41 @@ function start_simulation() {
 }
 
 // Add monitors the the main.html page as needed
-window.addEventListener("load", () => {
-    console.log("Page is fully loaded");
+window.addEventListener(
+    "load",
+    () => {
+        console.log("Page is fully loaded");
 
-    update_all_sliders();
-    print_info_block();
-    start_simulation();
-});
-window.addEventListener("resize", () => visualizer.onWindowResize(), false);
+        update_all_sliders();
+        print_info_block();
+        start_simulation();
+    }
+);
+window.addEventListener(
+    "resize",
+    () => {
+        visualizer.onWindowResize()
+    },
+    false
+);
 
 document.addEventListener(
     "mousemove",
-    d => {
+    () => {
         return visualizer.onDocumentMouseMove(event);
     },
     false
 );
 document.addEventListener(
     "mousedown",
-    d => {
+    () => {
         return visualizer.onDocumentMouseDown(event);
     },
     false
 );
 document.addEventListener(
     "keydown",
-    d => {
+    () => {
         return visualizer.onDocumentKeyDown(event);
     },
     false
@@ -466,21 +477,16 @@ document.addEventListener(
 document.querySelector("#pause_simulation").addEventListener("click", () => {
     visualizer.toggle_animate();
 });
-document
-    .querySelector("#show_simulation_info")
-    .addEventListener("click", () => {
-        //toggle element visability
-        if (document.getElementById("info_box").style.zIndex == -1) {
-            document.getElementById("info_box").style.zIndex = 100;
-        } else {
-            document.getElementById("info_box").style.zIndex = -1;
-        }
-    });
+document.querySelector("#show_simulation_info").addEventListener("click", () => {
+    //toggle element visability
+    if (document.getElementById("info_box").style.zIndex == -1) {
+        document.getElementById("info_box").style.zIndex = 100;
+    } else {
+        document.getElementById("info_box").style.zIndex = -1;
+    }
+});
 document.querySelector("#run_simulation").addEventListener("click", () => {
     run_sim = true;
-
-
-
     species = [{
             name: "Reactants",
             percent: [r_to_p_ratio],
@@ -552,19 +558,31 @@ document.querySelector("#prop_button").addEventListener("click", () => {
         document.getElementById("PercentVsTime").style.zIndex = -1;
     }
 });
+document.querySelector("#toggle_grid").addEventListener("click", () => {
+    //toggle element visability
+    visualizer.toggle_grid_visability();
+});
+document.querySelector("#toggle_camera").addEventListener("click", () => {
+    //toggle element visability
+    visualizer.toggle_camera_auto_rotate();
+});
 
 d3.select("#orders_of_magnitude").on("input", function() {
 
 
-    orders_of_magnitude = this.value;
+    molecular_count_slider_value = this.value;
     // raw starting numbers
     total_molecules = parseInt(scale.invert(this.value));
-    console.log(total_molecules);
+    // console.log(total_molecules);
 
     reactant_initial = Math.trunc(total_molecules * r_to_p_ratio);
     product_initial = Math.trunc(total_molecules * p_to_r_ratio);
-    console.log(reactant_initial);
+    // console.log(reactant_initial);
 
+    update_all_sliders();
+});
+d3.select("#edge_length").on("input", function() {
+    chamber_edge_length = this.value;
     update_all_sliders();
 });
 d3.select("#time_step").on("input", function() {
@@ -580,8 +598,10 @@ d3.select("#initial_ratio").on("input", function() {
     starting_concentration = total_molecules / chamber_volume;
     update_all_sliders();
 });
-d3.select("#edge_length").on("input", function() {
-    chamber_edge_length = this.value;
+d3.select("#time_for_new_glow").on("input", function() {
+
+    visualizer.set_new_molecule_glow_time(this.value);
+
     update_all_sliders();
 });
 d3.select("#forward_rate").on("input", function() {
