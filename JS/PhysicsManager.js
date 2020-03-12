@@ -7,14 +7,14 @@ import SideView from "/JS/SideView.js";
 //import ammo from '/JS/ammo/ammo.js'
 
 // raw starting numbers
-let molecular_count_slider_value = 35;
+let molecular_count_slider_value = 50;
 var scale = d3.scaleLog()
     .domain([1, 6000])
     .range([1, 100]);
 let total_molecules = parseInt(scale.invert(molecular_count_slider_value));
 
 //chamber settings
-let chamber_edge_length = 4; // this should be in nm
+let chamber_edge_length = 10; // this should be in nm
 let chamber_volume = Math.pow(chamber_edge_length, 3); // convert to nm3
 
 // molecule and species counts

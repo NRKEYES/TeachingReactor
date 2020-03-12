@@ -1,11 +1,13 @@
 class Molecule {
-    constructor(name = 'molecule', mass = 0, coords, geometry, material, starting_position, velocity, rotational_velocity) {
+    constructor(name = 'molecule', mass = 0, coords, geometry, material, physics_geom, starting_position, velocity, rotational_velocity) {
         this.name = name;
         this.velocity = velocity;
         this.starting_position = starting_position;
         this.rotational_velocity = rotational_velocity;
         this.lifetime = 0;
         this.can_decompose = false;
+
+        // TODO make this way more flexible
         if (this.mass > 50) {
             this.can_decompose = true;
         }
@@ -20,47 +22,15 @@ class Molecule {
         this.rotational_energy = 0.0;
         this.total_energy = this.translational_energy + this.rotational_energy;
 
-
-
-
-
         this.radius = .1 * (this.coords.length - 1);
 
-        // geometry.computeFaceNormals();
-        geometry.computeBoundingSphere();
-        geometry.center();
 
-        //Convert Geometry into a triangle mesh that can be used in ammo for colision
-        let geom = new THREE.Geometry().fromBufferGeometry(geometry)
-        geom.mergeVertices(); // duplicate vertices are created with fromBufferGeometry()
-        const vertices = geom.vertices;
-        const scale = [1, 1, 1];
-
-        const trig_mesh = new Ammo.btTriangleMesh(true, true);
-        trig_mesh.setScaling(new Ammo.btVector3(scale[0], scale[1], scale[2]));
-        for (let i = 0; i < geom.vertices.length; i = i + 3) {
-            trig_mesh.addTriangle(
-                new Ammo.btVector3(vertices[i].x, vertices[i].y, vertices[i].z),
-                new Ammo.btVector3(vertices[i + 1].x, vertices[i + 1].y, vertices[i + 1].z),
-                new Ammo.btVector3(vertices[i + 2].x, vertices[i + 2].y, vertices[i + 2].z),
-                true
-            );
-
-        }
-
-
-        geom.computeBoundingSphere();
-        geom.center();
-        geom.verticesNeedUpdate = true;
-        this.mesh = new THREE.Mesh(geom, material);
+        this.mesh = new THREE.Mesh(geometry, material);
         this.mesh.castShadow = true;
         this.mesh.receiveShadow = true;
         this.mesh.position.set(starting_position.x, starting_position.y, starting_position.z);
         this.mesh.castShadow = true;
         this.mesh.receiveShadow = true;
-
-
-
 
         this.transform = new Ammo.btTransform();
         this.transform.setIdentity();
@@ -70,26 +40,27 @@ class Molecule {
 
 
         //TODO
-        //add aditional colshape method based on multiple spheres
-        // this might require a bit of a rewrite
-
+        //TODO add aditional colshape method based on multiple spheres
+        //TODO this might require a bit of a rewrite
 
         //this.colShape = new Ammo.btBvhTriangleMeshShape(mesh, true, true);
         // this.colShape = new Ammo.btConvexHullShape(geom, true, true);
-        this.colShape = new Ammo.btConvexHullShape(trig_mesh, true, true);
         // this.colShape = new Ammo.btSphereShape(this.radius);
-        this.colShape.setMargin(0.15);
-
-
+        this.colShape = new Ammo.btConvexHullShape(physics_geom, true, true);
+        this.colShape.setMargin(0.05);
         //Don't really know what this is useful for...
         this.localInertia = new Ammo.btVector3(0.0, 0.0, 0.0);
         this.colShape.calculateLocalInertia(this.mass, this.localInertia);
-        this.rbInfo = new Ammo.btRigidBodyConstructionInfo(this.mass, this.motionState, this.colShape, this.localInertia);
+
+        this.rbInfo = new Ammo.btRigidBodyConstructionInfo(
+            this.mass,
+            this.motionState,
+            this.colShape,
+            this.localInertia
+        );
         this.body = new Ammo.btRigidBody(this.rbInfo);
         //prevents physics deactivation
         this.body.setActivationState(4);
-
-
 
         // Very basic collision parameters
         // Something here may be causing acceleration(excessive acceleration)
@@ -100,8 +71,6 @@ class Molecule {
         this.body.setFriction(0);
         this.body.setRestitution(1.0);
         this.body.setDamping(0.0, 0.0);
-
-
 
         this.mesh.userData.physicsBody = this.body;
         this.mesh.userData.molecule = this;

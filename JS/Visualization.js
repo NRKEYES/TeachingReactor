@@ -1,23 +1,34 @@
 // External Dependancies
-
-import { OrbitControls } from "/JS/three/examples/jsm/controls/OrbitControls.js";
 import { OBJLoader } from "/JS/three/examples/jsm/loaders/OBJLoader.js";
+import Stats from '/JS/three/examples/jsm/libs/stats.module.js';
+import { BufferGeometryUtils } from "/JS/three/examples/jsm/utils/BufferGeometryUtils.js";
+import { OrbitControls } from "/JS/three/examples/jsm/controls/OrbitControls.js";
 import { EffectComposer } from "/JS/three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "/JS/three/examples/jsm/postprocessing/RenderPass.js";
 import { ShaderPass } from "/JS/three/examples/jsm/postprocessing/ShaderPass.js";
 import { OutlinePass } from "/JS/three/examples/jsm/postprocessing/OutlinePass.js";
-import { BokehPass } from "/JS/three/examples/jsm/postprocessing/BokehPass.js";
-import {
-    BokehShader,
-    BokehDepthShader
-} from "/JS/three/examples/jsm/shaders/BokehShader2.js";
-
 import { FXAAShader } from "/JS/three/examples/jsm/shaders/FXAAShader.js";
-import { BufferGeometryUtils } from "/JS/three/examples/jsm/utils/BufferGeometryUtils.js";
+
+import { GammaCorrectionShader } from '/JS/three/examples/jsm/shaders/GammaCorrectionShader.js';
+import { ColorifyShader } from '/JS/three/examples/jsm/shaders/ColorifyShader.js';
+
+
+// import { BloomPass } from './jsm/postprocessing/BloomPass.js';
+// import { FilmPass } from './jsm/postprocessing/FilmPass.js';
+// import { DotScreenPass } from './jsm/postprocessing/DotScreenPass.js';
+// import { MaskPass, ClearMaskPass } from './jsm/postprocessing/MaskPass.js';
+// import { TexturePass } from './jsm/postprocessing/TexturePass.js';
+
+// import { BleachBypassShader } from './jsm/shaders/BleachBypassShader.js';
+// import { HorizontalBlurShader } from './jsm/shaders/HorizontalBlurShader.js';
+// import { VerticalBlurShader } from './jsm/shaders/VerticalBlurShader.js';
+// import { SepiaShader } from './jsm/shaders/SepiaShader.js';
+// import { VignetteShader } from './jsm/shaders/VignetteShader.js';
+
+
 
 // Internal Dependancies
 import Molecule from "/JS/Molecule.js";
-//importScripts('/JS/ammo/ammo.js')
 
 let sphere_quality = 10;
 
@@ -43,6 +54,7 @@ var atom_radius = {
     N: 0.155
 };
 
+
 class Visualization {
     constructor(incoming_data, chamber_edge_length) {
         // Initialize Ammo engine
@@ -56,9 +68,6 @@ class Visualization {
         this.physicsWorld;
         this.data = incoming_data;
         this.setupPhysicsWorld();
-
-        this.chamber_edge_length = chamber_edge_length;
-        this.camera_displacement = chamber_edge_length * 2;
 
         // for glow
         this.outline_params = {
@@ -80,7 +89,6 @@ class Visualization {
         this.grid_cube = [];
 
         // Create renderer
-
         this.renderer = new THREE.WebGLRenderer({
             antialias: true,
             alpha: true
@@ -88,12 +96,19 @@ class Visualization {
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.setClearColor(this.background_and_emis, 0.0);
         this.renderer.setSize(this.width_for_3d, this.height_for_3d);
+        this.renderer.physicallyCorrectLights = true;
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.bias = 0.0001;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         // this.renderer.shadowMap.enabled = true;
-        this.renderer.toneMappingExposure = 1.0;
+        // this.renderer.toneMappingExposure = 1.0;
 
         this.container = document.getElementById("Visualization");
         this.container.appendChild(this.renderer.domElement);
 
+        this.stats = new Stats();
+        let stats_block = document.getElementById("menu").appendChild(this.stats.dom);
+        stats_block.style.cssText = '';
     }
 
     init(incoming_data, chamber_edge_length) {
@@ -114,12 +129,7 @@ class Visualization {
 
         this.composer = new EffectComposer(this.renderer);
 
-        this.effectFXAA = new ShaderPass(FXAAShader);
-        this.effectFXAA.uniforms["resolution"].value.set(
-            1 / window.innerWidth,
-            1 / window.innerHeight
-        );
-        this.composer.addPass(this.effectFXAA);
+
 
         // Setup scene, camera, lighting
         this.scene = new THREE.Scene();
@@ -131,84 +141,99 @@ class Visualization {
         // this.scene.fog = new THREE.FogExp2(0xefd1b5, .035);
         // this.scene.fog = new THREE.Fog(0xefd1b5, 1, 1000);
 
-        this.createLights();
 
+        //setup the initial camera conditions
         this.camera = new THREE.PerspectiveCamera(
             70,
             this.width_for_3d / this.height_for_3d,
             0.1,
             1000
         );
-        this.camera.position.x = this.camera_displacement; //camera.lookAt(scene.position)
-        this.camera.position.y = (this.chamber_edge_length * 2) / 2; //camera.lookAt(scene.position)
-        this.camera.position.z = this.chamber_edge_length * 2; //camera.lookAt(scene.position)
+        this.camera.position.x = 0 // -left to +right
+        this.camera.position.y = 0 // +top to -bottom
+        this.camera.position.z = 100; // + towards, me - away
+        this.camera.lookAt(this.scene.position); // Not totally sure if this is helping orient the camera at init time.
 
-        this.renderPass = new RenderPass(this.scene, this.camera);
-        this.composer.addPass(this.renderPass);
+        //setup the camera controler
+        // loosely alphabetical
+        // a lot of default values, here for completeness
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        let default_autorotate = true;
+        if (default_autorotate) this.controls.autoRotate = true;
+        this.controls.autoRotateSpeed = 4; // default is 2
+
+        this.controls.dampingFactor = 1.0; // TODO play with this more to see if there is an ideal value
+
+        this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+        this.controls.enableKeys = true;
+        this.controls.enableZoom = true;
+        this.controls.enablePan = true;
+
+        this.controls.keyPanSpeed = 14; // default is 7
+        this.controls.keys = {
+            LEFT: 37, //left arrow
+            UP: 38, // up arrow
+            RIGHT: 39, // right arrow
+            BOTTOM: 40 // down arrow
+        }
+
+        // this.controls.maxAzimuthAngle = Math.; //left and right stops
+        // this.controls.minAzimuthAngle = -Math.PI; //Infinity was default
+
+        this.controls.maxPolarAngle = Math.PI; // top and bottom stops
+        this.controls.minPolarAngle = -Math.PI;
+
+        this.controls.maxDistance = this.chamber_edge_length * 4;
+        this.controls.minDistance = 0;
+
+        this.controls.mouseButtons = {
+            LEFT: THREE.MOUSE.ROTATE,
+            MIDDLE: THREE.MOUSE.DOLLY,
+            RIGHT: THREE.MOUSE.PAN
+        }
+
+        this.controls.screenSpacePanning = true;
+        this.controls.target = this.scene.position;
+
+        this.controls.zoomSpeed = .5; // default is 1
+        // END CONTROL INIT
 
 
 
-        this.impactObjects = [];
-        // Configure outline shader
+
+        this.renderPass = new RenderPass(
+            this.scene,
+            this.camera
+        );
         this.impactPass = new OutlinePass(
             new THREE.Vector2(window.innerWidth, window.innerHeight),
             this.scene,
             this.camera
         );
-        this.impactPass.selectedObjects = this.impactObjects;
-        this.impactPass.renderToScreen = true;
-        this.impactPass.edgeStrength = this.outline_params.edgeStrength;
-        this.impactPass.edgeGlow = this.outline_params.edgeGlow;
-        this.impactPass.pulsePeriod = this.outline_params.pulsePeriod;
-        this.impactPass.visibleEdgeColor.set('red');
-        this.impactPass.hiddenEdgeColor.set('white');
-
-        this.selectedObjects = [];
-        // Configure outline shader
         this.selectedPass = new OutlinePass(
             new THREE.Vector2(window.innerWidth, window.innerHeight),
             this.scene,
             this.camera
         );
-        this.selectedPass.selectedObjects = this.selectedObjects;
-        this.selectedPass.renderToScreen = true;
-        this.selectedPass.edgeStrength = this.outline_params.edgeStrength;
-        this.selectedPass.edgeGlow = this.outline_params.edgeGlow;
-        this.selectedPass.pulsePeriod = this.outline_params.pulsePeriod;
-        this.selectedPass.visibleEdgeColor.set('green');
-        this.selectedPass.hiddenEdgeColor.set('white');
-
-
-        this.newObjects = [];
-        // Configure outline shader
         this.newbornPass = new OutlinePass(
             new THREE.Vector2(window.innerWidth, window.innerHeight),
             this.scene,
             this.camera
         );
-        this.newbornPass.selectedObjects = this.newObjects;
-        this.newbornPass.renderToScreen = true;
-        this.newbornPass.edgeStrength = this.outline_params.edgeStrength;
-        this.newbornPass.edgeGlow = this.outline_params.edgeGlow;
-        this.newbornPass.pulsePeriod = this.outline_params.pulsePeriod;
-        this.newbornPass.visibleEdgeColor.set('blue');
-        this.newbornPass.hiddenEdgeColor.set('white');
+        this.effectFXAA = new ShaderPass(FXAAShader);
+        this.effectFXAA.uniforms["resolution"].value.set(
+            1 / window.innerWidth,
+            1 / window.innerHeight
+        );
 
         this.renderPass = new RenderPass(this.scene, this.camera);
         this.composer.addPass(this.renderPass);
         // this.composer.addPass(this.impactPass);
-        // this.composer.addPass(this.selectedPass);
+        this.composer.addPass(this.selectedPass);
         this.composer.addPass(this.newbornPass);
+        this.composer.addPass(this.effectFXAA);
 
 
-
-        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-        this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
-        this.controls.dampingFactor = 0.25;
-        this.controls.screenSpacePanning = true;
-        this.controls.minDistance = 1;
-        this.controls.maxDistance = this.chamber_edge_length * 4;
-        this.controls.maxPolarAngle = Math.PI;
 
 
         for (name in this.data) {
@@ -217,9 +242,12 @@ class Visualization {
                 this.add_molecule(name);
             }
         }
-        //this.mouse_viewer = this.view_mouse();
-        //console.log(this.mouse_viewer)
-        this.add_grid();
+
+        this.configure_outline_passes();
+        this.createLights();
+        this.create_chamber();
+        this.helper_show_axis();
+
         this.should_animate = true;
         this.animate();
     }
@@ -243,6 +271,37 @@ class Visualization {
         this.physicsWorld.setGravity(new Ammo.btVector3(0, 0, 0));
     }
 
+    configure_outline_passes() {
+        // Configure outline shader
+        this.impactObjects = [];
+        this.impactPass.selectedObjects = this.impactObjects;
+        this.impactPass.renderToScreen = true;
+        this.impactPass.edgeStrength = this.outline_params.edgeStrength;
+        this.impactPass.edgeGlow = this.outline_params.edgeGlow;
+        this.impactPass.pulsePeriod = this.outline_params.pulsePeriod;
+        this.impactPass.visibleEdgeColor.set('red');
+        this.impactPass.hiddenEdgeColor.set('white');
+
+        this.selectedObjects = [];
+        this.selectedPass.selectedObjects = this.selectedObjects;
+        this.selectedPass.renderToScreen = true;
+        this.selectedPass.edgeStrength = this.outline_params.edgeStrength;
+        this.selectedPass.edgeGlow = this.outline_params.edgeGlow;
+        this.selectedPass.pulsePeriod = this.outline_params.pulsePeriod;
+        this.selectedPass.visibleEdgeColor.set('green');
+        this.selectedPass.hiddenEdgeColor.set('white');
+
+
+        this.newObjects = [];
+        this.newbornPass.selectedObjects = this.newObjects;
+        this.newbornPass.renderToScreen = true;
+        this.newbornPass.edgeStrength = this.outline_params.edgeStrength;
+        this.newbornPass.edgeGlow = this.outline_params.edgeGlow;
+        this.newbornPass.pulsePeriod = this.outline_params.pulsePeriod;
+        this.newbornPass.visibleEdgeColor.set('blue');
+        this.newbornPass.hiddenEdgeColor.set('white');
+    }
+
     createLights() {
         // A hemisphere light is a gradient colored light;
         // the first parameter is the sky color, the second parameter is the ground color,
@@ -251,52 +310,54 @@ class Visualization {
 
         // A directional light shines from a specific direction.
         // It acts like the sun, that means that all the rays produced are parallel.
-        this.shadowLight = new THREE.DirectionalLight(0xffffff, 0.5);
-        this.shadowLight_x = new THREE.DirectionalLight(0xffffff, 0.5);
-        this.shadowLight_y = new THREE.DirectionalLight(0xffffff, 0.5);
-        this.shadowLight_z = new THREE.DirectionalLight(0xffffff, 0.5);
+        // this.shadowLight = new THREE.DirectionalLight(0xffffff, 0.5);
+        // this.shadowLight_x = new THREE.DirectionalLight(0xffffff, 0.5);
+        // this.shadowLight_y = new THREE.DirectionalLight(0xffffff, 0.5);
+        // this.shadowLight_z = new THREE.DirectionalLight(0xffffff, 0.5);
 
-        // Set the direction of the light
-        this.shadowLight.position.set(
-            this.chamber_edge_length,
-            this.chamber_edge_length / 2,
-            this.chamber_edge_length / 2
-        );
-        this.shadowLight_x.position.set(this.chamber_edge_length, 0, 0);
-        this.shadowLight_y.position.set(0, this.chamber_edge_length, 0);
-        this.shadowLight_z.position.set(0, 0, this.chamber_edge_length);
-        // Allow shadow casting
-        this.shadowLight.castShadow = true;
-        this.shadowLight_x.castShadow = true;
-        this.shadowLight_y.castShadow = true;
-        this.shadowLight_z.castShadow = true;
+        // // Set the direction of the light
+        // this.shadowLight.position.set(
+        //     this.chamber_edge_length,
+        //     this.chamber_edge_length / 2,
+        //     this.chamber_edge_length / 2
+        // );
+        // this.shadowLight_x.position.set(this.chamber_edge_length, 0, 0);
+        // this.shadowLight_y.position.set(0, this.chamber_edge_length, 0);
+        // this.shadowLight_z.position.set(0, 0, this.chamber_edge_length);
+        // // Allow shadow casting
+        // this.shadowLight.castShadow = true;
+        // this.shadowLight_x.castShadow = true;
+        // this.shadowLight_y.castShadow = true;
+        // this.shadowLight_z.castShadow = true;
 
         // define the visible area of the projected shadow
-        this.shadowLight.shadow.camera.left = -this.chamber_edge_length;
-        this.shadowLight.shadow.camera.right = this.chamber_edge_length;
-        this.shadowLight.shadow.camera.top = this.chamber_edge_length;
-        this.shadowLight.shadow.camera.bottom = -this.chamber_edge_length;
-        this.shadowLight.shadow.camera.near = 1;
-        this.shadowLight.shadow.camera.far = 1000;
+        // this.shadowLight.shadow.camera.left = -this.chamber_edge_length;
+        // this.shadowLight.shadow.camera.right = this.chamber_edge_length;
+        // this.shadowLight.shadow.camera.top = this.chamber_edge_length;
+        // this.shadowLight.shadow.camera.bottom = -this.chamber_edge_length;
+        // this.shadowLight.shadow.camera.near = 1;
+        // this.shadowLight.shadow.camera.far = 1000;
 
         // define the resolution of the shadow; the higher the better,
         // but also the more expensive and less performant
-        this.shadowLight.shadow.mapSize.width = 2048;
-        this.shadowLight.shadow.mapSize.height = 2048;
+        // this.shadowLight.shadow.mapSize.width = 2048;
+        // this.shadowLight.shadow.mapSize.height = 2048;
 
         // to activate the lights, just add them to the scene
         this.scene.add(this.hemisphereLight);
-        this.scene.add(this.shadowLight);
+        // this.scene.add(this.shadowLight);
         //this.scene.add(this.shadowLight_y);
         //this.scene.add(this.shadowLight_z);
     }
 
     generate_species(name) {
         // let envMap = new THREE.TextureLoader().load("Images/envMap.png");
-        let envMap = new THREE.TextureLoader().load("Images/moon_1024.jpg");
+        // let envMap = new THREE.TextureLoader().load("Images/moon_1024.jpg");
         // let envMap = new THREE.TextureLoader().load("Images/glassbw.jpg");
-        let normMap = new THREE.TextureLoader().load("Images/moon_1024.jpg");
+        // let normMap = new THREE.TextureLoader().load("Images/moon_1024.jpg");
 
+        let envMap = new THREE.TextureLoader().load("Images/ice-hr.jpg");
+        let normMap = new THREE.TextureLoader().load("Images/ice-hr.jpg");
 
         envMap.mapping = THREE.SphericalReflectionMapping;
 
@@ -310,20 +371,33 @@ class Visualization {
 
         for (let i = 0; i < geometry.length; i++) {
             //For atom i set up correct material
-            let material = new THREE.MeshPhysicalMaterial({
+            // let material = new THREE.MeshPhysicalMaterial({
+            //     // wireframe: true
+            //     color: COLORS[geometry[i][0]],
+            //     emissive: COLORS[geometry[i][0]],
+            //     metalness: 0.0, // metalness: .9,
+            //     roughness: 0.1, // roughness: roughness,
+            //     reflectivity: 1.0,
+            //     // color: diffuseColor,
+            //     envMap: envMap,
+            //     normalMap: normMap,
+            //     normalScale: new THREE.Vector2(0.15, 0.15),
+            //     clearcoatNormalMap: normMap,
+            //     premultipliedAlpha: true,
+            // });
+
+            let material = new THREE.MeshStandardMaterial({
                 // wireframe: true
                 color: COLORS[geometry[i][0]],
                 emissive: COLORS[geometry[i][0]],
-                metalness: 0.0, // metalness: .9,
-                roughness: 0.1, // roughness: roughness,
-                reflectivity: 1.0,
-                // color: diffuseColor,
                 envMap: envMap,
                 normalMap: normMap,
                 normalScale: new THREE.Vector2(0.15, 0.15),
-                clearcoatNormalMap: normMap,
-                premultipliedAlpha: true,
+                metalness: 0.0, // metalness: .9,
+                roughness: 0.1, // roughness: roughness,
+                reflectivity: 0.5,
             });
+
             materials.push(material);
 
             // for atom I create the correct geometry
@@ -342,14 +416,44 @@ class Visualization {
             mergedGeometry.push(sphereGeometry);
         }
 
+        let geometry_complete = BufferGeometryUtils.mergeBufferGeometries(mergedGeometry, true)
+        geometry_complete.computeBoundingSphere();
+        geometry_complete.center();
         // This information is now stored in the main data structure.
-
-        //console.log(mergedGeometry)
-
         this.data[name]["graphics"] = {
-            geom: BufferGeometryUtils.mergeBufferGeometries(mergedGeometry, true),
-            material: materials
+            geom: geometry_complete,
+            material: materials,
         };
+
+        //Convert Geometry into a triangle mesh that can be used in ammo for colision
+        let geom = new THREE.Geometry().fromBufferGeometry(geometry_complete)
+        geom.mergeVertices(); // duplicate vertices are created with fromBufferGeometry()
+        const vertices = geom.vertices;
+        const scale = [1, 1, 1];
+
+        const trig_mesh = new Ammo.btTriangleMesh(true, true);
+        trig_mesh.setScaling(new Ammo.btVector3(scale[0], scale[1], scale[2]));
+        for (let i = 0; i < geom.vertices.length; i = i + 3) {
+            trig_mesh.addTriangle(
+                new Ammo.btVector3(vertices[i].x, vertices[i].y, vertices[i].z),
+                new Ammo.btVector3(vertices[i + 1].x, vertices[i + 1].y, vertices[i + 1].z),
+                new Ammo.btVector3(vertices[i + 2].x, vertices[i + 2].y, vertices[i + 2].z),
+                true
+            );
+
+        }
+        geom.computeBoundingSphere();
+        geom.center();
+        geom.verticesNeedUpdate = true;
+
+        //store it for everyone!
+        this.data[name]["physics"] = {
+            geom: geom
+        };
+
+
+
+
 
         for (let geo of mergedGeometry) {
             geo.dispose();
@@ -378,12 +482,16 @@ class Visualization {
                 z: d3.randomNormal(0.0)(3.14)
             }
         }) {
+
+
+        // With starting info create a Molecule Instance
         let temp = new Molecule(
             name,
             this.data[name].mass,
             this.data[name].coords,
             this.data[name].graphics.geom,
             this.data[name].graphics.material,
+            this.data[name].physics.geom,
             starting_info.starting_position,
             starting_info.velocity,
             starting_info.rotational_velocity
@@ -407,92 +515,173 @@ class Visualization {
         // console.log(this.data[name])
     }
 
-    add_grid() {
+    create_chamber() {
         // Set up local
+        let grid_color_main = 'black';
+        let grid_color_secondary = 'black';
         let mass = 0;
         let pos = new THREE.Vector3();
         let dim = new THREE.Vector3();
-        let size = this.chamber_edge_length;
+        let edge = this.chamber_edge_length * 2;
         let divisions = this.chamber_edge_length;
         let gridHelper = null;
+        let thickness = this.chamber_edge_length / 2;
+
+        //X - left right
+        dim.set(
+            thickness,
+            edge,
+            edge,
+        );
+        pos.set(
+            (this.chamber_edge_length + thickness) / (-2),
+            0,
+            0
+        );
+        this.createRigidBody(pos, dim);
+        pos.set(
+            (this.chamber_edge_length + thickness) / (2),
+            0,
+            0
+        );
+        this.createRigidBody(pos, dim);
+
+        //Y - bottom top
+        dim.set(
+            edge,
+            thickness,
+            edge,
+        );
+        pos.set(
+            0,
+            (this.chamber_edge_length + thickness) / (-2),
+            0,
+        );
+        this.createRigidBody(pos, dim);
+        pos.set(
+            0,
+            (this.chamber_edge_length + thickness) / (2),
+            0,
+        );
+        this.createRigidBody(pos, dim);
+
+        //Z - back front
+        dim.set(
+            edge,
+            edge,
+            thickness,
+        );
+        pos.set(
+            0,
+            0,
+            (this.chamber_edge_length + thickness) / (-2),
+        );
+        this.createRigidBody(pos, dim);
+        pos.set(
+            0,
+            0,
+            (this.chamber_edge_length + thickness) / (2),
+        );
+        this.createRigidBody(pos, dim);
+
+
+
+
+
+
+
+        // gridHelper = new THREE.GridHelper(size, divisions, grid_color_main, grid_color_secondary);
+        // gridHelper.position.copy(pos);
+        // this.scene.add(gridHelper);
+        // this.grid_cube.push(gridHelper);
+
+
+        // Setup the boxes for actualy physics
 
         // ADD GRIDS
-
         //Top and bottom   - along Y axis
-        //Bottom
-        gridHelper = new THREE.GridHelper(size, divisions, "grey", "grey");
-        gridHelper.geometry.rotateY(Math.PI / 2);
-        pos.set(0, -this.chamber_edge_length / 2, 0);
-        dim.set(this.chamber_edge_length, 0.1, this.chamber_edge_length);
-        gridHelper.position.copy(pos);
-        this.scene.add(gridHelper);
+
+        // dim.set(
+        //     thickness,
+        //     this.chamber_edge_length * 2,
+        //     this.chamber_edge_length * 2
+        // );
+
+
+
+        // pos.set(
+        //     this.chamber_edge_length + thickness / (-2),
+        //     0,
+        //     0
+        // );
+        // this.createRigidBody(dim, mass, pos, thickness);
+
+
+
+        // //top
+        // gridHelper = new THREE.GridHelper(size, divisions, grid_color_main, grid_color_secondary);
+        // pos.set(
+        //     0,
+        //     this.chamber_edge_length / 2,
+        //     0
+        // );
+        // gridHelper.position.copy(pos);
+        // pos.set(0,
+        //     this.chamber_edge_length + thickness / 2,
+        //     0
+        // );
+        // this.createRigidBody(dim, mass, pos, thickness);
+        // this.scene.add(gridHelper);
         // this.grid_cube.push(gridHelper);
-        this.createRigidBody(dim, mass, pos);
-        //top
-        gridHelper = new THREE.GridHelper(size, divisions, "grey", "grey");
-        gridHelper.geometry.rotateY(Math.PI / 2);
-        pos.set(0, this.chamber_edge_length / 2, 0);
-        dim.set(this.chamber_edge_length, 0.1, this.chamber_edge_length);
-        gridHelper.position.copy(pos);
-        this.scene.add(gridHelper);
-        this.grid_cube.push(gridHelper);
-        this.createRigidBody(dim, mass, pos);
+
+
+
 
         // Front and back - along X
-        gridHelper = new THREE.GridHelper(size, divisions, "grey", "grey");
-        gridHelper.geometry.rotateZ(Math.PI / 2);
-        pos.set(-this.chamber_edge_length / 2, 0, 0);
-        dim.set(0.1, this.chamber_edge_length, this.chamber_edge_length);
-        gridHelper.position.copy(pos);
-        this.scene.add(gridHelper);
-        this.grid_cube.push(gridHelper);
-        this.createRigidBody(dim, mass, pos);
+        // gridHelper = new THREE.GridHelper(size, divisions, grid_color_main, grid_color_secondary);
+        // gridHelper.geometry.rotateZ(Math.PI / 2);
+        // pos.set(-(this.chamber_edge_length) / 2, 0, 0);
 
-        gridHelper = new THREE.GridHelper(size, divisions, "grey", "grey");
-        gridHelper.geometry.rotateZ(Math.PI / 2);
-        pos.set(this.chamber_edge_length / 2, 0, 0);
-        dim.set(0.1, this.chamber_edge_length, this.chamber_edge_length);
-        gridHelper.position.copy(pos);
-        this.scene.add(gridHelper);
-        this.grid_cube.push(gridHelper);
-        this.createRigidBody(dim, mass, pos);
+        // gridHelper.position.copy(pos);
+        // this.scene.add(gridHelper);
+        // this.grid_cube.push(gridHelper);
+        // dim.set(thickness, this.chamber_edge_length * 2, this.chamber_edge_length * 2);
+        // pos.set(-(this.chamber_edge_length + thickness) / 2, 0, 0);
+        // // this.createRigidBody(dim, mass, pos);
 
-        // Front and back - along Z
-        gridHelper = new THREE.GridHelper(size, divisions, "grey", "grey");
-        gridHelper.geometry.rotateX(Math.PI / 2);
-        pos.set(0, 0, -this.chamber_edge_length / 2);
-        dim.set(this.chamber_edge_length, this.chamber_edge_length, 0.1);
-        gridHelper.position.copy(pos);
-        this.scene.add(gridHelper);
-        this.grid_cube.push(gridHelper);
-        this.createRigidBody(dim, mass, pos);
+        // gridHelper = new THREE.GridHelper(size, divisions, grid_color_main, grid_color_secondary);
+        // gridHelper.geometry.rotateZ(Math.PI / 2);
+        // pos.set(this.chamber_edge_length / 2, 0, 0);
+        // gridHelper.position.copy(pos);
+        // this.scene.add(gridHelper);
+        // this.grid_cube.push(gridHelper);
+        // pos.set((this.chamber_edge_length + thickness) / 2, 0, 0);
+        // // this.createRigidBody(dim, mass, pos);
 
-        gridHelper = new THREE.GridHelper(size, divisions, "grey", "grey");
-        gridHelper.geometry.rotateX(Math.PI / 2);
-        pos.set(0, 0, this.chamber_edge_length / 2);
-        dim.set(this.chamber_edge_length, this.chamber_edge_length, 0.1);
-        gridHelper.position.copy(pos);
-        this.scene.add(gridHelper);
-        this.grid_cube.push(gridHelper);
-        this.createRigidBody(dim, mass, pos);
+        // // Front and back - along Z
+        // gridHelper = new THREE.GridHelper(size, divisions, grid_color_main, grid_color_secondary);
+        // gridHelper.geometry.rotateX(Math.PI / 2);
+        // pos.set(0, 0, -this.chamber_edge_length / 2);
+        // gridHelper.position.copy(pos);
+        // this.scene.add(gridHelper);
+        // pos.set(0, 0, -(this.chamber_edge_length + thickness) / 2);
+        // this.grid_cube.push(gridHelper);
+        // dim.set(this.chamber_edge_length * 2, this.chamber_edge_length * 2, thickness);
+        // // this.createRigidBody(dim, mass, pos);
+
+        // gridHelper = new THREE.GridHelper(size, divisions, grid_color_main, grid_color_secondary);
+        // gridHelper.geometry.rotateX(Math.PI / 2);
+        // pos.set(0, 0, this.chamber_edge_length / 2);
+        // gridHelper.position.copy(pos);
+        // this.scene.add(gridHelper);
+        // pos.set(0, 0, (this.chamber_edge_length + thickness) / 2);
+        // this.grid_cube.push(gridHelper);
+        // // this.createRigidBody(dim, mass, pos);
 
         // END ADD GRIDS
     }
 
-    createRigidBody(dim, mass, pos) {
-        // for visualizaton purposes:
-        // let material = new THREE.MeshPhysicalMaterial({
-        //     color: 'grey',
-        //     emissive: 'grey',
-        //     reflectivity: 0,
-        //     metalness: .9,
-        //     roughness: 1
-        // });
-        // let geometry = new THREE.BoxBufferGeometry(dim.x, dim.y, dim.z);
-        // this.chamber = new THREE.Mesh(geometry, material);
-        // this.chamber.position.set(pos.x, pos.y, pos.z);
-        // this.scene.add(this.chamber);
-        // End geometry helper block
+    createRigidBody(pos = new THREE.Vector3(0, 0, 0), dim = new THREE.Vector3(1, 1, 1), mass = 0) {
 
         // Actual ammo code
         let transform = new Ammo.btTransform();
@@ -500,7 +689,8 @@ class Visualization {
         transform.setOrigin(new Ammo.btVector3(pos.x, pos.y, pos.z));
         let motionState = new Ammo.btDefaultMotionState(transform);
 
-        let colShape = new Ammo.btBoxShape(new Ammo.btVector3(dim.x, dim.y, dim.z));
+        // The .5 multipliers appear to be essential.... not able to find a documented reason
+        let colShape = new Ammo.btBoxShape(new Ammo.btVector3(dim.x * 0.5, dim.y * 0.5, dim.z * 0.5));
         colShape.setMargin(0.05);
 
         let localInertia = new Ammo.btVector3(0, 0, 0);
@@ -519,34 +709,45 @@ class Visualization {
         body.setDamping(0.0, 0.0); // void 	setDamping (btScalar lin_damping, btScalar ang_damping)
 
         this.physicsWorld.addRigidBody(body);
+
+
+        // for visualizaton purposes:
+        let show_collision_volumes = true;
+        if (show_collision_volumes) {
+
+            let material = new THREE.MeshPhysicalMaterial({
+                color: 'grey',
+                emissive: 'grey',
+                transparent: true,
+                opacity: .2,
+                reflectivity: 0.0,
+                metalness: 0.0,
+                roughness: 0.0
+            });
+            //BoxBufferGeometry(
+            //  width: Float,   x
+            //  height : Float, y
+            //  depth : Float,  z
+            //  widthSegments : Integer, heightSegments : Integer, depthSegments : Integer)
+            let geometry = new THREE.BoxBufferGeometry(dim.x, dim.y, dim.z);
+            geometry.computeBoundingSphere();
+            geometry.center();
+
+            let wall = new THREE.Mesh(geometry, material);
+            wall.position.set(pos.x, pos.y, pos.z);
+            this.scene.add(wall);
+            // End geometry helper block
+
+            wall.userData.physicsBody = body;
+
+            this.rigidBodies.push(wall)
+
+            this.grid_cube.push(wall);
+
+        }
+
     }
 
-    clean_all() {
-        // Clean up old scene molecules and chamber
-
-        // for (name in this.data) {
-        //     while (this.data[name].instances.length > 0) {
-        //         let temp = this.data[name].instances.pop();
-        //         //console.log(temp)
-        //         let object = this.scene.getObjectByProperty('uuid', temp.mesh.uuid);
-        //         //console.log(object)
-        //         object.geometry.dispose();
-        //         for (let mat in object.materials) {
-        //             mat.dispose();
-        //         }
-        //         this.scene.remove(object);
-        //     }
-        // }
-
-        // console.log(this.chamber)
-        // if (this.chamber != null) {
-        //     this.chamber.geometry.dispose()
-        //     this.chamber.material.dispose();
-        //     this.scene.remove(this.chamber);
-        // }
-
-        // this.renderer.renderLists.dispose();
-    }
 
     add_to_pass(id, pass) {
         let object = this.scene.getObjectByProperty("uuid", id);
@@ -723,9 +924,7 @@ class Visualization {
     }
 
     molecular_updater() {
-        // console.log(this.data.length)
-
-
+        //call update on oll the molecules in the scene
         for (let i = 0; i < this.data.length; i++) {
             // console.log(this.data[i])
             // console.log(this.data[i].instances)
@@ -834,7 +1033,6 @@ class Visualization {
     tick(incoming_data) {}
 
     animate() {
-        //this.add_line();
 
         this.controls.update();
         this.camera.updateMatrixWorld();
@@ -852,7 +1050,9 @@ class Visualization {
         }
 
         requestAnimationFrame(this.animate.bind(this));
+        this.stats.begin();
         this.composer.render(this.scene, this.camera);
+        this.stats.end();
     }
 
     toggle_animate() {
@@ -914,15 +1114,21 @@ class Visualization {
             //     console.log("shrinking!");
             //     this.selectedObjects[this.selectedObjects.length - 1].scale.setScalar(1.0);
             // }
-            // interse   cts[0].object.scale.setScalar(3.0);
+            // intersects[0].object.scale.setScalar(3.0);
 
             this.remove_from_pass('all', this.selectedObjects);
             this.add_to_pass(intersects[0].object.uuid, this.selectedObjects);
+
+            console.log(intersects[0].object.position)
+            this.controls.target = intersects[0].object.position;
+
             // this.selectedObjects.push(intersects[0].object)
             // c  onsole.log(intersects[0].object);
         } else {
             this.remove_from_pass('all', this.selectedObjects);
         }
+
+
     }
 
     onDocumentKeyDown(event) {
@@ -939,7 +1145,7 @@ class Visualization {
         this.renderer.setSize(this.width_for_3d, this.height_for_3d);
     }
 
-    view_mouse() {
+    helper_view_mouse() {
         //console.log('in this mouse')
         // for visualizaton purposes:
         let material = new THREE.MeshPhysicalMaterial({
@@ -959,7 +1165,33 @@ class Visualization {
         //End geometry helper block
     }
 
-    add_line() {
+    helper_show_axis() {
+        //xyz
+        //rgb
+
+        let max_min = 50;
+
+        let pos = new THREE.Vector3();
+
+        this.helper_show_coordinate(pos.set(0, 0, 0), 'black')
+
+
+        for (let i = 1; i < max_min; i++) {
+            this.helper_show_coordinate(pos.set(i, 0, 0), 'red')
+            this.helper_show_coordinate(pos.set(-i, 0, 0), 'red')
+        }
+        for (let i = 1; i < max_min; i++) {
+            this.helper_show_coordinate(pos.set(0, i, 0), 'green')
+            this.helper_show_coordinate(pos.set(0, -i, 0), 'green')
+        }
+        for (let i = 1; i < max_min; i++) {
+            this.helper_show_coordinate(pos.set(0, 0, i), 'blue')
+            this.helper_show_coordinate(pos.set(0, 0, -i), 'blue')
+        }
+
+    }
+
+    helper_add_line() {
         let material = new THREE.LineBasicMaterial({ color: 0x0000ff });
         let points = [];
         //console.log(this.raycaster.ray.origin)
@@ -986,6 +1218,52 @@ class Visualization {
         let line = new THREE.Line(geometry, material);
         this.scene.add(line);
     }
+
+    helper_show_coordinate(pos, color = 'black') {
+        // for visualizaton purposes:
+        let material = new THREE.MeshPhysicalMaterial({
+            color: color,
+            emissive: color,
+            transparent: true,
+            opacity: .5,
+            reflectivity: 0.0,
+            metalness: 0.0,
+            roughness: 0.0
+        });
+        //BoxBufferGeometry(width : Float, height : Float, depth : Float, widthSegments : Integer, heightSegments : Integer, depthSegments : Integer)
+        let geometry = new THREE.SphereBufferGeometry(.1, .1, .1);
+        let temp_sphere = new THREE.Mesh(geometry, material);
+        temp_sphere.position.set(pos.x, pos.y, pos.z);
+        this.scene.add(temp_sphere);
+    }
+
+    clean_all() {
+        // Clean up old scene molecules and chamber
+
+        // for (name in this.data) {
+        //     while (this.data[name].instances.length > 0) {
+        //         let temp = this.data[name].instances.pop();
+        //         //console.log(temp)
+        //         let object = this.scene.getObjectByProperty('uuid', temp.mesh.uuid);
+        //         //console.log(object)
+        //         object.geometry.dispose();
+        //         for (let mat in object.materials) {
+        //             mat.dispose();
+        //         }
+        //         this.scene.remove(object);
+        //     }
+        // }
+
+        // console.log(this.chamber)
+        // if (this.chamber != null) {
+        //     this.chamber.geometry.dispose()
+        //     this.chamber.material.dispose();
+        //     this.scene.remove(this.chamber);
+        // }
+
+        // this.renderer.renderLists.dispose();
+    }
+
 }
 
 export default Visualization;

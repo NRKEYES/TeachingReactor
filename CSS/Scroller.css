@@ -55,7 +55,10 @@ body {
     display: flex;
 }
 
-.menu-branch {}
+.menu-branch {
+    justify-content: center;
+    text-align: right;
+}
 
 .menu-branch:hover {
     height: 75vh;
@@ -90,7 +93,7 @@ body {
     position: absolute;
     top: 0;
     left: 0;
-    width: 5vw;
+    width: fit-content;
 }
 
 .menu-root:hover {
