@@ -6,6 +6,7 @@ class Molecule {
         this.rotational_velocity = rotational_velocity;
         this.lifetime = 0;
         this.can_decompose = false;
+        this.glows = [];
 
         // TODO make this way more flexible
         if (this.mass > 50) {
@@ -26,8 +27,6 @@ class Molecule {
 
 
         this.mesh = new THREE.Mesh(geometry, material);
-        this.mesh.castShadow = true;
-        this.mesh.receiveShadow = true;
         this.mesh.position.set(starting_position.x, starting_position.y, starting_position.z);
         this.mesh.castShadow = true;
         this.mesh.receiveShadow = true;

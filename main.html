@@ -25,16 +25,17 @@
 </head>
 
 
-<body>
+<body id='body'>
 
     <nav class='menu menu-root' id='menu'>
-        <span>Menu</span>
+        <img src='Images/menu.svg'>
+        <!-- <a style='vertical-align: center;'>Menu</a> -->
 
-        <a type="button" class='menu menu-button' id="run_simulation">
-            <img source='Images/sci/svg/statistics-bars-graphic-hanging-of-a-nail.svg'>
-            <span>Start Simulation</span>
-        </a>
-
+        <li class='menu menu-button'>
+            <a type="button" class='button' id="run_simulation">
+                <span>Start Simulation</span>
+            </a>
+        </li>
 
         <li class='menu menu-button'>
             <a type="button" class='button' id="pause_simulation">
@@ -50,17 +51,6 @@
 
         <ul class='menu menu-branch' id="controls">
             <span>Simulation Controls</span>
-            <li class='menu menu-button'>
-                <a type="button" class='button' id="toggle_grid">
-                    <span>Toggle Grid Visability</span>
-                </a>
-            </li>
-            <li class='menu menu-button'>
-                <a type="button" class='button' id="toggle_camera">
-                    <span>Toggle Auto Rotate</span>
-                </a>
-            </li>
-
 
             <li class='menu menu-slider'>
                 <span>Number of Particles (Exponent):</span>
@@ -84,25 +74,37 @@
                 <input type="range" min="0" max="10" class="slider" id="time_for_new_glow">
                 <text id="slider_value"> </text>
             </li>
-
-
-
-
             <li class='menu menu-slider'>
                 <span>Time Step Equivalent (exponent):</span>
                 <input type="range" min="0" max="100" class="slider" id="time_step">
                 <text id="slider_value"> </text>
             </li>
+        </ul>
 
+        <ul class='menu menu-branch' id="Visual Options">
+            <span>Visability Options</span>
+            <li class='menu menu-button'>
+                <a type="button" class='button' id="toggle_grid">
+                    <span>Toggle Grid Cube</span>
+                </a>
+            </li>
+            <li class='menu menu-button'>
+                <a type="button" class='button' id="toggle_axis">
+                    <span>Toggle Axis</span>
+                </a>
+            </li>
+            <li class='menu menu-button'>
+                <a type="button" class='button' id="toggle_camera">
+                    <span>Toggle Auto Rotate</span>
+                </a>
+            </li>
 
         </ul>
 
         <ul class='menu menu-branch' id='Graph Control'>
             <span>Graph Controls</span>
 
-            <li class='menu menu-button'>
-                <a type="button" class='button' id="barchart_button"> Display Barchart</a>
-            </li>
+
 
             <li class='menu menu-button'>
                 <a type="button" class='button' id="histogram_button"> Display Histogram</a>
@@ -120,10 +122,14 @@
                 <a type="button" class='button' id="clear_graphs"> Clear Graphs</a>
             </li>
 
+
         </ul>
 
         <ul class='menu menu-branch' id='Developmental'>
             <span>Still in Development</span>
+            <li class='menu menu-button'>
+                <a type="button" class='button' id="barchart_button"> Display Barchart</a>
+            </li>
 
             <li class='menu menu-slider'>
                 Forward Reaction Rate (Exponent):
@@ -170,7 +176,7 @@
         <div id='CountVsTime' class='floating' style="width:60vw; height:50vh; z-index: -1;"></div>
         <div id='Barchart' class='floating' style="width:60vw; height:50vh; z-index: -1;"></div>
         <div id='SideView' class='floating' style="width:60vw; height:50vh; z-index: -1;"></div>
-        <div id='info_box' class='floating' style="width:60vw; height:50vh; z-index: -1;">
+        <div id='info_box' class='floating' style=" z-index: -1;">
             <span id='info_box'></span>
         </div>
     </div>

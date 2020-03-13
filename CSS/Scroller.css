@@ -7,24 +7,27 @@
     --height: 98vh;
     --font: 'Source Code Pro', monospace;
     --transition-speed: opacity 2s linear;
+    /* this lets me set font with em = font-size:  */
+    font-size: 6.25%;
+    font-family: var(--font);
+    font-style: normal;
+    text-decoration: none;
+    --line-height: 1.1;
+    line-height: var(--line-height);
 }
 
 body {
     width: var(--width);
     height: var(--height);
     background-color: var(--main-background-color);
-    font-family: var(--font);
-    font-size: 2vh;
-    font-style: normal;
-    text-decoration: none;
     position: fixed;
     justify-content: center;
     text-align: left;
 }
 
 .menu {
-    /* padding: 2%; */
-    /* border: 3px solid var(--highlight-color); */
+    border: none;
+    padding: 1%;
     /* visibility: hidden; */
     /* text-decoration: none; */
     /* justify-content: center; */
@@ -33,85 +36,121 @@ body {
     flex-direction: column;
     z-index: 100;
     opacity: 0;
-    margin: 0;
+    margin: 1px;
     list-style: none;
-    text-align: center;
-    transition: all 0.5s ease 0.1s;
-    background-color: var(--menu-color-main);
-    color: white;
-    height: 5vh;
+    /* font-size: 16em; */
+    text-align: right;
+    vertical-align: center;
+    transition: all 0.1s ease 0.1s;
+    background-color: rgba(0, 0, 0, 0.0);
+    color: grey;
+    height: var(--line-height);
     width: 20vw;
 }
 
 .menu:hover {
     /* border: 3px dotted var(--highlight-color); */
-    transition: all 0.5s ease 0s;
-    background-color: var(--menu-color-selected);
+    transition: all 0.1s ease 0s;
+    opacity: 1.0;
     left: 1vw;
+    /* font-size: 16em; */
+    color: black;
+    text-align: left;
+    vertical-align: center;
 }
 
 .menu:hover>* {
     opacity: 1.0;
     display: flex;
+    vertical-align: center;
+}
+
+.menu:active {
+    color: red;
 }
 
 .menu-branch {
-    justify-content: center;
-    text-align: right;
+    vertical-align: center;
 }
 
 .menu-branch:hover {
-    height: 75vh;
+    /* height: 75vh; */
+    height: var(--line-height);
     z-index: 2;
 }
 
 .menu-branch:hover~.menu {
     z-index: 1;
+    /* text-align: left; */
 }
 
-.menu-button {
-    background-color: #4e93b4;
+.menu button {
+    /* color: black; */
+    /* background-color: #4e93b4; */
 }
 
-.menu-button:hover {
-    background-color: #56c1d8;
+.menu button:hover {
+    /* background-color: #56c1d8; */
+    /* border: 3px solid var(--highlight-color); */
 }
 
 .menu-slider {
-    /* font-size: .8em; */
-    text-align: left;
-    background-color: var(--menu-color-main);
+    /* text-align: left; */
+    /* background-color: var(--menu-color-main); */
     height: fit-content;
 }
 
 .menu-root {
     /* transition: all 1.5s ease 4s; */
     /* justify-content: flex-end; */
-    display: flex;
-    flex-direction: column;
-    opacity: 1.0;
+    opacity: .5;
     position: absolute;
-    top: 0;
-    left: 0;
-    width: fit-content;
+    display: flex;
+    top: -1vh;
+    left: -1vw;
+    height: var(--line-height)*2;
+    width: 10vw;
+    vertical-align: center;
 }
 
 .menu-root:hover {
     /* justify-content: flex-end; */
-    left: 0;
-    height: 98vh;
+    height: 96vh;
+    width: 22vw;
+    opacity: 1.0;
+}
+
+.menu-root img {
+    max-height: var(--line-height);
+    max-width: 3vw;
+}
+
+.menu li:hover {
+    background-color: pink;
+    /* top: 50%;
+    left: 50%;
+    margin: -15% 0 0 -25%; */
+}
+
+.menu span {
+    vertical-align: center;
+}
+
+#Developmental {
+    margin-top: auto;
+    /* margin-bottom: auto; */
 }
 
 .slidecontainer {
     width: 100%;
-    background-color: var(--menu-color-main);
+    /* background-color: var(--menu-color-main); */
 }
 
 .slider {
     -webkit-appearance: none;
     width: 100%;
     height: 25px;
-    background: #d3d3d3;
+    /* background: #e3b505; */
     outline: none;
     opacity: 0.3;
     -webkit-transition: .2s;
@@ -128,7 +167,7 @@ body {
     width: 25px;
     height: 25px;
     border-radius: 50%;
-    background: #4CAF50;
+    background: #56A3A6;
     cursor: pointer;
 }
 
@@ -136,7 +175,7 @@ body {
     width: 25px;
     height: 25px;
     border-radius: 50%;
-    background: #4CAF50;
+    background: #56A3A6;
     cursor: pointer;
 }
 
@@ -168,9 +207,13 @@ body {
 
 #info_box {
     list-style: square;
-    font-size: .5em;
-    left: 1em;
+    font-size: .8em;
+    position: absolute;
+    left: 80vw;
+    /* right: 100vw; */
     top: 1em;
+    height: fit-content;
+    width: 17vw;
     justify-content: right;
     text-align: right;
 }
@@ -178,7 +221,6 @@ body {
 #info_box:hover {
     flex-direction: column;
     list-style: square;
-    height: fit-content;
     justify-content: right;
     text-align: right;
 }
@@ -190,7 +232,7 @@ body {
 }
 
 .axis {
-    font-size: large;
+    /* font-size: large; */
     color: Black;
 }
 

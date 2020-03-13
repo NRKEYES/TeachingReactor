@@ -11,7 +11,7 @@ import { FXAAShader } from "/JS/three/examples/jsm/shaders/FXAAShader.js";
 
 import { GammaCorrectionShader } from '/JS/three/examples/jsm/shaders/GammaCorrectionShader.js';
 import { ColorifyShader } from '/JS/three/examples/jsm/shaders/ColorifyShader.js';
-
+import { FilmPass } from '/JS/three/examples/jsm/postprocessing/FilmPass.js';
 
 // import { BloomPass } from './jsm/postprocessing/BloomPass.js';
 // import { FilmPass } from './jsm/postprocessing/FilmPass.js';
@@ -30,7 +30,7 @@ import { ColorifyShader } from '/JS/three/examples/jsm/shaders/ColorifyShader.js
 // Internal Dependancies
 import Molecule from "/JS/Molecule.js";
 
-let sphere_quality = 10;
+let sphere_quality = 20;
 
 var COLORS = {
     H: 0xc0c0c0,
@@ -57,36 +57,23 @@ var atom_radius = {
 
 class Visualization {
     constructor(incoming_data, chamber_edge_length) {
+
+        this.preferences = {
+            grid_cube_visible: false,
+            axis_visible: false,
+            colunm_visible: true,
+            animate: true,
+            auto_rotate: true,
+            initial_camera_displacement_multiplier: 1.5,
+        }
+
+
         // Initialize Ammo engine
         Ammo();
-        //Engine Variables
+
         this.height_for_3d = document.getElementById("Visualization").clientHeight;
         this.width_for_3d = document.getElementById("Visualization").clientWidth;
         this.background_and_emis = 0x00fffa;
-        this.clock = new THREE.Clock();
-        this.tmpTrans = new Ammo.btTransform();
-        this.physicsWorld;
-        this.data = incoming_data;
-        this.setupPhysicsWorld();
-
-        // for glow
-        this.outline_params = {
-            edgeStrength: 20,
-            edgeGlow: 2,
-            edgeThickness: 1.0,
-            pulsePeriod: 1.0,
-            usePatternTexture: false
-        };
-
-        this.raycaster = new THREE.Raycaster();
-        this.mouse = new THREE.Vector2();
-        this.new_molecule_glow_time = .5;
-        this.rigidBodies = []; // for ammo
-        this.selectedObjects = [];
-        this.impactObjects = [];
-        this.newObjects = [];
-        this.line = [];
-        this.grid_cube = [];
 
         // Create renderer
         this.renderer = new THREE.WebGLRenderer({
@@ -100,6 +87,9 @@ class Visualization {
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.bias = 0.0001;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        // this.renderer.gammaOutput = true;
+        this.renderer.outputEncoding = THREE.sRGBEncoding;
+        this.renderer.gammaFactor = 2.2;
         // this.renderer.shadowMap.enabled = true;
         // this.renderer.toneMappingExposure = 1.0;
 
@@ -107,30 +97,62 @@ class Visualization {
         this.container.appendChild(this.renderer.domElement);
 
         this.stats = new Stats();
-        let stats_block = document.getElementById("menu").appendChild(this.stats.dom);
-        stats_block.style.cssText = '';
+        let stats_block = document.getElementById("body").appendChild(this.stats.dom);
+        stats_block.style.cssText = ' ';
+        stats_block.style.position = 'absolute';
+        stats_block.style.right = 0;
+        stats_block.style.bottom = 0;
+
     }
 
     init(incoming_data, chamber_edge_length) {
-        this.should_animate = false;
+        this.should_animate = this.preferences.animate;
         this.data = incoming_data;
-        // this.chamber = this.view_mouse();
+        this.chamber_edge_length = chamber_edge_length;
+
+        //Engine Variables
+        this.height_for_3d = document.getElementById("Visualization").clientHeight;
+        this.width_for_3d = document.getElementById("Visualization").clientWidth;
+        this.background_and_emis = 0x00fffa;
+        this.clock = new THREE.Clock();
+        this.tmpTrans = new Ammo.btTransform();
+        this.raycaster = new THREE.Raycaster();
+        this.mouse = new THREE.Vector2();
+
+        this.new_molecule_glow_time = .5;
+
+        this.rigidBodies = []; // for ammo
+        this.selectedObjects = []; // for glows
+        this.impactObjects = []; // for glows
+        this.newObjects = []; // for glows
+        this.line = [];
+        this.grid_cube = [];
+        this.helper_objects = [];
+        this.column = [];
+
+
+        this.physicsWorld;
+        this.setupPhysicsWorld();
+
+        // for glow
+        this.outline_params = {
+            edgeStrength: 20,
+            edgeGlow: 2,
+            edgeThickness: 1.0,
+            pulsePeriod: 1.0,
+            usePatternTexture: false
+        };
+
+
+
+
 
         for (name in this.data) {
             this.data[name].instances = [];
         }
 
-        this.tmpTrans = new Ammo.btTransform();
-        this.physicsWorld;
-        this.rigidBodies = [];
-        this.setupPhysicsWorld();
-
-        this.chamber_edge_length = chamber_edge_length;
 
         this.composer = new EffectComposer(this.renderer);
-
-
-
         // Setup scene, camera, lighting
         this.scene = new THREE.Scene();
         this.scene.position.x = 0;
@@ -144,22 +166,22 @@ class Visualization {
 
         //setup the initial camera conditions
         this.camera = new THREE.PerspectiveCamera(
-            70,
+            45,
             this.width_for_3d / this.height_for_3d,
             0.1,
             1000
         );
         this.camera.position.x = 0 // -left to +right
         this.camera.position.y = 0 // +top to -bottom
-        this.camera.position.z = 100; // + towards, me - away
+        this.camera.position.z = this.chamber_edge_length * this.preferences.initial_camera_displacement_multiplier; // + towards, me - away
         this.camera.lookAt(this.scene.position); // Not totally sure if this is helping orient the camera at init time.
 
         //setup the camera controler
         // loosely alphabetical
         // a lot of default values, here for completeness
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-        let default_autorotate = true;
-        if (default_autorotate) this.controls.autoRotate = true;
+
+        this.controls.autoRotate = this.preferences.auto_rotate;
         this.controls.autoRotateSpeed = 4; // default is 2
 
         this.controls.dampingFactor = 1.0; // TODO play with this more to see if there is an ideal value
@@ -246,9 +268,14 @@ class Visualization {
         this.configure_outline_passes();
         this.createLights();
         this.create_chamber();
+        this.create_column();
         this.helper_show_axis();
 
-        this.should_animate = true;
+        if (!this.preferences.axis_visible) this.toggle_axis();
+        if (!this.preferences.grid_cube_visible) this.toggle_grid_visability();
+        // if (!this.preferences.colunm_visible) this.g();
+
+
         this.animate();
     }
 
@@ -306,29 +333,49 @@ class Visualization {
         // A hemisphere light is a gradient colored light;
         // the first parameter is the sky color, the second parameter is the ground color,
         // the third parameter is the intensity of the light
-        this.hemisphereLight = new THREE.HemisphereLight(0xaaaaaa, 0x000000, 0.9);
+
+        let distance_from_center = this.chamber_edge_length * .48
+
+        this.hemisphereLight = new THREE.HemisphereLight(0xaaaaaa, 0x000000, .5);
 
         // A directional light shines from a specific direction.
         // It acts like the sun, that means that all the rays produced are parallel.
-        // this.shadowLight = new THREE.DirectionalLight(0xffffff, 0.5);
-        // this.shadowLight_x = new THREE.DirectionalLight(0xffffff, 0.5);
-        // this.shadowLight_y = new THREE.DirectionalLight(0xffffff, 0.5);
-        // this.shadowLight_z = new THREE.DirectionalLight(0xffffff, 0.5);
+        this.shadowLight_top = new THREE.DirectionalLight(0xffffff, 0.5);
+        this.shadowLight_x = new THREE.DirectionalLight(0xffffff, 0.5);
+        this.shadowLight_bottom = new THREE.DirectionalLight(0xffffff, 0.5);
+        this.shadowLight_z = new THREE.DirectionalLight(0xffffff, 0.5);
 
         // // Set the direction of the light
-        // this.shadowLight.position.set(
-        //     this.chamber_edge_length,
-        //     this.chamber_edge_length / 2,
-        //     this.chamber_edge_length / 2
-        // );
-        // this.shadowLight_x.position.set(this.chamber_edge_length, 0, 0);
-        // this.shadowLight_y.position.set(0, this.chamber_edge_length, 0);
-        // this.shadowLight_z.position.set(0, 0, this.chamber_edge_length);
-        // // Allow shadow casting
-        // this.shadowLight.castShadow = true;
-        // this.shadowLight_x.castShadow = true;
-        // this.shadowLight_y.castShadow = true;
-        // this.shadowLight_z.castShadow = true;
+        this.shadowLight_top.position.set(
+            0,
+            distance_from_center,
+            0,
+        );
+        this.shadowLight_bottom.position.set(
+            0, -distance_from_center,
+            0
+        );
+        this.helper_show_coordinate(this.shadowLight_bottom.position)
+
+
+        this.shadowLight_x.position.set(
+            this.chamber_edge_length / 2,
+            this.chamber_edge_length / 2,
+            0
+        );
+
+        this.shadowLight_z.position.set(
+            0,
+            this.chamber_edge_length / 2,
+            this.chamber_edge_length
+        );
+        // Allow shadow casting
+        this.shadowLight_top.castShadow = true;
+        this.shadowLight_bottom.castShadow = true;
+
+        this.shadowLight_x.castShadow = true;
+
+        this.shadowLight_z.castShadow = true;
 
         // define the visible area of the projected shadow
         // this.shadowLight.shadow.camera.left = -this.chamber_edge_length;
@@ -338,27 +385,36 @@ class Visualization {
         // this.shadowLight.shadow.camera.near = 1;
         // this.shadowLight.shadow.camera.far = 1000;
 
-        // define the resolution of the shadow; the higher the better,
+        // define the resolution of the shadow;
+        // the higher the better,
         // but also the more expensive and less performant
-        // this.shadowLight.shadow.mapSize.width = 2048;
-        // this.shadowLight.shadow.mapSize.height = 2048;
+        this.shadowLight_top.shadow.mapSize.width = 2048;
+        this.shadowLight_top.shadow.mapSize.height = 2048;
 
         // to activate the lights, just add them to the scene
         this.scene.add(this.hemisphereLight);
-        // this.scene.add(this.shadowLight);
-        //this.scene.add(this.shadowLight_y);
-        //this.scene.add(this.shadowLight_z);
+        this.scene.add(this.shadowLight_top);
+        this.scene.add(this.shadowLight_bottom);
+        // this.scene.add(this.shadowLight_x);
+
+        // this.scene.add(this.shadowLight_z);
     }
 
     generate_species(name) {
-        // let envMap = new THREE.TextureLoader().load("Images/envMap.png");
+        let envMap = new THREE.TextureLoader().load("Images/envMap.png")
+        let glassMap = new THREE.TextureLoader().load("Images/glassbw.jpg");
+
         // let envMap = new THREE.TextureLoader().load("Images/moon_1024.jpg");
-        // let envMap = new THREE.TextureLoader().load("Images/glassbw.jpg");
-        // let normMap = new THREE.TextureLoader().load("Images/moon_1024.jpg");
+        let normMap = new THREE.TextureLoader().load("Images/moon_1024.jpg");
 
-        let envMap = new THREE.TextureLoader().load("Images/ice-hr.jpg");
-        let normMap = new THREE.TextureLoader().load("Images/ice-hr.jpg");
+        // let envMap = new THREE.TextureLoader().load("Images/ice-hr.jpg");
+        // let normMap = new THREE.TextureLoader().load("Images/ice-hr.jpg");
 
+        // let envMap = new THREE.TextureLoader().load("Images/Plastic_04_basecolor.jpg");
+        // let normMap = new THREE.TextureLoader().load("Images/Plastic_04_normalOgl.jpg");
+
+        let displacementMap = new THREE.TextureLoader().load("Images/Plastic_04_height.jpg");
+        let roughness = new THREE.TextureLoader().load("Images/Plastic_04_roughness.jpg");
         envMap.mapping = THREE.SphericalReflectionMapping;
 
         let geometry = this.data[name].coords; // Setting up to import different geometries
@@ -366,41 +422,54 @@ class Visualization {
         let materials = [];
         let mergedGeometry = [];
         // basic monochromatic energy preservation
-        let roughness = 0.4;
+        // let roughness = 0.4;
         let diffuseColor = new THREE.Color().setHSL(0.0, 0.0, 0.9);
 
         for (let i = 0; i < geometry.length; i++) {
             //For atom i set up correct material
-            // let material = new THREE.MeshPhysicalMaterial({
-            //     // wireframe: true
-            //     color: COLORS[geometry[i][0]],
-            //     emissive: COLORS[geometry[i][0]],
-            //     metalness: 0.0, // metalness: .9,
-            //     roughness: 0.1, // roughness: roughness,
-            //     reflectivity: 1.0,
-            //     // color: diffuseColor,
-            //     envMap: envMap,
-            //     normalMap: normMap,
-            //     normalScale: new THREE.Vector2(0.15, 0.15),
-            //     clearcoatNormalMap: normMap,
-            //     premultipliedAlpha: true,
-            // });
-
-            let material = new THREE.MeshStandardMaterial({
+            let material = new THREE.MeshPhysicalMaterial({
                 // wireframe: true
                 color: COLORS[geometry[i][0]],
                 emissive: COLORS[geometry[i][0]],
-                envMap: envMap,
-                normalMap: normMap,
-                normalScale: new THREE.Vector2(0.15, 0.15),
                 metalness: 0.0, // metalness: .9,
                 roughness: 0.1, // roughness: roughness,
-                reflectivity: 0.5,
+                reflectivity: 1.0,
+                // color: diffuseColor,
+                envMap: envMap,
+                normalMap: normMap,
+                roughnessMap: roughness,
+                // displacementMap: displacementMap,
+                normalScale: new THREE.Vector2(0.15, 0.15),
+                // displacementScale: .04,
+                clearcoatNormalMap: glassMap,
+                premultipliedAlpha: true,
             });
+
+            // let material = new THREE.MeshStandardMaterial({
+            //     // wireframe: true
+            //     color: COLORS[geometry[i][0]],
+            //     emissive: COLORS[geometry[i][0]],
+
+
+            //     map: new THREE.TextureLoader().load("Images/Plastic_04_basecolor.jpg"),
+            //     envMap: envMap,
+            //     emissiveMap: envMap,
+            //     normalMap: normMap,
+            //     displacementMap: new THREE.TextureLoader().load("Images/Plastic_04_height.jpg"),
+            //     roughnessMap: new THREE.TextureLoader().load("Images/Plastic_04_roughness.jpg"),
+
+            //     normalScale: new THREE.Vector2(0.15, 0.15),
+            //     displacementScale: .1,
+
+            //     // metalness: 0.0, // metalness: .9,
+            //     // roughnq/ess: 0.5, // roughness: roughness,
+            //     // reflectivity: 0.5,
+            // });
 
             materials.push(material);
 
             // for atom I create the correct geometry
+            // let sphereGeometry = new THREE.SphereGeometry(
             let sphereGeometry = new THREE.SphereBufferGeometry(
                 atom_radius[geometry[i][0]],
                 sphere_quality,
@@ -421,7 +490,7 @@ class Visualization {
         geometry_complete.center();
         // This information is now stored in the main data structure.
         this.data[name]["graphics"] = {
-            geom: geometry_complete,
+            geom: new THREE.Geometry().fromBufferGeometry(geometry_complete),
             material: materials,
         };
 
@@ -516,35 +585,58 @@ class Visualization {
     }
 
     create_chamber() {
+        console.log(this.chamber_edge_length);
         // Set up local
-        let grid_color_main = 'black';
-        let grid_color_secondary = 'black';
+        let gridHelper = null;
+        let material = new THREE.LineBasicMaterial({
+            color: 'black',
+            opacity: .3,
+        });
+        let edge = this.chamber_edge_length * 2;
+        let divisions = this.chamber_edge_length;
+
+        let grid_color_main = 'gray';
+        let grid_color_secondary = 'grey';
+
         let mass = 0;
         let pos = new THREE.Vector3();
         let dim = new THREE.Vector3();
-        let edge = this.chamber_edge_length * 2;
-        let divisions = this.chamber_edge_length;
-        let gridHelper = null;
         let thickness = this.chamber_edge_length / 2;
-
-        //X - left right
+        console.log(thickness)
+        console.table(pos)
+            //X - left right
         dim.set(
             thickness,
             edge,
             edge,
         );
+        console.log(this.chamber_edge_length);
+        console.log((this.chamber_edge_length + thickness) / (-2.0));
         pos.set(
-            (this.chamber_edge_length + thickness) / (-2),
+            ((this.chamber_edge_length + thickness) / (-2.0)),
             0,
             0
         );
+        console.table(pos)
         this.createRigidBody(pos, dim);
-        pos.set(
-            (this.chamber_edge_length + thickness) / (2),
-            0,
-            0
-        );
+        pos.setX((this.chamber_edge_length + thickness) / (2));
+        console.table(pos)
         this.createRigidBody(pos, dim);
+        console.table(pos)
+
+        gridHelper = new THREE.GridHelper(this.chamber_edge_length, divisions, grid_color_main, grid_color_secondary);
+        gridHelper.position.copy(pos.setX((this.chamber_edge_length) / (-2)));
+        gridHelper.geometry.rotateZ(Math.PI / 2);
+        gridHelper.material = material;
+        this.scene.add(gridHelper);
+        this.grid_cube.push(gridHelper);
+
+        gridHelper = new THREE.GridHelper(this.chamber_edge_length, divisions, grid_color_main, grid_color_secondary);
+        gridHelper.position.copy(pos.setX((this.chamber_edge_length) / (2)));
+        gridHelper.geometry.rotateZ(Math.PI / 2);
+        gridHelper.material = material;
+        this.scene.add(gridHelper);
+        this.grid_cube.push(gridHelper);
 
         //Y - bottom top
         dim.set(
@@ -558,12 +650,20 @@ class Visualization {
             0,
         );
         this.createRigidBody(pos, dim);
-        pos.set(
-            0,
-            (this.chamber_edge_length + thickness) / (2),
-            0,
-        );
+        pos.setY((this.chamber_edge_length + thickness) / (2));
         this.createRigidBody(pos, dim);
+
+        gridHelper = new THREE.GridHelper(this.chamber_edge_length, divisions, grid_color_main, grid_color_secondary);
+        gridHelper.position.copy(pos.setY((this.chamber_edge_length) / (-2)));
+        gridHelper.material = material;
+        this.scene.add(gridHelper);
+        this.grid_cube.push(gridHelper);
+
+        gridHelper = new THREE.GridHelper(this.chamber_edge_length, divisions, grid_color_main, grid_color_secondary);
+        gridHelper.position.copy(pos.setY((this.chamber_edge_length) / (2)));
+        gridHelper.material = material;
+        this.scene.add(gridHelper);
+        this.grid_cube.push(gridHelper);
 
         //Z - back front
         dim.set(
@@ -577,108 +677,27 @@ class Visualization {
             (this.chamber_edge_length + thickness) / (-2),
         );
         this.createRigidBody(pos, dim);
-        pos.set(
-            0,
-            0,
-            (this.chamber_edge_length + thickness) / (2),
-        );
+        pos.setZ((this.chamber_edge_length + thickness) / (2));
         this.createRigidBody(pos, dim);
 
+        gridHelper = new THREE.GridHelper(this.chamber_edge_length, divisions, grid_color_main, grid_color_secondary);
+        gridHelper.position.copy(pos.setZ((this.chamber_edge_length) / (-2)));
+        gridHelper.geometry.rotateX(Math.PI / 2);
+        gridHelper.material = material;
+        this.scene.add(gridHelper);
+        this.grid_cube.push(gridHelper);
+
+        gridHelper = new THREE.GridHelper(this.chamber_edge_length, divisions, grid_color_main, grid_color_secondary);
+        gridHelper.position.copy(pos.setZ((this.chamber_edge_length) / (2)));
+        gridHelper.geometry.rotateX(Math.PI / 2);
+        gridHelper.material = material;
+        this.scene.add(gridHelper);
+        this.grid_cube.push(gridHelper);
 
 
 
 
 
-
-        // gridHelper = new THREE.GridHelper(size, divisions, grid_color_main, grid_color_secondary);
-        // gridHelper.position.copy(pos);
-        // this.scene.add(gridHelper);
-        // this.grid_cube.push(gridHelper);
-
-
-        // Setup the boxes for actualy physics
-
-        // ADD GRIDS
-        //Top and bottom   - along Y axis
-
-        // dim.set(
-        //     thickness,
-        //     this.chamber_edge_length * 2,
-        //     this.chamber_edge_length * 2
-        // );
-
-
-
-        // pos.set(
-        //     this.chamber_edge_length + thickness / (-2),
-        //     0,
-        //     0
-        // );
-        // this.createRigidBody(dim, mass, pos, thickness);
-
-
-
-        // //top
-        // gridHelper = new THREE.GridHelper(size, divisions, grid_color_main, grid_color_secondary);
-        // pos.set(
-        //     0,
-        //     this.chamber_edge_length / 2,
-        //     0
-        // );
-        // gridHelper.position.copy(pos);
-        // pos.set(0,
-        //     this.chamber_edge_length + thickness / 2,
-        //     0
-        // );
-        // this.createRigidBody(dim, mass, pos, thickness);
-        // this.scene.add(gridHelper);
-        // this.grid_cube.push(gridHelper);
-
-
-
-
-        // Front and back - along X
-        // gridHelper = new THREE.GridHelper(size, divisions, grid_color_main, grid_color_secondary);
-        // gridHelper.geometry.rotateZ(Math.PI / 2);
-        // pos.set(-(this.chamber_edge_length) / 2, 0, 0);
-
-        // gridHelper.position.copy(pos);
-        // this.scene.add(gridHelper);
-        // this.grid_cube.push(gridHelper);
-        // dim.set(thickness, this.chamber_edge_length * 2, this.chamber_edge_length * 2);
-        // pos.set(-(this.chamber_edge_length + thickness) / 2, 0, 0);
-        // // this.createRigidBody(dim, mass, pos);
-
-        // gridHelper = new THREE.GridHelper(size, divisions, grid_color_main, grid_color_secondary);
-        // gridHelper.geometry.rotateZ(Math.PI / 2);
-        // pos.set(this.chamber_edge_length / 2, 0, 0);
-        // gridHelper.position.copy(pos);
-        // this.scene.add(gridHelper);
-        // this.grid_cube.push(gridHelper);
-        // pos.set((this.chamber_edge_length + thickness) / 2, 0, 0);
-        // // this.createRigidBody(dim, mass, pos);
-
-        // // Front and back - along Z
-        // gridHelper = new THREE.GridHelper(size, divisions, grid_color_main, grid_color_secondary);
-        // gridHelper.geometry.rotateX(Math.PI / 2);
-        // pos.set(0, 0, -this.chamber_edge_length / 2);
-        // gridHelper.position.copy(pos);
-        // this.scene.add(gridHelper);
-        // pos.set(0, 0, -(this.chamber_edge_length + thickness) / 2);
-        // this.grid_cube.push(gridHelper);
-        // dim.set(this.chamber_edge_length * 2, this.chamber_edge_length * 2, thickness);
-        // // this.createRigidBody(dim, mass, pos);
-
-        // gridHelper = new THREE.GridHelper(size, divisions, grid_color_main, grid_color_secondary);
-        // gridHelper.geometry.rotateX(Math.PI / 2);
-        // pos.set(0, 0, this.chamber_edge_length / 2);
-        // gridHelper.position.copy(pos);
-        // this.scene.add(gridHelper);
-        // pos.set(0, 0, (this.chamber_edge_length + thickness) / 2);
-        // this.grid_cube.push(gridHelper);
-        // // this.createRigidBody(dim, mass, pos);
-
-        // END ADD GRIDS
     }
 
     createRigidBody(pos = new THREE.Vector3(0, 0, 0), dim = new THREE.Vector3(1, 1, 1), mass = 0) {
@@ -708,11 +727,10 @@ class Visualization {
         body.setRestitution(1.0);
         body.setDamping(0.0, 0.0); // void 	setDamping (btScalar lin_damping, btScalar ang_damping)
 
-        this.physicsWorld.addRigidBody(body);
 
 
         // for visualizaton purposes:
-        let show_collision_volumes = true;
+        let show_collision_volumes = false;
         if (show_collision_volumes) {
 
             let material = new THREE.MeshPhysicalMaterial({
@@ -730,8 +748,7 @@ class Visualization {
             //  depth : Float,  z
             //  widthSegments : Integer, heightSegments : Integer, depthSegments : Integer)
             let geometry = new THREE.BoxBufferGeometry(dim.x, dim.y, dim.z);
-            geometry.computeBoundingSphere();
-            geometry.center();
+
 
             let wall = new THREE.Mesh(geometry, material);
             wall.position.set(pos.x, pos.y, pos.z);
@@ -740,14 +757,76 @@ class Visualization {
 
             wall.userData.physicsBody = body;
 
-            this.rigidBodies.push(wall)
-
+            // this.rigidBodies.push(wall)
             this.grid_cube.push(wall);
 
         }
+        this.physicsWorld.addRigidBody(body);
 
     }
 
+    create_column() {
+        let column_height = 2 * this.chamber_edge_length;
+        let column_dop = (this.chamber_edge_length + column_height) * .5;
+
+        let ao = new THREE.TextureLoader().load("Images/Plastic_04_ambientocclusion.jpg");
+
+        let basecolor = new THREE.TextureLoader().load("Images/Plastic_04_basecolor.jpg");
+        let displacementMap = new THREE.TextureLoader().load("Images/Plastic_04_height.jpg");
+        let envMap = new THREE.TextureLoader().load("Images/envMap.png")
+
+        let normMap = new THREE.TextureLoader().load("Images/Plastic_04_normalOgl.jpg");
+
+        let roughness = new THREE.TextureLoader().load("Images/Plastic_04_roughness.jpg");
+
+
+        envMap.mapping = THREE.SphericalReflectionMapping;
+
+        let material = new THREE.MeshStandardMaterial({
+            // wireframe: true
+            visible: this.preferences.colunm_visible,
+
+            // alphaMap: ao,
+            // aoMap: ao,
+            // bumpMap: displacementMap,
+
+            color: basecolor,
+            emissive: basecolor,
+
+            envMap: envMap,
+            // normalMap: normMap,
+            // roughnessMap: roughness,
+            // displacementMap: displacementMap,
+            // clearcoatNormalMap: basecolor,
+
+            // normalScale: new THREE.Vector2(0.15, 0.15),
+            // displacementScale: .04,
+
+        });
+
+
+        //BoxBufferGeometry(
+        //  width: Float,   x
+        //  height : Float, y
+        //  depth : Float,  z
+        //  widthSegments : Integer, heightSegments : Integer, depthSegments : Integer)
+        let geometry = new THREE.BoxBufferGeometry(this.chamber_edge_length, column_height, this.chamber_edge_length);
+
+
+        let column = new THREE.Mesh(geometry, material);
+        column.position.set(0, column_dop, 0);
+        column.castShadow = true;
+        column.receiveShadow = true;
+        this.column.push(column);
+        this.scene.add(column);
+
+        column = new THREE.Mesh(geometry, material);
+        column.position.set(0, -column_dop, 0);
+        column.castShadow = true;
+        column.receiveShadow = true;
+        this.column.push(column);
+        this.scene.add(column);
+    }
 
     add_to_pass(id, pass) {
         let object = this.scene.getObjectByProperty("uuid", id);
@@ -1030,8 +1109,6 @@ class Visualization {
         this.molecular_updater();
     }
 
-    tick(incoming_data) {}
-
     animate() {
 
         this.controls.update();
@@ -1055,6 +1132,13 @@ class Visualization {
         this.stats.end();
     }
 
+    pause_animate() {
+        this.should_animate = false;
+    }
+    resume_animate() {
+        this.should_animate = true;
+    }
+
     toggle_animate() {
         this.should_animate = this.should_animate == false;
 
@@ -1064,24 +1148,26 @@ class Visualization {
             document.getElementById("pause_simulation").innerHTML = "Resume";
         }
     }
-    pause_animate() {
-        this.should_animate = false;
-    }
-    resume_animate() {
-        this.should_animate = true;
-    }
 
     toggle_grid_visability() {
         console.log('Called grid toggle.')
         for (let side of this.grid_cube) {
             side.visible = side.visible == false;
-            console.log(side);
+            // console.log(side);
         }
     }
 
     toggle_camera_auto_rotate() {
         console.log('Called camera toggle.')
         this.controls.autoRotate = this.controls.autoRotate == false;
+    }
+
+    toggle_axis() {
+        console.log('Called axis toggle.')
+        for (let obj of this.helper_objects) {
+            obj.visible = obj.visible == false;
+            // console.log(side);
+        }
     }
 
     set_new_molecule_glow_time(new_time) {
@@ -1102,8 +1188,9 @@ class Visualization {
         } catch (err) {}
     }
 
-    onDocumentMouseDown(event) {
-        //event.preventDefault();
+    selector(event) {
+        // console.log('clicked');
+        // event.preventDefault();
         //this.mouse.unproject(this.camera);
         this.raycaster.setFromCamera(this.mouse, this.camera);
 
@@ -1121,10 +1208,13 @@ class Visualization {
 
             console.log(intersects[0].object.position)
             this.controls.target = intersects[0].object.position;
+            this.controls.autoRotate = false; // ==this.controls.autoRotate;
 
             // this.selectedObjects.push(intersects[0].object)
             // c  onsole.log(intersects[0].object);
         } else {
+            this.controls.target = this.scene.position;
+            this.controls.autoRotate = false;
             this.remove_from_pass('all', this.selectedObjects);
         }
 
@@ -1234,7 +1324,10 @@ class Visualization {
         let geometry = new THREE.SphereBufferGeometry(.1, .1, .1);
         let temp_sphere = new THREE.Mesh(geometry, material);
         temp_sphere.position.set(pos.x, pos.y, pos.z);
+        this.helper_objects.push(temp_sphere);
+
         this.scene.add(temp_sphere);
+
     }
 
     clean_all() {
@@ -1264,6 +1357,7 @@ class Visualization {
         // this.renderer.renderLists.dispose();
     }
 
+    tick(incoming_data) {}
 }
 
 export default Visualization;

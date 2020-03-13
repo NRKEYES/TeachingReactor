@@ -459,10 +459,10 @@ document.addEventListener(
     },
     false
 );
-document.addEventListener(
+document.querySelector("#Visualization").addEventListener(
     "mousedown",
     () => {
-        return visualizer.onDocumentMouseDown(event);
+        return visualizer.selector(event);
     },
     false
 );
@@ -566,6 +566,10 @@ document.querySelector("#toggle_camera").addEventListener("click", () => {
     //toggle element visability
     visualizer.toggle_camera_auto_rotate();
 });
+document.querySelector("#toggle_axis").addEventListener("click", () => {
+    //toggle element visability
+    visualizer.toggle_axis();
+});
 
 d3.select("#orders_of_magnitude").on("input", function() {
 
@@ -582,7 +586,7 @@ d3.select("#orders_of_magnitude").on("input", function() {
     update_all_sliders();
 });
 d3.select("#edge_length").on("input", function() {
-    chamber_edge_length = this.value;
+    chamber_edge_length = parseInt(this.value);
     update_all_sliders();
 });
 d3.select("#time_step").on("input", function() {
