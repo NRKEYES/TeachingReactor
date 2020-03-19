@@ -460,7 +460,7 @@ document.addEventListener(
     false
 );
 document.querySelector("#Visualization").addEventListener(
-    "mousedown",
+    "dblclick",
     () => {
         return visualizer.selector(event);
     },
@@ -569,6 +569,10 @@ document.querySelector("#toggle_camera").addEventListener("click", () => {
 document.querySelector("#toggle_axis").addEventListener("click", () => {
     //toggle element visability
     visualizer.toggle_axis();
+});
+document.querySelector("#toggle_column").addEventListener("click", () => {
+    //toggle element visability
+    visualizer.toggle_column();
 });
 
 d3.select("#orders_of_magnitude").on("input", function() {

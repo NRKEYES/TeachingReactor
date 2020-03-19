@@ -1,5 +1,4 @@
 // External Dependancies
-import { OBJLoader } from "/JS/three/examples/jsm/loaders/OBJLoader.js";
 import Stats from '/JS/three/examples/jsm/libs/stats.module.js';
 import { BufferGeometryUtils } from "/JS/three/examples/jsm/utils/BufferGeometryUtils.js";
 import { OrbitControls } from "/JS/three/examples/jsm/controls/OrbitControls.js";
@@ -12,6 +11,8 @@ import { FXAAShader } from "/JS/three/examples/jsm/shaders/FXAAShader.js";
 import { GammaCorrectionShader } from '/JS/three/examples/jsm/shaders/GammaCorrectionShader.js';
 import { ColorifyShader } from '/JS/three/examples/jsm/shaders/ColorifyShader.js';
 import { FilmPass } from '/JS/three/examples/jsm/postprocessing/FilmPass.js';
+import { OBJLoader } from "/JS/three/examples/jsm/loaders/OBJLoader.js";
+
 
 // import { BloomPass } from './jsm/postprocessing/BloomPass.js';
 // import { FilmPass } from './jsm/postprocessing/FilmPass.js';
@@ -33,13 +34,13 @@ import Molecule from "/JS/Molecule.js";
 let sphere_quality = 20;
 
 var COLORS = {
-    H: 0xc0c0c0,
+    H: 0xFFFFFF,
     C: 0x000000,
     Au: 0xd4af37,
     Al: 0x00334d,
     V: 0xff26d4,
-    O: 0xff0000,
-    N: 0x0033cc
+    O: 0xF00000,
+    N: 0x8F8FFF
 };
 
 // In nanometers
@@ -59,13 +60,23 @@ class Visualization {
     constructor(incoming_data, chamber_edge_length) {
 
         this.preferences = {
-            grid_cube_visible: false,
+            grid_cube_visible: true,
             axis_visible: false,
-            colunm_visible: true,
+            column_visible: false,
             animate: true,
             auto_rotate: true,
             initial_camera_displacement_multiplier: 1.5,
+            show_stats: true,
         }
+
+        // for glow
+        this.outline_params = {
+            edgeStrength: 20,
+            edgeGlow: 2,
+            edgeThickness: 1.0,
+            pulsePeriod: 1.0,
+            usePatternTexture: false
+        };
 
 
         // Initialize Ammo engine
@@ -84,14 +95,42 @@ class Visualization {
         this.renderer.setClearColor(this.background_and_emis, 0.0);
         this.renderer.setSize(this.width_for_3d, this.height_for_3d);
         this.renderer.physicallyCorrectLights = true;
+
         this.renderer.shadowMap.enabled = true;
-        this.renderer.shadowMap.bias = 0.0001;
+        // this.renderer.shadowMap.bias = 0.0001;
+
+
+        // this.renderer.shadowMap.type = THREE.BasicShadowMap;
+        // this.renderer.shadowMap.type = THREE.PCFShadowMap;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        // this.renderer.gammaOutput = true;
+        // this.renderer.shadowMap.type = THREE.VSMShadowMap;
+
+
+        // this.renderer.outputEncoding = THREE.LinearEncoding; // default
         this.renderer.outputEncoding = THREE.sRGBEncoding;
-        this.renderer.gammaFactor = 2.2;
-        // this.renderer.shadowMap.enabled = true;
-        // this.renderer.toneMappingExposure = 1.0;
+        // this.renderer.outputEncoding = THREE.GammaEncoding;
+        // this.renderer.outputEncoding = THREE.RGBEEncoding;
+        // this.renderer.outputEncoding = THREE.LogLuvEncoding;
+        // this.renderer.outputEncoding = THREE.RGBM7Encoding;
+        // this.renderer.outputEncoding = THREE.RGBM16Encoding;
+        // this.renderer.outputEncoding = THREE.RGBDEncoding;
+        // this.renderer.outputEncoding = THREE.BasicDepthPacking; //incompatible
+        // this.renderer.outputEncoding = THREE.RGBADepthPacking; // incompatible
+
+        this.renderer.gammaFactor = 2.0;
+
+
+        this.renderer.whitepoint = 0.8;
+        this.renderer.toneMappingExposure = 1.0;
+
+        // this.renderer.toneMapping = THREE.NoToneMapping;
+        // this.renderer.toneMapping = THREE.LinearToneMapping;
+        // this.renderer.toneMapping = THREE.ReinhardToneMapping;
+        this.renderer.toneMapping = THREE.Uncharted2ToneMapping;
+        // this.renderer.toneMapping = THREE.CineonToneMapping;
+        // this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+
+
 
         this.container = document.getElementById("Visualization");
         this.container.appendChild(this.renderer.domElement);
@@ -103,6 +142,11 @@ class Visualization {
         stats_block.style.right = 0;
         stats_block.style.bottom = 0;
 
+        // TODO add toggle for this
+        if (!this.preferences.show_stats) {
+            stats_block.style.display = 'none';
+        }
+
     }
 
     init(incoming_data, chamber_edge_length) {
@@ -113,7 +157,6 @@ class Visualization {
         //Engine Variables
         this.height_for_3d = document.getElementById("Visualization").clientHeight;
         this.width_for_3d = document.getElementById("Visualization").clientWidth;
-        this.background_and_emis = 0x00fffa;
         this.clock = new THREE.Clock();
         this.tmpTrans = new Ammo.btTransform();
         this.raycaster = new THREE.Raycaster();
@@ -133,18 +176,6 @@ class Visualization {
 
         this.physicsWorld;
         this.setupPhysicsWorld();
-
-        // for glow
-        this.outline_params = {
-            edgeStrength: 20,
-            edgeGlow: 2,
-            edgeThickness: 1.0,
-            pulsePeriod: 1.0,
-            usePatternTexture: false
-        };
-
-
-
 
 
         for (name in this.data) {
@@ -273,7 +304,7 @@ class Visualization {
 
         if (!this.preferences.axis_visible) this.toggle_axis();
         if (!this.preferences.grid_cube_visible) this.toggle_grid_visability();
-        // if (!this.preferences.colunm_visible) this.g();
+        if (!this.preferences.column_visible) this.toggle_column();
 
 
         this.animate();
@@ -336,14 +367,15 @@ class Visualization {
 
         let distance_from_center = this.chamber_edge_length * .48
 
-        this.hemisphereLight = new THREE.HemisphereLight(0xaaaaaa, 0x000000, .5);
+        this.hemisphereLight = new THREE.HemisphereLight(0xffffff, 0xffffff, .9);
 
         // A directional light shines from a specific direction.
         // It acts like the sun, that means that all the rays produced are parallel.
-        this.shadowLight_top = new THREE.DirectionalLight(0xffffff, 0.5);
-        this.shadowLight_x = new THREE.DirectionalLight(0xffffff, 0.5);
-        this.shadowLight_bottom = new THREE.DirectionalLight(0xffffff, 0.5);
-        this.shadowLight_z = new THREE.DirectionalLight(0xffffff, 0.5);
+        this.shadowLight_top = new THREE.DirectionalLight(0xffffff, 0.9);
+        this.shadowLight_bottom = new THREE.DirectionalLight(0xffffff, 0.9);
+
+        // this.shadowLight_x = new THREE.DirectionalLight(0xffffff, 0.5);
+        // this.shadowLight_z = new THREE.DirectionalLight(0xffffff, 0.5);
 
         // // Set the direction of the light
         this.shadowLight_top.position.set(
@@ -355,67 +387,76 @@ class Visualization {
             0, -distance_from_center,
             0
         );
-        this.helper_show_coordinate(this.shadowLight_bottom.position)
+        // this.helper_show_coordinate(this.shadowLight_bottom.position)
 
 
-        this.shadowLight_x.position.set(
-            this.chamber_edge_length / 2,
-            this.chamber_edge_length / 2,
-            0
-        );
+        // this.shadowLight_x.position.set(
+        //     this.chamber_edge_length / 2,
+        //     this.chamber_edge_length / 2,
+        //     0
+        // );
 
-        this.shadowLight_z.position.set(
-            0,
-            this.chamber_edge_length / 2,
-            this.chamber_edge_length
-        );
+        // this.shadowLight_z.position.set(
+        //     0,
+        //     this.chamber_edge_length / 2,
+        //     this.chamber_edge_length
+        // );
         // Allow shadow casting
         this.shadowLight_top.castShadow = true;
-        this.shadowLight_bottom.castShadow = true;
+        // this.shadowLight_bottom.castShadow = true;
 
-        this.shadowLight_x.castShadow = true;
+        // this.shadowLight_x.castShadow = true;
 
-        this.shadowLight_z.castShadow = true;
+        // this.shadowLight_z.castShadow = true;
 
         // define the visible area of the projected shadow
-        // this.shadowLight.shadow.camera.left = -this.chamber_edge_length;
-        // this.shadowLight.shadow.camera.right = this.chamber_edge_length;
-        // this.shadowLight.shadow.camera.top = this.chamber_edge_length;
-        // this.shadowLight.shadow.camera.bottom = -this.chamber_edge_length;
-        // this.shadowLight.shadow.camera.near = 1;
-        // this.shadowLight.shadow.camera.far = 1000;
+        this.shadowLight_top.shadow.camera.left = -this.chamber_edge_length;
+        this.shadowLight_top.shadow.camera.right = this.chamber_edge_length;
+        this.shadowLight_top.shadow.camera.top = this.chamber_edge_length;
+        this.shadowLight_top.shadow.camera.bottom = -this.chamber_edge_length;
+        this.shadowLight_top.shadow.camera.near = 1;
+        this.shadowLight_top.shadow.camera.far = 1000;
+        this.shadowLight_top.shadow.mapSize.width = 512; // define the resolution of the shadow;
+        this.shadowLight_top.shadow.mapSize.height = 512; // the higher the better,         // but also the more expensive and less performant
 
-        // define the resolution of the shadow;
-        // the higher the better,
-        // but also the more expensive and less performant
-        this.shadowLight_top.shadow.mapSize.width = 2048;
-        this.shadowLight_top.shadow.mapSize.height = 2048;
+        // this.shadowLight_bottom.shadow.camera.left = -this.chamber_edge_length;
+        // this.shadowLight_bottom.shadow.camera.right = this.chamber_edge_length;
+        // this.shadowLight_bottom.shadow.camera.top = this.chamber_edge_length;
+        // this.shadowLight_bottom.shadow.camera.bottom = -this.chamber_edge_length;
+        // this.shadowLight_bottom.shadow.camera.near = 1;
+        // this.shadowLight_bottom.shadow.camera.far = 1000;
+        // this.shadowLight_bottom.shadow.mapSize.width = 512; // define the resolution of the shadow;
+        // this.shadowLight_bottom.shadow.mapSize.height = 512; // the higher the better,         // but also the more expensive and less performant
+
 
         // to activate the lights, just add them to the scene
         this.scene.add(this.hemisphereLight);
         this.scene.add(this.shadowLight_top);
-        this.scene.add(this.shadowLight_bottom);
-        // this.scene.add(this.shadowLight_x);
+        // this.scene.add(this.shadowLight_bottom);
 
-        // this.scene.add(this.shadowLight_z);
     }
 
     generate_species(name) {
         let envMap = new THREE.TextureLoader().load("Images/envMap.png")
-        let glassMap = new THREE.TextureLoader().load("Images/glassbw.jpg");
+        let envMapShiny = new THREE.TextureLoader().load("Images/Textures/sprite.png")
 
-        // let envMap = new THREE.TextureLoader().load("Images/moon_1024.jpg");
-        let normMap = new THREE.TextureLoader().load("Images/moon_1024.jpg");
+        envMap.mapping = THREE.SphericalReflectionMapping;
+
+
+        let glassMap = new THREE.TextureLoader().load("Images/glassbw.jpg");
+        let moonMap = new THREE.TextureLoader().load("Images/moon_1024.jpg");
 
         // let envMap = new THREE.TextureLoader().load("Images/ice-hr.jpg");
         // let normMap = new THREE.TextureLoader().load("Images/ice-hr.jpg");
 
-        // let envMap = new THREE.TextureLoader().load("Images/Plastic_04_basecolor.jpg");
-        // let normMap = new THREE.TextureLoader().load("Images/Plastic_04_normalOgl.jpg");
-
-        let displacementMap = new THREE.TextureLoader().load("Images/Plastic_04_height.jpg");
+        let ao = new THREE.TextureLoader().load("Images/Plastic_04_ambientocclusion.jpg");
+        let basecolor = new THREE.TextureLoader().load("Images/Plastic_04_basecolor.jpg");
+        let normal = new THREE.TextureLoader().load("Images/Plastic_04_normalOgl.jpg");
+        let height = new THREE.TextureLoader().load("Images/Plastic_04_height.jpg");
         let roughness = new THREE.TextureLoader().load("Images/Plastic_04_roughness.jpg");
-        envMap.mapping = THREE.SphericalReflectionMapping;
+
+
+
 
         let geometry = this.data[name].coords; // Setting up to import different geometries
 
@@ -427,23 +468,43 @@ class Visualization {
 
         for (let i = 0; i < geometry.length; i++) {
             //For atom i set up correct material
-            let material = new THREE.MeshPhysicalMaterial({
-                // wireframe: true
+            let material = new THREE.MeshLambertMaterial({
+                alphaMap: null,
+                aoMap: null,
                 color: COLORS[geometry[i][0]],
-                emissive: COLORS[geometry[i][0]],
-                metalness: 0.0, // metalness: .9,
-                roughness: 0.1, // roughness: roughness,
-                reflectivity: 1.0,
-                // color: diffuseColor,
+                // color: 'pink',
+                map: null,
+                emissive: 'white ',
+                emissiveMap: null,
+                emissiveIntensity: 1.0,
                 envMap: envMap,
-                normalMap: normMap,
-                roughnessMap: roughness,
-                // displacementMap: displacementMap,
-                normalScale: new THREE.Vector2(0.15, 0.15),
-                // displacementScale: .04,
-                clearcoatNormalMap: glassMap,
-                premultipliedAlpha: true,
+                lightMap: null,
+                reflectivity: 0.99,
+                refractionRatio: 0.01,
+                specularMap: roughness,
             });
+
+
+
+            //For atom i set up correct material
+            // let material = new THREE.MeshPhysicalMaterial({
+            //     // wireframe: true
+            //     color: COLORS[geometry[i][0]],
+            //     emissive: COLORS[geometry[i][0]],
+            //     // metalness: 0.0, // metalness: .9,
+            //     roughness: 0.1, // roughness: roughness,
+            //     reflectivity: 1.0,
+            //     // color: diffuseColor,
+            //     envMap: envMap,
+            //     normalMap: normMap,
+            //     roughnessMap: roughness,
+            //     // displacementMap: displacementMap,
+            //     normalScale: new THREE.Vector2(0.15, 0.15),
+            //     // displacementScale: .04,
+            //     clearcoatNormalMap: glassMap,
+            //     premultipliedAlpha: true,
+            // });
+
 
             // let material = new THREE.MeshStandardMaterial({
             //     // wireframe: true
@@ -481,6 +542,14 @@ class Visualization {
                 geometry[i][1].y,
                 geometry[i][1].z
             );
+
+            // sphereGeometry.rotation.x(d3.randomNormal(0.0)(3.14));
+            // sphereGeometry.rotation.y(d3.randomNormal(0.0)(3.14));
+            // sphereGeometry.ratation.z(d3.randomNormal(0.0)(3.14));
+
+            //     d3.randomNormal(0.0)(3.14),
+            //     d3.randomNormal(0.0)(3.14)
+            // );
 
             mergedGeometry.push(sphereGeometry);
         }
@@ -520,10 +589,6 @@ class Visualization {
             geom: geom
         };
 
-
-
-
-
         for (let geo of mergedGeometry) {
             geo.dispose();
         }
@@ -541,9 +606,9 @@ class Visualization {
                 z: d3.randomUniform(-this.chamber_edge_length / 2, this.chamber_edge_length / 2)()
             },
             velocity: {
-                x: d3.randomNormal(0.0)(1),
-                y: d3.randomNormal(0.0)(1),
-                z: d3.randomNormal(0.0)(1)
+                x: d3.randomNormal(0.0)(.5),
+                y: d3.randomNormal(0.0)(.5),
+                z: d3.randomNormal(0.0)(.5)
             },
             rotational_velocity: {
                 x: d3.randomNormal(0.0)(3.14),
@@ -747,7 +812,7 @@ class Visualization {
             //  height : Float, y
             //  depth : Float,  z
             //  widthSegments : Integer, heightSegments : Integer, depthSegments : Integer)
-            let geometry = new THREE.BoxBufferGeometry(dim.x, dim.y, dim.z);
+            let geometry = new THREE.BoxBufferGeometry(dim.x, dim.y, dim.z, 5, 5, 5);
 
 
             let wall = new THREE.Mesh(geometry, material);
@@ -767,13 +832,14 @@ class Visualization {
 
     create_column() {
         let column_height = 2 * this.chamber_edge_length;
-        let column_dop = (this.chamber_edge_length + column_height) * .5;
+        let column_drop = (this.chamber_edge_length + column_height) * .5;
 
         let ao = new THREE.TextureLoader().load("Images/Plastic_04_ambientocclusion.jpg");
 
         let basecolor = new THREE.TextureLoader().load("Images/Plastic_04_basecolor.jpg");
         let displacementMap = new THREE.TextureLoader().load("Images/Plastic_04_height.jpg");
-        let envMap = new THREE.TextureLoader().load("Images/envMap.png")
+        let envMap = new THREE.TextureLoader().load("Images/Textures/sprite.png")
+
 
         let normMap = new THREE.TextureLoader().load("Images/Plastic_04_normalOgl.jpg");
 
@@ -783,18 +849,18 @@ class Visualization {
         envMap.mapping = THREE.SphericalReflectionMapping;
 
         let material = new THREE.MeshStandardMaterial({
-            // wireframe: true
+            // wireframe: true,
             visible: this.preferences.colunm_visible,
 
-            // alphaMap: ao,
-            // aoMap: ao,
+            alphaMap: ao,
+            aoMap: ao,
             // bumpMap: displacementMap,
 
-            color: basecolor,
+            color: 'grey',
             emissive: basecolor,
 
             envMap: envMap,
-            // normalMap: normMap,
+            normalMap: normMap,
             // roughnessMap: roughness,
             // displacementMap: displacementMap,
             // clearcoatNormalMap: basecolor,
@@ -814,18 +880,22 @@ class Visualization {
 
 
         let column = new THREE.Mesh(geometry, material);
-        column.position.set(0, column_dop, 0);
-        column.castShadow = true;
+        column.position.set(0, column_drop, 0);
+        // column.castShadow = true;
         column.receiveShadow = true;
         this.column.push(column);
         this.scene.add(column);
 
         column = new THREE.Mesh(geometry, material);
-        column.position.set(0, -column_dop, 0);
-        column.castShadow = true;
+        column.position.set(0, -column_drop, 0);
+        // column.castShadow = true;
         column.receiveShadow = true;
         this.column.push(column);
         this.scene.add(column);
+
+        geometry.dispose();
+
+        material.dispose();
     }
 
     add_to_pass(id, pass) {
@@ -1110,21 +1180,23 @@ class Visualization {
     }
 
     animate() {
-
-        this.controls.update();
-        this.camera.updateMatrixWorld();
         this.delta_t = this.clock.getDelta();
+
 
         if (this.should_animate) {
             this.physics_updater();
+
             for (let temp of this.newObjects) {
                 // console.log(temp)
                 if (temp.userData.molecule.lifetime > this.new_molecule_glow_time) {
                     this.remove_from_pass(temp.uuid, this.newObjects);
                 }
-
             }
+
         }
+
+        this.controls.update();
+        this.camera.updateMatrixWorld();
 
         requestAnimationFrame(this.animate.bind(this));
         this.stats.begin();
@@ -1165,6 +1237,14 @@ class Visualization {
     toggle_axis() {
         console.log('Called axis toggle.')
         for (let obj of this.helper_objects) {
+            obj.visible = obj.visible == false;
+            // console.log(side);
+        }
+    }
+
+    toggle_column() {
+        console.log('Called column toggle.')
+        for (let obj of this.column) {
             obj.visible = obj.visible == false;
             // console.log(side);
         }
@@ -1225,6 +1305,9 @@ class Visualization {
         if (event.key == " ") {
             this.toggle_animate();
         }
+        if (event.key == "r") {
+            this.toggle_camera_auto_rotate();
+        }
     }
 
     onWindowResize() {
@@ -1259,7 +1342,7 @@ class Visualization {
         //xyz
         //rgb
 
-        let max_min = 50;
+        let max_min = 10;
 
         let pos = new THREE.Vector3();
 
@@ -1327,6 +1410,8 @@ class Visualization {
         this.helper_objects.push(temp_sphere);
 
         this.scene.add(temp_sphere);
+        material.dispose();
+        geometry.dispose();
 
     }
 

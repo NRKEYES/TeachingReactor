@@ -35,7 +35,7 @@ body {
     display: none;
     flex-direction: column;
     z-index: 100;
-    opacity: 0;
+    opacity: .5;
     margin: 1px;
     list-style: none;
     /* font-size: 16em; */
@@ -43,55 +43,43 @@ body {
     vertical-align: center;
     transition: all 0.1s ease 0.1s;
     background-color: rgba(0, 0, 0, 0.0);
-    color: grey;
-    height: var(--line-height);
-    width: 20vw;
+    color: black;
+    height: var(--line-height)*1vh;
+    width: 18vw;
 }
 
 .menu:hover {
     /* border: 3px dotted var(--highlight-color); */
-    transition: all 0.1s ease 0s;
+    transition: all 0.1s ease 0.1s;
     opacity: 1.0;
-    left: 1vw;
-    /* font-size: 16em; */
+    display: flex;
     color: black;
     text-align: left;
     vertical-align: center;
 }
 
 .menu:hover>* {
-    opacity: 1.0;
     display: flex;
     vertical-align: center;
 }
 
-.menu:active {
-    color: red;
+.menu li:hover {
+    background-color: pink;
+}
+
+.menu li:active {
+    background-color: turquoise;
+    text-align: right;
 }
 
 .menu-branch {
-    vertical-align: center;
+    transition: all 0.3s ease 0.1s;
+    height: 1vh;
 }
 
 .menu-branch:hover {
-    /* height: 75vh; */
-    height: var(--line-height);
-    z-index: 2;
-}
-
-.menu-branch:hover~.menu {
-    z-index: 1;
-    /* text-align: left; */
-}
-
-.menu button {
-    /* color: black; */
-    /* background-color: #4e93b4; */
-}
-
-.menu button:hover {
-    /* background-color: #56c1d8; */
-    /* border: 3px solid var(--highlight-color); */
+    transition: all 0.1s ease 0s;
+    height: 40vh;
 }
 
 .menu-slider {
@@ -106,34 +94,21 @@ body {
     opacity: .5;
     position: absolute;
     display: flex;
-    top: -1vh;
-    left: -1vw;
-    height: var(--line-height)*2;
-    width: 10vw;
+    top: 0vh;
+    left: 0vw;
+    height: var(--line-height)*2vh;
+    font-size: 16em;
+    width: 5vw;
     vertical-align: center;
+    text-align: left;
 }
 
 .menu-root:hover {
     /* justify-content: flex-end; */
     height: 96vh;
     width: 22vw;
-    opacity: 1.0;
-}
-
-.menu-root img {
-    max-height: var(--line-height);
-    max-width: 3vw;
-}
-
-.menu li:hover {
-    background-color: pink;
-    /* top: 50%;
-    left: 50%;
-    margin: -15% 0 0 -25%; */
-}
-
-.menu span {
-    vertical-align: center;
+    background-color: rgba(0, 0, 0, 0.0);
+    /* opacity: .9; */
 }
 
 #Developmental {
