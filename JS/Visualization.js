@@ -438,7 +438,7 @@ class Visualization {
 
     generate_species(name) {
         let envMap = new THREE.TextureLoader().load("Images/envMap.png")
-        let envMapShiny = new THREE.TextureLoader().load("Images/Textures/lightshaft.png")
+        let envMapShiny = new THREE.TextureLoader().load("Images/Textures/water.jpg")
 
         envMapShiny.mapping = THREE.SphericalReflectionMapping;
         envMap.mapping = THREE.SphericalReflectionMapping;
@@ -470,7 +470,7 @@ class Visualization {
         for (let i = 0; i < geometry.length; i++) {
             //For atom i set up correct material
             let material = new THREE.MeshLambertMaterial({
-                alphaMap: envMapShiny,
+                alphaMap: null,
                 aoMap: null,
                 color: COLORS[geometry[i][0]],
                 // color: 'pink',
@@ -478,11 +478,11 @@ class Visualization {
                 emissive: 'white ',
                 emissiveMap: null,
                 emissiveIntensity: 1.0,
-                envMap: envMapShiny,
+                envMap: envMap,
                 lightMap: null,
-                reflectivity: 0.99,
+                reflectivity: 0.5,
                 refractionRatio: 0.01,
-                specularMap: roughness,
+                specularMap: envMapShiny,
             });
 
 
@@ -1308,6 +1308,9 @@ class Visualization {
         }
         if (event.key == "r") {
             this.toggle_camera_auto_rotate();
+        }
+        if (event.key == "g") {
+            this.toggle_grid_visability();
         }
     }
 
