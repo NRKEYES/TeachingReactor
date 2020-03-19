@@ -438,8 +438,9 @@ class Visualization {
 
     generate_species(name) {
         let envMap = new THREE.TextureLoader().load("Images/envMap.png")
-        let envMapShiny = new THREE.TextureLoader().load("Images/Textures/sprite.png")
+        let envMapShiny = new THREE.TextureLoader().load("Images/Textures/lightshaft.png")
 
+        envMapShiny.mapping = THREE.SphericalReflectionMapping;
         envMap.mapping = THREE.SphericalReflectionMapping;
 
 
@@ -469,7 +470,7 @@ class Visualization {
         for (let i = 0; i < geometry.length; i++) {
             //For atom i set up correct material
             let material = new THREE.MeshLambertMaterial({
-                alphaMap: null,
+                alphaMap: envMapShiny,
                 aoMap: null,
                 color: COLORS[geometry[i][0]],
                 // color: 'pink',
@@ -477,7 +478,7 @@ class Visualization {
                 emissive: 'white ',
                 emissiveMap: null,
                 emissiveIntensity: 1.0,
-                envMap: envMap,
+                envMap: envMapShiny,
                 lightMap: null,
                 reflectivity: 0.99,
                 refractionRatio: 0.01,
