@@ -41,8 +41,6 @@ let species = [{
         instances: [],
         coords: [
             ["N", new THREE.Vector3(0, 0, 0)],
-            ["O", new THREE.Vector3(-0.07, 0.12, 0)],
-            ["O", new THREE.Vector3(-0.07, -0.12, 0)]
         ],
         mass: 46.0055 // g/mol
     },
@@ -53,11 +51,6 @@ let species = [{
         instances: [],
         coords: [
             ["N", new THREE.Vector3(0, 0, 0)],
-            ["O", new THREE.Vector3(-0.07, 0.12, 0)],
-            ["O", new THREE.Vector3(-0.07, -0.12, 0)],
-            ["N", new THREE.Vector3(0.3, 0, 0)],
-            ["O", new THREE.Vector3(0.37, 0.12, 0)],
-            ["O", new THREE.Vector3(0.37, -0.12, 0)]
         ],
         mass: 92.011, // g/mol
     }
@@ -415,6 +408,36 @@ function update_all() {
 }
 
 function start_simulation() {
+
+    species = [{
+            name: "Reactants",
+            percent: [r_to_p_ratio],
+            count: [reactant_initial],
+            instances: [],
+            coords: [
+                ["N", new THREE.Vector3(0, 0, 0)],
+                ["O", new THREE.Vector3(0.04653, 0.10989, 0)],
+                ["O", new THREE.Vector3(0.04653, -0.10989, 0)]
+            ],
+            mass: "46.0055 "
+        },
+        {
+            name: "Products",
+            percent: [p_to_r_ratio],
+            count: [product_initial],
+            instances: [],
+            coords: [
+                ["N", new THREE.Vector3(0.0, 0.0, 0.0)],
+                ["O", new THREE.Vector3(0.04516, 0.11010, 0.0)],
+                ["O", new THREE.Vector3(0.04516, -0.11010, 0.0)],
+                ["N", new THREE.Vector3(-1.7820, 0.0, 0.0)],
+                ["O", new THREE.Vector3(-2.2336, 0.11010, 0.0)],
+                ["O", new THREE.Vector3(-2.2336, 0. - 11010, 0.0)]
+            ],
+            mass: "92.011", // g/mol
+        }
+    ];
+
     console.log(species)
 
     find_time_step();
@@ -479,44 +502,10 @@ document.querySelector("#pause_simulation").addEventListener("click", () => {
 });
 document.querySelector("#show_simulation_info").addEventListener("click", () => {
     //toggle element visability
-    if (document.getElementById("info_box").style.zIndex == -1) {
-        document.getElementById("info_box").style.zIndex = 100;
-    } else {
-        document.getElementById("info_box").style.zIndex = -1;
-    }
+    visualizer.toggle_information_display();
 });
 document.querySelector("#run_simulation").addEventListener("click", () => {
     run_sim = true;
-    species = [{
-            name: "Reactants",
-            percent: [r_to_p_ratio],
-            count: [reactant_initial],
-            instances: [],
-            coords: [
-                ["N", new THREE.Vector3(0, 0, 0)],
-                ["O", new THREE.Vector3(-0.07, 0.12, 0)],
-                ["O", new THREE.Vector3(-0.07, -0.12, 0)]
-            ],
-            mass: "46.0055 "
-        },
-        {
-            name: "Products",
-            percent: [p_to_r_ratio],
-            count: [product_initial],
-            instances: [],
-            coords: [
-                ["N", new THREE.Vector3(0, 0, 0)],
-                ["O", new THREE.Vector3(-0.07, 0.12, 0)],
-                ["O", new THREE.Vector3(-0.07, -0.12, 0)],
-                ["N", new THREE.Vector3(0.3, 0, 0)],
-                ["O", new THREE.Vector3(0.37, 0.12, 0)],
-                ["O", new THREE.Vector3(0.37, -0.12, 0)]
-            ],
-            mass: "92.011", // g/mol
-        }
-    ];
-
-    console.log(species);
 
     update_all_sliders();
 

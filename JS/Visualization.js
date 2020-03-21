@@ -7,6 +7,7 @@ import { RenderPass } from "/JS/three/examples/jsm/postprocessing/RenderPass.js"
 import { ShaderPass } from "/JS/three/examples/jsm/postprocessing/ShaderPass.js";
 import { OutlinePass } from "/JS/three/examples/jsm/postprocessing/OutlinePass.js";
 import { FXAAShader } from "/JS/three/examples/jsm/shaders/FXAAShader.js";
+import { EXRLoader } from '/JS/three/examples/jsm/loaders/EXRLoader.js';
 
 import { GammaCorrectionShader } from '/JS/three/examples/jsm/shaders/GammaCorrectionShader.js';
 import { ColorifyShader } from '/JS/three/examples/jsm/shaders/ColorifyShader.js';
@@ -31,7 +32,7 @@ import { OBJLoader } from "/JS/three/examples/jsm/loaders/OBJLoader.js";
 // Internal Dependancies
 import Molecule from "/JS/Molecule.js";
 
-let sphere_quality = 20;
+let sphere_quality = 10;
 
 var COLORS = {
     H: 0xFFFFFF,
@@ -39,20 +40,32 @@ var COLORS = {
     Au: 0xd4af37,
     Al: 0x00334d,
     V: 0xff26d4,
-    O: 0xF00000,
-    N: 0x8F8FFF
+    O: 0xFF0000,
+    N: 0x899e2,
 };
 
 // In nanometers
-var atom_radius = {
-    // Van der walls from wiki https://en.wikipedia.org/wiki/Van_der_Waals_radius
-    H: 0.12,
-    C: 0.17,
-    Au: 0.166,
-    Al: 0.184,
-    V: 0.152,
-    O: 0.152,
-    N: 0.155
+// let atom_radius = {
+//     // Van der walls from wiki https://en.wikipedia.org/wiki/Van_der_Waals_radius
+//     H: 0.12,
+//     C: 0.17,
+//     Au: 0.166,
+//     Al: 0.184,
+//     V: 0.152,
+//     O: 0.152,
+//     N: 0.155
+// };
+
+// In nanometers
+let atom_radius = {
+    //https://en.wikipedia.org/wiki/Atomic_radius
+    H: 0.025,
+    C: 0.070,
+    Au: 0.135,
+    Al: 0.125,
+    V: 0.135,
+    O: 0.060,
+    N: 0.065
 };
 
 
@@ -60,6 +73,7 @@ class Visualization {
     constructor(incoming_data, chamber_edge_length) {
 
         this.preferences = {
+            camera_type: 'perspective',
             grid_cube_visible: true,
             axis_visible: false,
             column_visible: false,
@@ -67,6 +81,7 @@ class Visualization {
             auto_rotate: true,
             initial_camera_displacement_multiplier: 1.5,
             show_stats: true,
+
         }
 
         // for glow
@@ -95,6 +110,7 @@ class Visualization {
         this.renderer.setClearColor(this.background_and_emis, 0.0);
         this.renderer.setSize(this.width_for_3d, this.height_for_3d);
         this.renderer.physicallyCorrectLights = true;
+        this.renderer.logarithmicDepthBuffer = true;
 
         this.renderer.shadowMap.enabled = true;
         // this.renderer.shadowMap.bias = 0.0001;
@@ -120,14 +136,14 @@ class Visualization {
         this.renderer.gammaFactor = 2.0;
 
 
-        this.renderer.whitepoint = 0.8;
+        this.renderer.whitepoint = 0.9;
         this.renderer.toneMappingExposure = 1.0;
 
         // this.renderer.toneMapping = THREE.NoToneMapping;
         // this.renderer.toneMapping = THREE.LinearToneMapping;
         // this.renderer.toneMapping = THREE.ReinhardToneMapping;
-        this.renderer.toneMapping = THREE.Uncharted2ToneMapping;
-        // this.renderer.toneMapping = THREE.CineonToneMapping;
+        // this.renderer.toneMapping = THREE .Uncharted2ToneMapping;
+        this.renderer.toneMapping = THREE.CineonToneMapping;
         // this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
 
 
@@ -157,6 +173,7 @@ class Visualization {
         //Engine Variables
         this.height_for_3d = document.getElementById("Visualization").clientHeight;
         this.width_for_3d = document.getElementById("Visualization").clientWidth;
+        this.ratio = this.width_for_3d / this.height_for_3d;
         this.clock = new THREE.Clock();
         this.tmpTrans = new Ammo.btTransform();
         this.raycaster = new THREE.Raycaster();
@@ -190,22 +207,11 @@ class Visualization {
         this.scene.position.y = 0;
         this.scene.position.z = 0;
 
-        // No success with fog really adding anything
-        // this.scene.fog = new THREE.FogExp2(0xefd1b5, .035);
-        // this.scene.fog = new THREE.Fog(0xefd1b5, 1, 1000);
+        // this.scene.fog = new THREE.Fog(0x000000, 0, this.chamber_edge_length * 4);
+        this.scene.fog = new THREE.FogExp2(0xffffff, this.chamber_edge_length / 200);
 
 
-        //setup the initial camera conditions
-        this.camera = new THREE.PerspectiveCamera(
-            45,
-            this.width_for_3d / this.height_for_3d,
-            0.1,
-            1000
-        );
-        this.camera.position.x = 0 // -left to +right
-        this.camera.position.y = 0 // +top to -bottom
-        this.camera.position.z = this.chamber_edge_length * this.preferences.initial_camera_displacement_multiplier; // + towards, me - away
-        this.camera.lookAt(this.scene.position); // Not totally sure if this is helping orient the camera at init time.
+        this.create_camera();
 
         //setup the camera controler
         // loosely alphabetical
@@ -281,7 +287,7 @@ class Visualization {
 
         this.renderPass = new RenderPass(this.scene, this.camera);
         this.composer.addPass(this.renderPass);
-        // this.composer.addPass(this.impactPass);
+        this.composer.addPass(this.impactPass);
         this.composer.addPass(this.selectedPass);
         this.composer.addPass(this.newbornPass);
         this.composer.addPass(this.effectFXAA);
@@ -297,7 +303,7 @@ class Visualization {
         }
 
         this.configure_outline_passes();
-        this.createLights();
+        this.create_lights();
         this.create_chamber();
         this.create_column();
         this.helper_show_axis();
@@ -310,6 +316,40 @@ class Visualization {
         this.animate();
     }
 
+    onDocumentMouseMove(event) {
+        //event.preventDefault();
+        //console.log(event.clientX, event.clientY);
+        //this.mouse.x = event.clientX // / this.width_for_3d * 2;
+        //this.mouse.y = -event.clientY // / this.height_for_3d * 2;
+        //console.log(this.mouse.x)
+
+        try {
+            this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            this.mouse.unproject(this.camera);
+        } catch (err) {}
+    }
+    onDocumentKeyDown(event) {
+        if (event.key == " ") {
+            this.toggle_simulate();
+        }
+        if (event.key == "r") {
+            this.toggle_camera_auto_rotate();
+        }
+        if (event.key == "g") {
+            this.toggle_grid_visability();
+        }
+        if (event.key == "i") {
+            this.toggle_information_display();
+        }
+    }
+    onWindowResize() {
+        this.height_for_3d = document.getElementById("Visualization").clientHeight;
+        this.width_for_3d = document.getElementById("Visualization").clientWidth;
+        this.camera.aspect = this.width_for_3d / this.height_for_3d;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(this.width_for_3d, this.height_for_3d);
+    }
     setupPhysicsWorld() {
         this.collisionConfiguration = new Ammo.btDefaultCollisionConfiguration();
         this.dispatcher = new Ammo.btCollisionDispatcher(
@@ -328,6 +368,71 @@ class Visualization {
         // Currently I don't want gravity.
         this.physicsWorld.setGravity(new Ammo.btVector3(0, 0, 0));
     }
+    createRigidBody(pos = new THREE.Vector3(0, 0, 0), dim = new THREE.Vector3(1, 1, 1), mass = 0) {
+
+        // Actual ammo code
+        let transform = new Ammo.btTransform();
+        transform.setIdentity();
+        transform.setOrigin(new Ammo.btVector3(pos.x, pos.y, pos.z));
+        let motionState = new Ammo.btDefaultMotionState(transform);
+
+        // The .5 multipliers appear to be essential.... not able to find a documented reason
+        let colShape = new Ammo.btBoxShape(new Ammo.btVector3(dim.x * 0.5, dim.y * 0.5, dim.z * 0.5));
+        colShape.setMargin(0.05);
+
+        let localInertia = new Ammo.btVector3(0, 0, 0);
+        colShape.calculateLocalInertia(mass, localInertia);
+
+        let rbInfo = new Ammo.btRigidBodyConstructionInfo(
+            mass,
+            motionState,
+            colShape,
+            localInertia
+        );
+        let body = new Ammo.btRigidBody(rbInfo);
+
+        body.setFriction(0);
+        body.setRestitution(1.0);
+        body.setDamping(0.0, 0.0); // void 	setDamping (btScalar lin_damping, btScalar ang_damping)
+
+
+
+        // for visualizaton purposes:
+        let show_collision_volumes = false;
+        if (show_collision_volumes) {
+
+            let material = new THREE.MeshPhysicalMaterial({
+                color: 'grey',
+                emissive: 'grey',
+                transparent: true,
+                opacity: .2,
+                reflectivity: 0.0,
+                metalness: 0.0,
+                roughness: 0.0
+            });
+            //BoxBufferGeometry(
+            //  width: Float,   x
+            //  height : Float, y
+            //  depth : Float,  z
+            //  widthSegments : Integer, heightSegments : Integer, depthSegments : Integer)
+            let geometry = new THREE.BoxBufferGeometry(dim.x, dim.y, dim.z, 5, 5, 5);
+
+
+            let wall = new THREE.Mesh(geometry, material);
+            wall.position.set(pos.x, pos.y, pos.z);
+            this.scene.add(wall);
+            // End geometry helper block
+
+            wall.userData.physicsBody = body;
+
+            // this.rigidBodies.push(wall)
+            this.grid_cube.push(wall);
+
+        }
+        this.physicsWorld.addRigidBody(body);
+
+    }
+
 
     configure_outline_passes() {
         // Configure outline shader
@@ -360,55 +465,83 @@ class Visualization {
         this.newbornPass.hiddenEdgeColor.set('white');
     }
 
-    createLights() {
+    create_camera() {
+        //setup the initial camera conditions
+
+        switch (this.preferences.camera_type) {
+            case 'perspective':
+                this.camera = new THREE.PerspectiveCamera(
+                    45,
+                    this.ratio,
+                    0.1,
+                    1000
+                );
+                this.camera.position.x = 0 // -left to +right
+                this.camera.position.y = 0 // +top to -bottom
+                this.camera.position.z = this.chamber_edge_length * this.preferences.initial_camera_displacement_multiplier; // + towards, me - away
+                this.camera.lookAt(this.scene.position); // Not totally sure if this is helping orient the camera at init time.
+
+                break;
+
+            case 'orthographic':
+                this.camera = new THREE.OrthographicCamera(
+                    (-this.chamber_edge_length), //left
+                    this.chamber_edge_length, //right
+                    (-this.chamber_edge_length) / this.ratio, //top
+                    this.chamber_edge_length / this.ratio, //bottom
+                    0.1, //near
+                    1000 //far
+                );
+                this.camera.position.x = 0 // -left to +right
+                this.camera.position.y = 0 // +top to -bottom
+                this.camera.position.z = this.chamber_edge_length; // + towards, me - away
+                this.camera.lookAt(this.scene.position); // Not totally sure if this is helping orient the camera at init time.
+                break;
+
+            default:
+                this.camera = new THREE.PerspectiveCamera(
+                    45,
+                    this.ratio,
+                    0.1,
+                    1000
+                );
+                this.camera.position.x = 0 // -left to +right
+                this.camera.position.y = 0 // +top to -bottom
+                this.camera.position.z = this.chamber_edge_length * this.preferences.initial_camera_displacement_multiplier; // + towards, me - away
+                this.camera.lookAt(this.scene.position); // Not totally sure if this is helping orient the camera at init time.
+                break;
+        }
+    }
+
+    create_lights() {
         // A hemisphere light is a gradient colored light;
         // the first parameter is the sky color, the second parameter is the ground color,
         // the third parameter is the intensity of the light
 
         let distance_from_center = this.chamber_edge_length * .48
+        let lights = [];
 
-        this.hemisphereLight = new THREE.HemisphereLight(0xffffff, 0xffffff, .9);
+
+        // this.hemisphereLight = new THREE.HemisphereLight(0xffffff, 0xffffff, .9);
+        this.hemisphereLight = new THREE.AmbientLight(0xffffff);
+
+        lights.push(this.hemisphereLight);
 
         // A directional light shines from a specific direction.
         // It acts like the sun, that means that all the rays produced are parallel.
-        this.shadowLight_top = new THREE.DirectionalLight(0xffffff, 0.9);
-        this.shadowLight_bottom = new THREE.DirectionalLight(0xffffff, 0.9);
+        this.shadowLight_top = new THREE.DirectionalLight(0xffffff, 1.0);
 
-        // this.shadowLight_x = new THREE.DirectionalLight(0xffffff, 0.5);
-        // this.shadowLight_z = new THREE.DirectionalLight(0xffffff, 0.5);
-
+        // PointLight(color: Integer, intensity: Float, distance: Number, decay: Float)
+        // this.shadowLight_top = new THREE.PointLight(0xffffff, 1, 0, 2);
         // // Set the direction of the light
         this.shadowLight_top.position.set(
             0,
             distance_from_center,
             0,
         );
-        this.shadowLight_bottom.position.set(
-            0, -distance_from_center,
-            0
-        );
-        // this.helper_show_coordinate(this.shadowLight_bottom.position)
 
-
-        // this.shadowLight_x.position.set(
-        //     this.chamber_edge_length / 2,
-        //     this.chamber_edge_length / 2,
-        //     0
-        // );
-
-        // this.shadowLight_z.position.set(
-        //     0,
-        //     this.chamber_edge_length / 2,
-        //     this.chamber_edge_length
-        // );
         // Allow shadow casting
         this.shadowLight_top.castShadow = true;
-        // this.shadowLight_bottom.castShadow = true;
-
-        // this.shadowLight_x.castShadow = true;
-
-        // this.shadowLight_z.castShadow = true;
-
         // define the visible area of the projected shadow
         this.shadowLight_top.shadow.camera.left = -this.chamber_edge_length;
         this.shadowLight_top.shadow.camera.right = this.chamber_edge_length;
@@ -419,26 +552,31 @@ class Visualization {
         this.shadowLight_top.shadow.mapSize.width = 512; // define the resolution of the shadow;
         this.shadowLight_top.shadow.mapSize.height = 512; // the higher the better,         // but also the more expensive and less performant
 
-        // this.shadowLight_bottom.shadow.camera.left = -this.chamber_edge_length;
-        // this.shadowLight_bottom.shadow.camera.right = this.chamber_edge_length;
-        // this.shadowLight_bottom.shadow.camera.top = this.chamber_edge_length;
-        // this.shadowLight_bottom.shadow.camera.bottom = -this.chamber_edge_length;
-        // this.shadowLight_bottom.shadow.camera.near = 1;
-        // this.shadowLight_bottom.shadow.camera.far = 1000;
-        // this.shadowLight_bottom.shadow.mapSize.width = 512; // define the resolution of the shadow;
-        // this.shadowLight_bottom.shadow.mapSize.height = 512; // the higher the better,         // but also the more expensive and less performant
+
+        lights.push(this.shadowLight_top);
+
+        // lights.push(new THREE.DirectionalLight(0xffffff, 1, 0));
+        // lights.push(new THREE.DirectionalLight(0xffffff, 1, 0));
+        // lights.push(new THREE.DirectionalLight(0xffffff, 1, 0));
+        // lights[2].position.set(0, distance_from_center, 0);
+        // lights[3].position.set(distance_from_center, distance_from_center, distance_from_center);
+        // lights[4].position.set(-distance_from_center, -distance_from_center, -distance_from_center);
+
+
 
 
         // to activate the lights, just add them to the scene
-        this.scene.add(this.hemisphereLight);
-        this.scene.add(this.shadowLight_top);
+        lights.forEach(
+            light => this.scene.add(light)
+        );
+
         // this.scene.add(this.shadowLight_bottom);
 
     }
 
     generate_species(name) {
         let envMap = new THREE.TextureLoader().load("Images/envMap.png")
-        let envMapShiny = new THREE.TextureLoader().load("Images/Textures/water.jpg")
+        let envMapShiny = new THREE.TextureLoader().load("Images/Textures/sprites/circle.png")
 
         envMapShiny.mapping = THREE.SphericalReflectionMapping;
         envMap.mapping = THREE.SphericalReflectionMapping;
@@ -450,12 +588,11 @@ class Visualization {
         // let envMap = new THREE.TextureLoader().load("Images/ice-hr.jpg");
         // let normMap = new THREE.TextureLoader().load("Images/ice-hr.jpg");
 
-        let ao = new THREE.TextureLoader().load("Images/Plastic_04_ambientocclusion.jpg");
-        let basecolor = new THREE.TextureLoader().load("Images/Plastic_04_basecolor.jpg");
-        let normal = new THREE.TextureLoader().load("Images/Plastic_04_normalOgl.jpg");
-        let height = new THREE.TextureLoader().load("Images/Plastic_04_height.jpg");
-        let roughness = new THREE.TextureLoader().load("Images/Plastic_04_roughness.jpg");
-
+        let ao = new THREE.TextureLoader().load("Images/pitted-metal_ao.png");
+        let basecolor = new THREE.TextureLoader().load("Images/Textures/sprite2.png");
+        let normal = new THREE.TextureLoader().load("Images/pitted-metal_normal-ogl.png");
+        let height = new THREE.TextureLoader().load("Images/streakedmetal-roughness.png");
+        let roughness = new THREE.TextureLoader().load("Images/pitted-metal_roughness.png");
 
 
 
@@ -463,26 +600,18 @@ class Visualization {
 
         let materials = [];
         let mergedGeometry = [];
-        // basic monochromatic energy preservation
-        // let roughness = 0.4;
-        let diffuseColor = new THREE.Color().setHSL(0.0, 0.0, 0.9);
 
         for (let i = 0; i < geometry.length; i++) {
             //For atom i set up correct material
-            let material = new THREE.MeshLambertMaterial({
-                alphaMap: null,
-                aoMap: null,
+            let material = new THREE.MeshPhongMaterial({
                 color: COLORS[geometry[i][0]],
-                // color: 'pink',
-                map: null,
-                emissive: 'white ',
-                emissiveMap: null,
-                emissiveIntensity: 1.0,
+                combine: THREE.AddOperation, // THREE.Multiply (default), THREE.MixOperation, THREE.AddOperation.
                 envMap: envMap,
-                lightMap: null,
-                reflectivity: 0.5,
-                refractionRatio: 0.01,
-                specularMap: envMapShiny,
+                emissive: COLORS[geometry[i][0]],
+                emissiveIntensity: .5,
+                specular: COLORS[geometry[i][0]],
+                shininess: 100,
+
             });
 
 
@@ -558,6 +687,7 @@ class Visualization {
         let geometry_complete = BufferGeometryUtils.mergeBufferGeometries(mergedGeometry, true)
         geometry_complete.computeBoundingSphere();
         geometry_complete.center();
+        geometry_complete.toNonIndexed(); // Performance hit?
         // This information is now stored in the main data structure.
         this.data[name]["graphics"] = {
             geom: new THREE.Geometry().fromBufferGeometry(geometry_complete),
@@ -567,27 +697,30 @@ class Visualization {
         //Convert Geometry into a triangle mesh that can be used in ammo for colision
         let geom = new THREE.Geometry().fromBufferGeometry(geometry_complete)
         geom.mergeVertices(); // duplicate vertices are created with fromBufferGeometry()
-        const vertices = geom.vertices;
-        const scale = [1, 1, 1];
 
-        const trig_mesh = new Ammo.btTriangleMesh(true, true);
-        trig_mesh.setScaling(new Ammo.btVector3(scale[0], scale[1], scale[2]));
-        for (let i = 0; i < geom.vertices.length; i = i + 3) {
-            trig_mesh.addTriangle(
-                new Ammo.btVector3(vertices[i].x, vertices[i].y, vertices[i].z),
-                new Ammo.btVector3(vertices[i + 1].x, vertices[i + 1].y, vertices[i + 1].z),
-                new Ammo.btVector3(vertices[i + 2].x, vertices[i + 2].y, vertices[i + 2].z),
-                true
-            );
 
-        }
+        // const vertices = geom.vertices;
+        // const scale = [1, 1, 1];
+        // const trig_mesh = new Ammo.btTriangleMesh(true, true);
+        // trig_mesh.setScaling(new Ammo.btVector3(scale[0], scale[1], scale[2]));
+        // for (let i = 0; i < geom.vertices.length; i = i + 3) {
+        //     trig_mesh.addTriangle(
+        //         new Ammo.btVector3(vertices[i].x, vertices[i].y, vertices[i].z),
+        //         new Ammo.btVector3(vertices[i + 1].x, vertices[i + 1].y, vertices[i + 1].z),
+        //         new Ammo.btVector3(vertices[i + 2].x, vertices[i + 2].y, vertices[i + 2].z),
+        //         true
+        //     );
+
+        // }
+
+
         geom.computeBoundingSphere();
         geom.center();
         geom.verticesNeedUpdate = true;
 
         //store it for everyone!
         this.data[name]["physics"] = {
-            geom: geom
+            geom: geom,
         };
 
         for (let geo of mergedGeometry) {
@@ -763,71 +896,6 @@ class Visualization {
 
 
 
-
-    }
-
-    createRigidBody(pos = new THREE.Vector3(0, 0, 0), dim = new THREE.Vector3(1, 1, 1), mass = 0) {
-
-        // Actual ammo code
-        let transform = new Ammo.btTransform();
-        transform.setIdentity();
-        transform.setOrigin(new Ammo.btVector3(pos.x, pos.y, pos.z));
-        let motionState = new Ammo.btDefaultMotionState(transform);
-
-        // The .5 multipliers appear to be essential.... not able to find a documented reason
-        let colShape = new Ammo.btBoxShape(new Ammo.btVector3(dim.x * 0.5, dim.y * 0.5, dim.z * 0.5));
-        colShape.setMargin(0.05);
-
-        let localInertia = new Ammo.btVector3(0, 0, 0);
-        colShape.calculateLocalInertia(mass, localInertia);
-
-        let rbInfo = new Ammo.btRigidBodyConstructionInfo(
-            mass,
-            motionState,
-            colShape,
-            localInertia
-        );
-        let body = new Ammo.btRigidBody(rbInfo);
-
-        body.setFriction(0);
-        body.setRestitution(1.0);
-        body.setDamping(0.0, 0.0); // void 	setDamping (btScalar lin_damping, btScalar ang_damping)
-
-
-
-        // for visualizaton purposes:
-        let show_collision_volumes = false;
-        if (show_collision_volumes) {
-
-            let material = new THREE.MeshPhysicalMaterial({
-                color: 'grey',
-                emissive: 'grey',
-                transparent: true,
-                opacity: .2,
-                reflectivity: 0.0,
-                metalness: 0.0,
-                roughness: 0.0
-            });
-            //BoxBufferGeometry(
-            //  width: Float,   x
-            //  height : Float, y
-            //  depth : Float,  z
-            //  widthSegments : Integer, heightSegments : Integer, depthSegments : Integer)
-            let geometry = new THREE.BoxBufferGeometry(dim.x, dim.y, dim.z, 5, 5, 5);
-
-
-            let wall = new THREE.Mesh(geometry, material);
-            wall.position.set(pos.x, pos.y, pos.z);
-            this.scene.add(wall);
-            // End geometry helper block
-
-            wall.userData.physicsBody = body;
-
-            // this.rigidBodies.push(wall)
-            this.grid_cube.push(wall);
-
-        }
-        this.physicsWorld.addRigidBody(body);
 
     }
 
@@ -1170,7 +1238,9 @@ class Visualization {
 
     physics_updater() {
         // Step world
-        this.physicsWorld.stepSimulation(this.delta_t, 10);
+
+
+        this.physicsWorld.stepSimulation(this.delta_t, 100);
 
         this.update_rigid_bodies();
 
@@ -1181,8 +1251,8 @@ class Visualization {
     }
 
     animate() {
-        this.delta_t = this.clock.getDelta();
-
+        // this.delta_t = Math.min(this.clock.getDelta(), 1 / 60);
+        this.delta_t = 1 / 60;
 
         if (this.should_animate) {
             this.physics_updater();
@@ -1204,7 +1274,6 @@ class Visualization {
         this.composer.render(this.scene, this.camera);
         this.stats.end();
     }
-
     pause_animate() {
         this.should_animate = false;
     }
@@ -1212,7 +1281,7 @@ class Visualization {
         this.should_animate = true;
     }
 
-    toggle_animate() {
+    toggle_simulate() {
         this.should_animate = this.should_animate == false;
 
         if (this.should_animate) {
@@ -1251,22 +1320,16 @@ class Visualization {
         }
     }
 
-    set_new_molecule_glow_time(new_time) {
-        this.new_molecule_glow_time = new_time;
+    toggle_information_display() {
+        if (document.getElementById("info_box").style.zIndex == -1) {
+            document.getElementById("info_box").style.zIndex = 100;
+        } else {
+            document.getElementById("info_box").style.zIndex = -1;
+        }
     }
 
-    onDocumentMouseMove(event) {
-        //event.preventDefault();
-        //console.log(event.clientX, event.clientY);
-        //this.mouse.x = event.clientX // / this.width_for_3d * 2;
-        //this.mouse.y = -event.clientY // / this.height_for_3d * 2;
-        //console.log(this.mouse.x)
-
-        try {
-            this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-            this.mouse.unproject(this.camera);
-        } catch (err) {}
+    set_new_molecule_glow_time(new_time) {
+        this.new_molecule_glow_time = new_time;
     }
 
     selector(event) {
@@ -1300,26 +1363,6 @@ class Visualization {
         }
 
 
-    }
-
-    onDocumentKeyDown(event) {
-        if (event.key == " ") {
-            this.toggle_animate();
-        }
-        if (event.key == "r") {
-            this.toggle_camera_auto_rotate();
-        }
-        if (event.key == "g") {
-            this.toggle_grid_visability();
-        }
-    }
-
-    onWindowResize() {
-        this.height_for_3d = document.getElementById("Visualization").clientHeight;
-        this.width_for_3d = document.getElementById("Visualization").clientWidth;
-        this.camera.aspect = this.width_for_3d / this.height_for_3d;
-        this.camera.updateProjectionMatrix();
-        this.renderer.setSize(this.width_for_3d, this.height_for_3d);
     }
 
     helper_view_mouse() {
@@ -1398,14 +1441,11 @@ class Visualization {
 
     helper_show_coordinate(pos, color = 'black') {
         // for visualizaton purposes:
-        let material = new THREE.MeshPhysicalMaterial({
+        let material = new THREE.MeshBasicMaterial({
             color: color,
-            emissive: color,
             transparent: true,
             opacity: .5,
             reflectivity: 0.0,
-            metalness: 0.0,
-            roughness: 0.0
         });
         //BoxBufferGeometry(width : Float, height : Float, depth : Float, widthSegments : Integer, heightSegments : Integer, depthSegments : Integer)
         let geometry = new THREE.SphereBufferGeometry(.1, .1, .1);

@@ -12,7 +12,7 @@
     font-family: var(--font);
     font-style: normal;
     text-decoration: none;
-    --line-height: 1.1;
+    --line-height: 1.2;
     line-height: var(--line-height);
 }
 
@@ -38,13 +38,13 @@ body {
     opacity: .5;
     margin: 1px;
     list-style: none;
-    /* font-size: 16em; */
+    font-size: inherit;
     text-align: right;
     vertical-align: center;
     transition: all 0.1s ease 0.1s;
     background-color: rgba(0, 0, 0, 0.0);
     color: black;
-    height: var(--line-height)*1vh;
+    height: var(--line-height);
     width: 18vw;
 }
 
@@ -74,12 +74,14 @@ body {
 
 .menu-branch {
     transition: all 0.3s ease 0.1s;
-    height: 1vh;
+    height: 1.2em;
 }
 
 .menu-branch:hover {
     transition: all 0.1s ease 0s;
-    height: 40vh;
+    height: 40%;
+    overflow-y: scroll;
+    /* background-repeat: repeat-y; */
 }
 
 .menu-slider {

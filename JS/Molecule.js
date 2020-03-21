@@ -1,55 +1,70 @@
 class Molecule {
     constructor(name = 'molecule', mass = 0, coords, geometry, material, physics_geom, starting_position, velocity, rotational_velocity) {
         this.name = name;
-        this.velocity = velocity;
+        this.mass = mass;
+        this.coords = coords;
         this.starting_position = starting_position;
+
+        this.velocity = velocity;
+        this.velocity_mag = Math.sqrt(Math.pow(velocity.x, 2) + Math.pow(velocity.y, 2) + Math.pow(velocity.z, 2));
+        this.translational_energy = .5 * this.mass * Math.pow(this.velocity_mag, 2);
+
         this.rotational_velocity = rotational_velocity;
+        this.rotational_energy = 0.0;
+
+        this.total_energy = this.translational_energy + this.rotational_energy;
+
         this.lifetime = 0;
         this.can_decompose = false;
         this.glows = [];
+
 
         // TODO make this way more flexible
         if (this.mass > 50) {
             this.can_decompose = true;
         }
 
-        // console.log(velocity)
 
-        //console.log(coords.length);
-        this.coords = coords;
-        this.mass = mass;
-        this.velocity_mag = Math.sqrt(Math.pow(velocity.x, 2) + Math.pow(velocity.y, 2) + Math.pow(velocity.z, 2));;
-        this.translational_energy = .5 * this.mass * Math.pow(this.velocity_mag, 2);
-        this.rotational_energy = 0.0;
-        this.total_energy = this.translational_energy + this.rotational_energy;
+        // const vertices = geometry.vertices;
+        // const scale = [1, 1, 1];
+        // const trig_mesh = new Ammo.btTriangleMesh(true, true);
+        // trig_mesh.setScaling(new Ammo.btVector3(scale[0], scale[1], scale[2]));
+        // for (let i = 0; i < geometry.vertices.length; i = i + 3) {
+        //     trig_mesh.addTriangle(
+        //         new Ammo.btVector3(vertices[i].x, vertices[i].y, vertices[i].z),
+        //         new Ammo.btVector3(vertices[i + 1].x, vertices[i + 1].y, vertices[i + 1].z),
+        //         new Ammo.btVector3(vertices[i + 2].x, vertices[i + 2].y, vertices[i + 2].z),
+        //         true
+        //     );
+        // }
 
-        this.radius = .1 * (this.coords.length - 1);
-
-
-        this.mesh = new THREE.Mesh(geometry, material);
-        this.mesh.position.set(starting_position.x, starting_position.y, starting_position.z);
-        this.mesh.castShadow = true;
-        this.mesh.receiveShadow = true;
-
-        this.transform = new Ammo.btTransform();
-        this.transform.setIdentity();
-        this.transform.setOrigin(new Ammo.btVector3(starting_position.x, starting_position.y, starting_position.z));
-        //this.transform.setRotation(new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
-        this.motionState = new Ammo.btDefaultMotionState(this.transform);
+        //builds a reduced complexity hull
+        let hull = new Ammo.btShapeHull(physics_geom);
+        // hull.buildHull(.05);
+        let result = new Ammo.btConvexHullShape(hull);
 
 
         //TODO
         //TODO add aditional colshape method based on multiple spheres
         //TODO this might require a bit of a rewrite
 
-        //this.colShape = new Ammo.btBvhTriangleMeshShape(mesh, true, true);
-        // this.colShape = new Ammo.btConvexHullShape(geom, true, true);
-        // this.colShape = new Ammo.btSphereShape(this.radius);
-        this.colShape = new Ammo.btConvexHullShape(physics_geom, true, true);
+        this.mesh = new THREE.Mesh(geometry, material);
+        this.mesh.material.needsUpdate = true;
+        this.colShape = new Ammo.btConvexHullShape(result, true, true);
+        this.transform = new Ammo.btTransform();
+        this.transform.setIdentity();
+        this.transform.setOrigin(new Ammo.btVector3(starting_position.x, starting_position.y, starting_position.z));
+        this.mesh.position.set(starting_position.x, starting_position.y, starting_position.z);
+        this.mesh.castShadow = true;
+        this.mesh.receiveShadow = true;
+
+
+        //this.transform.setRotation(new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
+        this.motionState = new Ammo.btDefaultMotionState(this.transform);
         this.colShape.setMargin(0.05);
-        //Don't really know what this is useful for...
         this.localInertia = new Ammo.btVector3(0.0, 0.0, 0.0);
-        this.colShape.calculateLocalInertia(this.mass, this.localInertia);
+        this.colShape.calculateLocalInertia(this.mass, this.localInertia); //Don't really know what this is useful for...
+
 
         this.rbInfo = new Ammo.btRigidBodyConstructionInfo(
             this.mass,
@@ -62,11 +77,14 @@ class Molecule {
         this.body.setActivationState(4);
 
         // Very basic collision parameters
+
         // Something here may be causing acceleration(excessive acceleration)
         let vel_vec = new Ammo.btVector3(velocity.x, velocity.y, velocity.z);
         this.body.setLinearVelocity(vel_vec);
+
         let rot_vec = new Ammo.btVector3(rotational_velocity.x, rotational_velocity.y, rotational_velocity.z);
         this.body.setAngularVelocity(rot_vec);
+
         this.body.setFriction(0);
         this.body.setRestitution(1.0);
         this.body.setDamping(0.0, 0.0);
@@ -77,7 +95,11 @@ class Molecule {
         this.mesh.name = this.body.H;
 
         // console.log(this);
-
+        // console.log(hull);
+        hull.__destroy__();
+        physics_geom.dispose();
+        geometry.dispose();
+        // this.colShape.dispose();
         return this;
     }
 
