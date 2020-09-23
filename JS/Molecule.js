@@ -1,5 +1,5 @@
 class Molecule {
-    constructor(name = 'molecule', mass = 0, coords, geometry, material, physics_geom, starting_position, velocity, rotational_velocity) {
+    constructor(name = 'molecule', mass = 0, coords, geometry, material, starting_position, velocity, rotational_velocity) {
         this.name = name;
         this.mass = mass;
         this.coords = coords;
@@ -16,10 +16,13 @@ class Molecule {
 
         this.lifetime = 0;
         this.can_decompose = false;
+<<<<<<< HEAD
         this.glows = [];
 
 
         // TODO make this way more flexible
+=======
+>>>>>>> parent of 1a069fd... Heading home- push
         if (this.mass > 50) {
             this.can_decompose = true;
         }
@@ -43,6 +46,7 @@ class Molecule {
         // hull.buildHull(.05);
         let result = new Ammo.btConvexHullShape(hull);
 
+<<<<<<< HEAD
 
         //TODO
         //TODO add aditional colshape method based on multiple spheres
@@ -54,11 +58,49 @@ class Molecule {
         this.transform = new Ammo.btTransform();
         this.transform.setIdentity();
         this.transform.setOrigin(new Ammo.btVector3(starting_position.x, starting_position.y, starting_position.z));
+=======
+
+
+
+
+        this.radius = .1 * (this.coords.length - 1);
+
+        // geometry.computeFaceNormals();
+        geometry.computeBoundingSphere();
+        geometry.center();
+
+        //Convert Geometry into a triangle mesh that can be used in ammo for colision
+        let geom = new THREE.Geometry().fromBufferGeometry(geometry)
+        geom.mergeVertices(); // duplicate vertices are created with fromBufferGeometry()
+        const vertices = geom.vertices;
+        const scale = [1, 1, 1];
+
+        const trig_mesh = new Ammo.btTriangleMesh(true, true);
+        trig_mesh.setScaling(new Ammo.btVector3(scale[0], scale[1], scale[2]));
+        for (let i = 0; i < geom.vertices.length; i = i + 3) {
+            trig_mesh.addTriangle(
+                new Ammo.btVector3(vertices[i].x, vertices[i].y, vertices[i].z),
+                new Ammo.btVector3(vertices[i + 1].x, vertices[i + 1].y, vertices[i + 1].z),
+                new Ammo.btVector3(vertices[i + 2].x, vertices[i + 2].y, vertices[i + 2].z),
+                true
+            );
+
+        }
+
+
+        geom.computeBoundingSphere();
+        geom.center();
+        geom.verticesNeedUpdate = true;
+        this.mesh = new THREE.Mesh(geom, material);
+        this.mesh.castShadow = true;
+        this.mesh.receiveShadow = true;
+>>>>>>> parent of 1a069fd... Heading home- push
         this.mesh.position.set(starting_position.x, starting_position.y, starting_position.z);
         this.mesh.castShadow = true;
         this.mesh.receiveShadow = true;
 
 
+<<<<<<< HEAD
         //this.transform.setRotation(new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
         this.motionState = new Ammo.btDefaultMotionState(this.transform);
         this.colShape.setMargin(0.005);
@@ -72,9 +114,38 @@ class Molecule {
             this.colShape,
             this.localInertia
         );
+=======
+
+
+        this.transform = new Ammo.btTransform();
+        this.transform.setIdentity();
+        this.transform.setOrigin(new Ammo.btVector3(starting_position.x, starting_position.y, starting_position.z));
+        //this.transform.setRotation(new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
+        this.motionState = new Ammo.btDefaultMotionState(this.transform);
+
+
+        //TODO
+        //add aditional colshape method based on multiple spheres
+        // this might require a bit of a rewrite
+
+
+        //this.colShape = new Ammo.btBvhTriangleMeshShape(mesh, true, true);
+        // this.colShape = new Ammo.btConvexHullShape(geom, true, true);
+        this.colShape = new Ammo.btConvexHullShape(trig_mesh, true, true);
+        // this.colShape = new Ammo.btSphereShape(this.radius);
+        this.colShape.setMargin(0.15);
+
+
+        //Don't really know what this is useful for...
+        this.localInertia = new Ammo.btVector3(0.0, 0.0, 0.0);
+        this.colShape.calculateLocalInertia(this.mass, this.localInertia);
+        this.rbInfo = new Ammo.btRigidBodyConstructionInfo(this.mass, this.motionState, this.colShape, this.localInertia);
+>>>>>>> parent of 1a069fd... Heading home- push
         this.body = new Ammo.btRigidBody(this.rbInfo);
         //prevents physics deactivation
         this.body.setActivationState(4);
+
+
 
         // Very basic collision parameters
 
@@ -88,6 +159,8 @@ class Molecule {
         this.body.setFriction(0);
         this.body.setRestitution(1.0);
         this.body.setDamping(0.0, 0.0);
+
+
 
         this.mesh.userData.physicsBody = this.body;
         this.mesh.userData.molecule = this;

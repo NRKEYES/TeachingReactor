@@ -58,10 +58,14 @@ body {
     vertical-align: center;
 }
 
+<<<<<<< HEAD
 .menu:hover>* {
     display: flex;
     vertical-align: center;
 }
+=======
+.menu-branch {}
+>>>>>>> parent of 1a069fd... Heading home- push
 
 .menu li:hover {
     background-color: pink;
@@ -95,6 +99,7 @@ body {
     /* justify-content: flex-end; */
     opacity: .5;
     position: absolute;
+<<<<<<< HEAD
     display: flex;
     top: 0vh;
     left: 0vw;
@@ -103,6 +108,11 @@ body {
     width: 5vw;
     vertical-align: center;
     text-align: left;
+=======
+    top: 0;
+    left: 0;
+    width: 5vw;
+>>>>>>> parent of 1a069fd... Heading home- push
 }
 
 .menu-root:hover {
