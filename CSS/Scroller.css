@@ -67,9 +67,13 @@ body {
 .menu-branch {}
 >>>>>>> parent of 1a069fd... Heading home- push
 
+<<<<<<< HEAD
 .menu li:hover {
     background-color: pink;
 }
+=======
+.menu-branch {}
+>>>>>>> parent of 1a069fd... Heading home- push
 
 .menu li:active {
     background-color: turquoise;
@@ -112,6 +116,9 @@ body {
     top: 0;
     left: 0;
     width: 5vw;
+<<<<<<< HEAD
+>>>>>>> parent of 1a069fd... Heading home- push
+=======
 >>>>>>> parent of 1a069fd... Heading home- push
 }
 
