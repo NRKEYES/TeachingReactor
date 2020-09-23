@@ -32,7 +32,7 @@ import { OBJLoader } from "/JS/three/examples/jsm/loaders/OBJLoader.js";
 // Internal Dependancies
 import Molecule from "/JS/Molecule.js";
 
-let sphere_quality = 10;
+let sphere_quality = 3;
 
 var COLORS = {
     H: 0xFFFFFF,
@@ -378,7 +378,7 @@ class Visualization {
 
         // The .5 multipliers appear to be essential.... not able to find a documented reason
         let colShape = new Ammo.btBoxShape(new Ammo.btVector3(dim.x * 0.5, dim.y * 0.5, dim.z * 0.5));
-        colShape.setMargin(0.05);
+        colShape.setMargin(0.005);
 
         let localInertia = new Ammo.btVector3(0, 0, 0);
         colShape.calculateLocalInertia(mass, localInertia);
@@ -1252,7 +1252,13 @@ class Visualization {
 
     animate() {
         // this.delta_t = Math.min(this.clock.getDelta(), 1 / 60);
-        this.delta_t = 1 / 60;
+        // this.delta_t = 1 / 60;
+
+
+        // make sure delta time isn't too big.
+        this.delta_t = Math.min(this.clock.getDelta(), 1 / 20);
+
+
 
         if (this.should_animate) {
             this.physics_updater();

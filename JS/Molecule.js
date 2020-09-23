@@ -61,7 +61,7 @@ class Molecule {
 
         //this.transform.setRotation(new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
         this.motionState = new Ammo.btDefaultMotionState(this.transform);
-        this.colShape.setMargin(0.05);
+        this.colShape.setMargin(0.005);
         this.localInertia = new Ammo.btVector3(0.0, 0.0, 0.0);
         this.colShape.calculateLocalInertia(this.mass, this.localInertia); //Don't really know what this is useful for...
 
