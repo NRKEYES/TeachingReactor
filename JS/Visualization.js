@@ -1,8 +1,12 @@
 // External Dependancies
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 import Stats from '/JS/three/examples/jsm/libs/stats.module.js';
 import { BufferGeometryUtils } from "/JS/three/examples/jsm/utils/BufferGeometryUtils.js";
+=======
+
+>>>>>>> parent of 1a069fd... Heading home- push
 =======
 
 >>>>>>> parent of 1a069fd... Heading home- push
@@ -15,6 +19,7 @@ import { EffectComposer } from "/JS/three/examples/jsm/postprocessing/EffectComp
 import { RenderPass } from "/JS/three/examples/jsm/postprocessing/RenderPass.js";
 import { ShaderPass } from "/JS/three/examples/jsm/postprocessing/ShaderPass.js";
 import { OutlinePass } from "/JS/three/examples/jsm/postprocessing/OutlinePass.js";
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 import { FXAAShader } from "/JS/three/examples/jsm/shaders/FXAAShader.js";
@@ -41,12 +46,17 @@ import { OBJLoader } from "/JS/three/examples/jsm/loaders/OBJLoader.js";
 =======
 =======
 >>>>>>> parent of 1a069fd... Heading home- push
+=======
+>>>>>>> parent of 1a069fd... Heading home- push
 import { BokehPass } from "/JS/three/examples/jsm/postprocessing/BokehPass.js";
 import {
     BokehShader,
     BokehDepthShader
 } from "/JS/three/examples/jsm/shaders/BokehShader2.js";
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> parent of 1a069fd... Heading home- push
+=======
 >>>>>>> parent of 1a069fd... Heading home- push
 =======
 >>>>>>> parent of 1a069fd... Heading home- push
@@ -95,6 +105,9 @@ let atom_radius = {
     N: 0.065
 };
 
+<<<<<<< HEAD
+=======
+>>>>>>> parent of 1a069fd... Heading home- push
 =======
 >>>>>>> parent of 1a069fd... Heading home- push
 class Visualization {
@@ -111,6 +124,9 @@ class Visualization {
             show_stats: true,
 
         }
+
+        this.chamber_edge_length = chamber_edge_length;
+        this.camera_displacement = chamber_edge_length * 2;
 
         this.chamber_edge_length = chamber_edge_length;
         this.camera_displacement = chamber_edge_length * 2;
@@ -144,6 +160,7 @@ class Visualization {
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.setClearColor(this.background_and_emis, 0.0);
         this.renderer.setSize(this.width_for_3d, this.height_for_3d);
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
         this.renderer.physicallyCorrectLights = true;
@@ -192,10 +209,15 @@ class Visualization {
         // this.renderer.shadowMap.enabled = true;
         this.renderer.toneMappingExposure = 1.0;
 >>>>>>> parent of 1a069fd... Heading home- push
+=======
+        // this.renderer.shadowMap.enabled = true;
+        this.renderer.toneMappingExposure = 1.0;
+>>>>>>> parent of 1a069fd... Heading home- push
 
         this.container = document.getElementById("Visualization");
         this.container.appendChild(this.renderer.domElement);
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
         this.stats = new Stats();
@@ -210,6 +232,8 @@ class Visualization {
             stats_block.style.display = 'none';
         }
 
+=======
+>>>>>>> parent of 1a069fd... Heading home- push
 =======
 >>>>>>> parent of 1a069fd... Heading home- push
 =======
@@ -248,11 +272,14 @@ class Visualization {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         for (name in this.data) {
             this.data[name].instances = [];
         }
 
 =======
+=======
+>>>>>>> parent of 1a069fd... Heading home- push
 =======
 >>>>>>> parent of 1a069fd... Heading home- push
         this.effectFXAA = new ShaderPass(FXAAShader);
@@ -262,6 +289,9 @@ class Visualization {
         );
         this.composer.addPass(this.effectFXAA);
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> parent of 1a069fd... Heading home- push
+=======
 >>>>>>> parent of 1a069fd... Heading home- push
 =======
 >>>>>>> parent of 1a069fd... Heading home- push
@@ -278,6 +308,7 @@ class Visualization {
 
         this.createLights();
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
         this.create_camera();
@@ -328,6 +359,8 @@ class Visualization {
 =======
 =======
 >>>>>>> parent of 1a069fd... Heading home- push
+=======
+>>>>>>> parent of 1a069fd... Heading home- push
         this.camera = new THREE.PerspectiveCamera(
             70,
             this.width_for_3d / this.height_for_3d,
@@ -338,6 +371,9 @@ class Visualization {
         this.camera.position.y = (this.chamber_edge_length * 2) / 2; //camera.lookAt(scene.position)
         this.camera.position.z = this.chamber_edge_length * 2; //camera.lookAt(scene.position)
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> parent of 1a069fd... Heading home- push
+=======
 >>>>>>> parent of 1a069fd... Heading home- push
 =======
 >>>>>>> parent of 1a069fd... Heading home- push
@@ -397,8 +433,13 @@ class Visualization {
         this.composer.addPass(this.renderPass);
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         this.composer.addPass(this.impactPass);
         this.composer.addPass(this.selectedPass);
+=======
+        // this.composer.addPass(this.impactPass);
+        // this.composer.addPass(this.selectedPass);
+>>>>>>> parent of 1a069fd... Heading home- push
 =======
         // this.composer.addPass(this.impactPass);
         // this.composer.addPass(this.selectedPass);
@@ -428,6 +469,7 @@ class Visualization {
         }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
         this.configure_outline_passes();
         this.create_lights();
@@ -441,6 +483,8 @@ class Visualization {
 
 
 =======
+=======
+>>>>>>> parent of 1a069fd... Heading home- push
 =======
 >>>>>>> parent of 1a069fd... Heading home- push
         //this.mouse_viewer = this.view_mouse();
@@ -571,6 +615,7 @@ class Visualization {
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     configure_outline_passes() {
         // Configure outline shader
         this.impactObjects = [];
@@ -654,6 +699,8 @@ class Visualization {
 =======
 =======
 >>>>>>> parent of 1a069fd... Heading home- push
+=======
+>>>>>>> parent of 1a069fd... Heading home- push
     createLights() {
 >>>>>>> parent of 1a069fd... Heading home- push
         // A hemisphere light is a gradient colored light;
@@ -673,6 +720,7 @@ class Visualization {
         // It acts like the sun, that means that all the rays produced are parallel.
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         this.shadowLight_top = new THREE.DirectionalLight(0xffffff, 1.0);
 
         // PointLight(color: Integer, intensity: Float, distance: Number, decay: Float)
@@ -684,6 +732,8 @@ class Visualization {
             0,
         );
 =======
+=======
+>>>>>>> parent of 1a069fd... Heading home- push
 =======
 >>>>>>> parent of 1a069fd... Heading home- push
         this.shadowLight = new THREE.DirectionalLight(0xffffff, 0.5);
@@ -705,6 +755,7 @@ class Visualization {
         this.shadowLight_x.castShadow = true;
         this.shadowLight_y.castShadow = true;
         this.shadowLight_z.castShadow = true;
+<<<<<<< HEAD
 <<<<<<< HEAD
 >>>>>>> parent of 1a069fd... Heading home- push
 
@@ -751,6 +802,10 @@ class Visualization {
 
         // define the visible area of the projected shadow
 >>>>>>> parent of 1a069fd... Heading home- push
+=======
+
+        // define the visible area of the projected shadow
+>>>>>>> parent of 1a069fd... Heading home- push
         this.shadowLight.shadow.camera.left = -this.chamber_edge_length;
         this.shadowLight.shadow.camera.right = this.chamber_edge_length;
         this.shadowLight.shadow.camera.top = this.chamber_edge_length;
@@ -777,6 +832,9 @@ class Visualization {
         let normMap = new THREE.TextureLoader().load("Images/moon_1024.jpg");
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> parent of 1a069fd... Heading home- push
+=======
 >>>>>>> parent of 1a069fd... Heading home- push
 =======
 >>>>>>> parent of 1a069fd... Heading home- push
@@ -806,6 +864,7 @@ class Visualization {
 
         for (let i = 0; i < geometry.length; i++) {
             //For atom i set up correct material
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
             let material = new THREE.MeshPhongMaterial({
@@ -865,6 +924,8 @@ class Visualization {
 =======
 =======
 >>>>>>> parent of 1a069fd... Heading home- push
+=======
+>>>>>>> parent of 1a069fd... Heading home- push
             let material = new THREE.MeshPhysicalMaterial({
                 // wireframe: true
                 color: COLORS[geometry[i][0]],
@@ -880,6 +941,9 @@ class Visualization {
                 premultipliedAlpha: true,
             });
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> parent of 1a069fd... Heading home- push
+=======
 >>>>>>> parent of 1a069fd... Heading home- push
 =======
 >>>>>>> parent of 1a069fd... Heading home- push
@@ -910,6 +974,7 @@ class Visualization {
             mergedGeometry.push(sphereGeometry);
         }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
         let geometry_complete = BufferGeometryUtils.mergeBufferGeometries(mergedGeometry, true)
@@ -969,6 +1034,17 @@ class Visualization {
 >>>>>>> parent of 1a069fd... Heading home- push
         };
 
+=======
+        // This information is now stored in the main data structure.
+
+        //console.log(mergedGeometry)
+
+        this.data[name]["graphics"] = {
+            geom: BufferGeometryUtils.mergeBufferGeometries(mergedGeometry, true),
+            material: materials
+        };
+
+>>>>>>> parent of 1a069fd... Heading home- push
         for (let geo of mergedGeometry) {
             geo.dispose();
         }
@@ -1025,6 +1101,7 @@ class Visualization {
         // console.log(this.data[name])
     }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
     create_chamber() {
@@ -1193,10 +1270,77 @@ class Visualization {
         gridHelper.geometry.rotateY(Math.PI / 2);
         pos.set(0, this.chamber_edge_length / 2, 0);
         dim.set(this.chamber_edge_length, 0.1, this.chamber_edge_length);
+=======
+    add_grid() {
+        // Set up local
+        let mass = 0;
+        let pos = new THREE.Vector3();
+        let dim = new THREE.Vector3();
+        let size = this.chamber_edge_length;
+        let divisions = this.chamber_edge_length;
+        let gridHelper = null;
+
+        // ADD GRIDS
+
+        //Top and bottom   - along Y axis
+        //Bottom
+        gridHelper = new THREE.GridHelper(size, divisions, "grey", "grey");
+        gridHelper.geometry.rotateY(Math.PI / 2);
+        pos.set(0, -this.chamber_edge_length / 2, 0);
+        dim.set(this.chamber_edge_length, 0.1, this.chamber_edge_length);
+        gridHelper.position.copy(pos);
+        this.scene.add(gridHelper);
+        // this.grid_cube.push(gridHelper);
+        this.createRigidBody(dim, mass, pos);
+        //top
+        gridHelper = new THREE.GridHelper(size, divisions, "grey", "grey");
+        gridHelper.geometry.rotateY(Math.PI / 2);
+        pos.set(0, this.chamber_edge_length / 2, 0);
+        dim.set(this.chamber_edge_length, 0.1, this.chamber_edge_length);
         gridHelper.position.copy(pos);
         this.scene.add(gridHelper);
         this.grid_cube.push(gridHelper);
         this.createRigidBody(dim, mass, pos);
+
+        // Front and back - along X
+        gridHelper = new THREE.GridHelper(size, divisions, "grey", "grey");
+        gridHelper.geometry.rotateZ(Math.PI / 2);
+        pos.set(-this.chamber_edge_length / 2, 0, 0);
+        dim.set(0.1, this.chamber_edge_length, this.chamber_edge_length);
+        gridHelper.position.copy(pos);
+        this.scene.add(gridHelper);
+        this.grid_cube.push(gridHelper);
+        this.createRigidBody(dim, mass, pos);
+
+        gridHelper = new THREE.GridHelper(size, divisions, "grey", "grey");
+        gridHelper.geometry.rotateZ(Math.PI / 2);
+        pos.set(this.chamber_edge_length / 2, 0, 0);
+        dim.set(0.1, this.chamber_edge_length, this.chamber_edge_length);
+        gridHelper.position.copy(pos);
+        this.scene.add(gridHelper);
+        this.grid_cube.push(gridHelper);
+        this.createRigidBody(dim, mass, pos);
+
+        // Front and back - along Z
+        gridHelper = new THREE.GridHelper(size, divisions, "grey", "grey");
+        gridHelper.geometry.rotateX(Math.PI / 2);
+        pos.set(0, 0, -this.chamber_edge_length / 2);
+        dim.set(this.chamber_edge_length, this.chamber_edge_length, 0.1);
+        gridHelper.position.copy(pos);
+        this.scene.add(gridHelper);
+        this.grid_cube.push(gridHelper);
+        this.createRigidBody(dim, mass, pos);
+
+        gridHelper = new THREE.GridHelper(size, divisions, "grey", "grey");
+        gridHelper.geometry.rotateX(Math.PI / 2);
+        pos.set(0, 0, this.chamber_edge_length / 2);
+        dim.set(this.chamber_edge_length, this.chamber_edge_length, 0.1);
+>>>>>>> parent of 1a069fd... Heading home- push
+        gridHelper.position.copy(pos);
+        this.scene.add(gridHelper);
+        this.grid_cube.push(gridHelper);
+        this.createRigidBody(dim, mass, pos);
+<<<<<<< HEAD
 
         // Front and back - along X
         gridHelper = new THREE.GridHelper(size, divisions, "grey", "grey");
@@ -1288,6 +1432,12 @@ class Visualization {
             // displacementMap: displacementMap,
             // clearcoatNormalMap: basecolor,
 =======
+=======
+
+        // END ADD GRIDS
+    }
+
+>>>>>>> parent of 1a069fd... Heading home- push
     createRigidBody(dim, mass, pos) {
         // for visualizaton purposes:
         // let material = new THREE.MeshPhysicalMaterial({
@@ -1329,11 +1479,15 @@ class Visualization {
 =======
         this.physicsWorld.addRigidBody(body);
     }
+<<<<<<< HEAD
+>>>>>>> parent of 1a069fd... Heading home- push
+=======
 >>>>>>> parent of 1a069fd... Heading home- push
 
     clean_all() {
         // Clean up old scene molecules and chamber
 
+<<<<<<< HEAD
 <<<<<<< HEAD
         let column = new THREE.Mesh(geometry, material);
         column.position.set(0, column_drop, 0);
@@ -1361,6 +1515,8 @@ class Visualization {
 
 =======
 >>>>>>> parent of 1a069fd... Heading home- push
+=======
+>>>>>>> parent of 1a069fd... Heading home- push
         // for (name in this.data) {
         //     while (this.data[name].instances.length > 0) {
         //         let temp = this.data[name].instances.pop();
@@ -1384,6 +1540,9 @@ class Visualization {
 
         // this.renderer.renderLists.dispose();
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> parent of 1a069fd... Heading home- push
+=======
 >>>>>>> parent of 1a069fd... Heading home- push
 =======
 >>>>>>> parent of 1a069fd... Heading home- push
@@ -1677,6 +1836,7 @@ class Visualization {
     animate() {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         // this.delta_t = Math.min(this.clock.getDelta(), 1 / 60);
         // this.delta_t = 1 / 60;
 
@@ -1684,6 +1844,9 @@ class Visualization {
         // make sure delta time isn't too big.
         this.delta_t = Math.min(this.clock.getDelta(), 1 / 20);
 
+=======
+        //this.add_line();
+>>>>>>> parent of 1a069fd... Heading home- push
 =======
         //this.add_line();
 >>>>>>> parent of 1a069fd... Heading home- push
@@ -1710,12 +1873,15 @@ class Visualization {
         requestAnimationFrame(this.animate.bind(this));
         this.composer.render(this.scene, this.camera);
 <<<<<<< HEAD
+<<<<<<< HEAD
     }
     pause_animate() {
         this.should_animate = false;
     }
     resume_animate() {
         this.should_animate = true;
+=======
+>>>>>>> parent of 1a069fd... Heading home- push
 =======
 >>>>>>> parent of 1a069fd... Heading home- push
     }
@@ -1790,11 +1956,14 @@ class Visualization {
             this.add_to_pass(intersects[0].object.uuid, this.selectedObjects);
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
             console.log(intersects[0].object.position)
             this.controls.target = intersects[0].object.position;
             this.controls.autoRotate = false; // ==this.controls.autoRotate;
 
+=======
+>>>>>>> parent of 1a069fd... Heading home- push
 =======
 >>>>>>> parent of 1a069fd... Heading home- push
 =======
@@ -1827,6 +1996,9 @@ class Visualization {
 
     view_mouse() {
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> parent of 1a069fd... Heading home- push
+=======
 >>>>>>> parent of 1a069fd... Heading home- push
 =======
 >>>>>>> parent of 1a069fd... Heading home- push
@@ -1849,6 +2021,7 @@ class Visualization {
         //End geometry helper block
     }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
     helper_show_axis() {
@@ -1884,6 +2057,9 @@ class Visualization {
 =======
     add_line() {
 >>>>>>> parent of 1a069fd... Heading home- push
+=======
+    add_line() {
+>>>>>>> parent of 1a069fd... Heading home- push
         let material = new THREE.LineBasicMaterial({ color: 0x0000ff });
         let points = [];
         //console.log(this.raycaster.ray.origin)
@@ -1910,6 +2086,7 @@ class Visualization {
         let line = new THREE.Line(geometry, material);
         this.scene.add(line);
     }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 
@@ -1961,6 +2138,8 @@ class Visualization {
     }
 
     tick(incoming_data) {}
+=======
+>>>>>>> parent of 1a069fd... Heading home- push
 =======
 >>>>>>> parent of 1a069fd... Heading home- push
 =======

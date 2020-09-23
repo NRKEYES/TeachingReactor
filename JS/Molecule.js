@@ -18,10 +18,13 @@ class Molecule {
         this.can_decompose = false;
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         this.glows = [];
 
 
         // TODO make this way more flexible
+=======
+>>>>>>> parent of 1a069fd... Heading home- push
 =======
 >>>>>>> parent of 1a069fd... Heading home- push
 =======
@@ -44,6 +47,7 @@ class Molecule {
         //     );
         // }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
         //builds a reduced complexity hull
         let hull = new Ammo.btShapeHull(physics_geom);
@@ -117,6 +121,34 @@ class Molecule {
             );
 
 >>>>>>> parent of 1a069fd... Heading home- push
+=======
+
+
+
+
+        this.radius = .1 * (this.coords.length - 1);
+
+        // geometry.computeFaceNormals();
+        geometry.computeBoundingSphere();
+        geometry.center();
+
+        //Convert Geometry into a triangle mesh that can be used in ammo for colision
+        let geom = new THREE.Geometry().fromBufferGeometry(geometry)
+        geom.mergeVertices(); // duplicate vertices are created with fromBufferGeometry()
+        const vertices = geom.vertices;
+        const scale = [1, 1, 1];
+
+        const trig_mesh = new Ammo.btTriangleMesh(true, true);
+        trig_mesh.setScaling(new Ammo.btVector3(scale[0], scale[1], scale[2]));
+        for (let i = 0; i < geom.vertices.length; i = i + 3) {
+            trig_mesh.addTriangle(
+                new Ammo.btVector3(vertices[i].x, vertices[i].y, vertices[i].z),
+                new Ammo.btVector3(vertices[i + 1].x, vertices[i + 1].y, vertices[i + 1].z),
+                new Ammo.btVector3(vertices[i + 2].x, vertices[i + 2].y, vertices[i + 2].z),
+                true
+            );
+
+>>>>>>> parent of 1a069fd... Heading home- push
         }
 
 
@@ -134,6 +166,7 @@ class Molecule {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         //this.transform.setRotation(new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w));
         this.motionState = new Ammo.btDefaultMotionState(this.transform);
         this.colShape.setMargin(0.005);
@@ -148,6 +181,8 @@ class Molecule {
             this.localInertia
         );
 =======
+=======
+>>>>>>> parent of 1a069fd... Heading home- push
 =======
 >>>>>>> parent of 1a069fd... Heading home- push
 
@@ -176,6 +211,9 @@ class Molecule {
         this.colShape.calculateLocalInertia(this.mass, this.localInertia);
         this.rbInfo = new Ammo.btRigidBodyConstructionInfo(this.mass, this.motionState, this.colShape, this.localInertia);
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> parent of 1a069fd... Heading home- push
+=======
 >>>>>>> parent of 1a069fd... Heading home- push
 =======
 >>>>>>> parent of 1a069fd... Heading home- push
