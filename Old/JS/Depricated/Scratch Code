@@ -1,0 +1,616 @@
+// let conc_reactants = starting_amount / (1 + k_fwd * starting_amount * t * t_step);
+// let conc_products = stoich_coef * (starting_amount - conc_reactants);
+// let percent_product = (conc_products / (conc_products + conc_reactants));
+// for (name in species) {
+//     species[name].percent.push(1 - percent_product);
+//     species[name].count.push(A);
+// }
+
+
+function update_slider_value(passed) {
+    passed.parentElement.lastElementChild.innerHTML = passed.value;
+    //console.log(this.parentElement.lastElementChild.innerHTML)
+}
+
+
+
+
+function make_line() {
+    // adding a line
+    this.points = [];
+    points.push(new THREE.Vector3(0, 0, 0));
+    points.push(new THREE.Vector3(0, 100, 0));
+    points.push(new THREE.Vector3(10, 0, 0));
+
+    geometry = new THREE.BufferGeometry().setFromPoints(points);
+    material = new THREE.LineBasicMaterial({ color: 0x0000ff });
+
+    line = new THREE.Line(geometry, material);
+
+    scene.add(line);
+}
+
+
+
+
+//gridHelper.setRotationFromQuaternion(quat);
+
+createBoxShape(sx, sy, sz) {
+    var shape = new Ammo.btBoxShape(new Ammo.btVector3(sx, sy, sz));
+    shape.setMargin(this.margin);
+    return shape;
+}
+
+
+
+
+
+// // ADD GRIDS
+// var size = this.chamber_edge_length;
+// var divisions = this.chamber_edge_length;
+
+// var gridHelper = new THREE.GridHelper(size, divisions, 'black', 'black');
+
+
+
+// pos.set(-this.chamber_edge_length / 2, 0, 0);
+// quat.set(0, 0, 0, 1);
+
+// let geometry = new THREE.BoxBufferGeometry(.2, this.chamber_edge_length, this.chamber_edge_length);
+// this.chamber = new THREE.Mesh(geometry, material);
+// this.chamber.position.set(pos.x, pos.y, pos.z);
+// this.scene.add(this.chamber);
+
+// this.createRigidBody(
+//     geometry,
+//     this.createBoxShape(1, this.chamber_edge_length, this.chamber_edge_length),
+//     1,
+//     pos,
+//     quat);
+
+// gridHelper.setRotationFromQuaternion(quat);
+// gridHelper.position.copy(pos);
+// this.scene.add(gridHelper);
+
+
+// gridHelper = new THREE.GridHelper(size, divisions, 'black', 'black');
+// gridHelper.position.set(0, 0, -this.chamber_edge_length / 2);
+// gridHelper.geometry.rotateX(Math.PI / 2);
+// this.scene.add(gridHelper);
+// pos.set(0, 0, -this.chamber_edge_length / 2);
+// quat.set(0, 0, 0, 1);
+// this.createRigidBody(new THREE.Object3D(), this.createBoxShape(this.chamber_edge_length, this.chamber_edge_length, this.chamber_edge_length), 0, pos, quat);
+
+
+// gridHelper = new THREE.GridHelper(size, divisions, 'black', 'black');
+// gridHelper.position.set(-this.chamber_edge_length / 2, 0, 0);
+// gridHelper.geometry.rotateZ(Math.PI / 2);
+// this.scene.add(gridHelper);
+// pos.set(-this.chamber_edge_length / 2, 0, 0);
+// quat.set(0, 0, 0, 1);
+// this.createRigidBody(new THREE.Object3D(), this.createBoxShape(this.chamber_edge_length, this.chamber_edge_length, this.chamber_edge_length), 0, pos, quat);
+
+
+
+// gridHelper = new THREE.GridHelper(size, divisions);
+// gridHelper.position.set(0, this.chamber_edge_length / 2, 0);
+// this.scene.add(gridHelper);
+// pos.set(0, this.chamber_edge_length / 2, 0);
+// quat.set(0, 0, 0, 1);
+// this.createRigidBody(new THREE.Object3D(), this.createBoxShape(this.chamber_edge_length, this.chamber_edge_length, this.chamber_edge_length), 0, pos, quat);
+
+
+
+// gridHelper = new THREE.GridHelper(size, divisions);
+// gridHelper.position.set(0, 0, this.chamber_edge_length / 2);
+// gridHelper.geometry.rotateX(Math.PI / 2);
+// this.scene.add(gridHelper);
+// pos.set(0, this.chamber_edge_length / 2, 0);
+// quat.set(0, 0, 0, 1);
+// this.createRigidBody(new THREE.Object3D(), this.createBoxShape(this.chamber_edge_length, this.chamber_edge_length, this.chamber_edge_length), 0, pos, quat);
+
+
+// gridHelper = new THREE.GridHelper(size, divisions);
+// gridHelper.position.set(this.chamber_edge_length / 2, 0, 0);
+// gridHelper.geometry.rotateZ(Math.PI / 2);
+// this.scene.add(gridHelper);
+// pos.set(0, this.chamber_edge_length / 2, 0);
+// quat.set(0, 0, 0, 1);
+// this.createRigidBody(new THREE.Object3D(), this.createBoxShape(this.chamber_edge_length, this.chamber_edge_length, this.chamber_edge_length), 0, pos, quat);
+
+
+
+
+//Set of transparent walls towards the initial camera
+// material = new THREE.MeshPhysicalMaterial({
+//     color: 'lightblue',
+//     metalness: 1.0,
+//     roughness: .1,
+//     //alphaMap: texture2,
+//     //alphaTest: 0.33,
+//     envMap: texture1,
+//     envMapIntensity: .9,
+//     depthTest: true,
+//     transparency: .8,
+//     transparent: true,
+//     side: THREE.DoubleSide,
+// });
+// geometry = new THREE.BoxBufferGeometry(.2, this.chamber_edge_length, this.chamber_edge_length);
+// this.chamber = new THREE.Mesh(geometry, material);
+
+// this.chamber.position.set(this.chamber_edge_length / 2, 0, 0);
+// //console.log(this.chamber)
+// this.scene.add(this.chamber);
+
+// geometry = new THREE.BoxBufferGeometry(this.chamber_edge_length, .2, this.chamber_edge_length);
+// this.chamber = new THREE.Mesh(geometry, material);
+
+// this.chamber.position.set(0, this.chamber_edge_length / 2, 0);
+// //console.log(this.chamber)
+// this.scene.add(this.chamber);
+
+// geometry = new THREE.BoxBufferGeometry(this.chamber_edge_length, this.chamber_edge_length, .2);
+// this.chamber = new THREE.Mesh(geometry, material);
+
+// this.chamber.position.set(0, 0, this.chamber_edge_length / 2);
+// //console.log(this.chamber)
+// this.scene.add(this.chamber);
+
+
+
+// geometry.dispose();
+// material.dispose();
+//selectedObjects.push(chamber)
+
+
+// let mass = 0;
+
+
+// let pos = new THREE.Vector3();
+// let quat = new THREE.Quaternion();
+
+
+
+// let material = new THREE.MeshPhysicalMaterial({
+//     color: 'yellow',
+//     emissive: 'grey',
+//     reflectivity: 0,
+//     metalness: .9,
+//     roughness: 1,
+//     //envMap: envMap,
+//     side: THREE.BackSide
+
+// });
+
+
+// let geometry = new THREE.SphereBufferGeometry(
+//     this.chamber_edge_length * 10, 4, 4, 4);
+
+// this.chamber = new THREE.Mesh(geometry, material);
+// this.chamber.receiveShadow = false;
+// this.chamber.castShadow = false;
+// this.chamber.position.set(0, 0, 0);
+// this.scene.add(this.chamber);
+
+
+
+
+// let chamber_spacing = .3
+
+
+// let material = new THREE.MeshPhysicalMaterial({
+//     color: 'grey',
+//     emissive: 'grey',
+//     reflectivity: 0,
+//     metalness: .9,
+//     roughness: 1,
+//     envMap: envMap,
+//     polygonOffset: true,
+//     polygonOffsetFactor: 1, // positive value pushes polygon further away
+//     polygonOffsetUnits: 1,
+//     side: THREE.DoubleSide
+
+// });
+
+// let geometry = new THREE.BoxBufferGeometry(.2, this.chamber_edge_length, this.chamber_edge_length);
+// this.chamber = new THREE.Mesh(geometry, material);
+// this.chamber.receiveShadow = true;
+// this.chamber.position.set(-this.chamber_edge_length / 2 - chamber_spacing, 0, 0);
+// this.scene.add(this.chamber);
+
+// // material = new THREE.MeshPhysicalMaterial({
+// //     color: 'grey',
+// //     emissive: 'grey',
+// //     reflectivity: 0,
+// //     roughness: 1,
+// //     envMap: envMap,
+// // });
+
+// geometry = new THREE.BoxBufferGeometry(this.chamber_edge_length, .2, this.chamber_edge_length);
+// this.chamber = new THREE.Mesh(geometry, material);
+// this.chamber.receiveShadow = true;
+// this.chamber.position.set(0, -this.chamber_edge_length / 2 - chamber_spacing, 0);
+// this.scene.add(this.chamber);
+
+// geometry = new THREE.BoxGeometry(
+//     this.chamber_edge_length, this.chamber_edge_length, .2, // size
+//     this.chamber_edge_length, this.chamber_edge_length, 1); // divisions
+// this.chamber = new THREE.Mesh(geometry, material);
+// this.chamber.receiveShadow = true;
+// this.chamber.position.set(0, 0, -this.chamber_edge_length / 2 - chamber_spacing);
+// this.scene.add(this.chamber);
+
+
+
+add_reaction_chamber() {
+    // Reaction Chamber
+
+    let texture1 = new THREE.TextureLoader().load('Images/steel.jpg');
+    let texture2 = new THREE.TextureLoader().load('Images/glass1.gif');
+
+    let material = new THREE.MeshPhysicalMaterial({
+        color: 'lightblue',
+        metalness: 1.0,
+        roughness: .1,
+        //alphaMap: texture2,
+        //alphaTest: 0.33,
+        envMap: texture1,
+        envMapIntensity: .9,
+        depthTest: true,
+        transparency: .8,
+        transparent: true,
+        side: THREE.DoubleSide,
+    });
+
+    let geometry = new THREE.BoxBufferGeometry(this.chamber_edge_length, this.chamber_edge_length, this.chamber_edge_length);
+    this.chamber = new THREE.Mesh(geometry, material);
+    this.chamber.castShadow = true;
+    this.chamber.receiveShadow = true;
+    this.chamber.position.set(0, 0, 0);
+    //console.log(this.chamber)
+    this.scene.add(this.chamber);
+
+    // geometry.dispose();
+    // material.dispose();
+    //selectedObjects.push(chamber)
+}
+
+
+
+
+
+
+//this.velocity = this.body.getLinearVelocity()
+console.log(this.velocity)
+
+// this.mesh.position.addScaledVector(this.velocity, delta_t);
+// this.mesh.rotateOnAxis(this.rotational_axis, .05);
+
+//this.check_walls(chamber_edge_length);
+
+
+
+check_neighbors(data) {
+    //console.log('check neighbors')
+
+    let hit_dist = .2;
+
+
+    let possible_x = [];
+    let possible_x_y = [];
+
+
+
+
+    for (let x = 0; x < data.instances.length; x++) {
+        //console.log(data.instances[x])
+
+        let aprox =
+            this.mesh.position.x -
+            data.instances[x].mesh.position.x;
+
+        //console.log(aprox);
+
+        if (Math.abs(aprox < hit_dist)) {
+            //console.log('we hit! X')
+            possible_x.push(data.instances[x])
+        }
+    }
+
+    for (let y = 0; y < possible_x.length; y++) {
+
+        let aprox =
+            this.mesh.position.y -
+            possible_x[y].mesh.position.y;
+
+        //console.log(aprox);
+
+        if (Math.abs(aprox < hit_dist)) {
+            //console.log('we hit Y!')
+            possible_x_y.push(possible_x[y])
+        }
+    }
+    //console.log(possible_x_y);
+    for (let z = 0; z < possible_x_y.length; z++) {
+
+        let aprox =
+            this.mesh.position.z -
+            possible_x_y[z].mesh.position.z;
+
+        //console.log(aprox);
+
+        if (Math.abs(aprox < hit_dist)) {
+
+            this.merge(possible_x_y[z]);
+        }
+    }
+
+}
+
+
+
+//console.log('we hit!');
+//console.log(mol_1.name.length)
+
+let mass_factor = this.name.length / mol_1.name.length;
+
+//console.log(mol_1.velocity);
+mol_1.velocity.addScaledVector(mol_1.velocity, -2 * mass_factor);
+//console.log(mol_1.velocity);
+
+mol_1.check = false;
+this.velocity.addScaledVector(this.velocity, -2 * (1 / mass_factor));
+//this.velocity = // multiply by factor based on mass
+
+
+
+
+//console.log(this.mouse_viewer)
+//this.chamber.position.set(this.mouse.x, this.mouse, y, 0)
+
+// this.raycaster.setFromCamera(this.mouse, this.camera);
+
+// let intersects = this.raycaster.intersectObjects(this.rigidBodies);
+
+// if (intersects.length > 0) {
+//     this.selectedObjects.pop();
+//     console.log(intersects[0].object);
+//     this.selectedObjects.push(intersects[0].object)
+
+
+// } else {
+//     this.INTERSECTED = null;
+// }
+
+
+
+// for (var i = 0; i < this.rigidBodies.length; i++) {
+//     var contactManifold = this.physicsWorld.getDispatcher().getManifoldByIndexInternal(i);
+//     var obA = contactManifold.getBody0();
+//     var obB = contactManifold.getBody1();
+//     //contactManifold.refreshContactPoints(obA.getWorldTransform(), obB.getWorldTransform());
+//     var numContacts = contactManifold.getNumContacts();
+
+//     // For each contact point in that manifold 
+//     for (var j = 0; j < numContacts; j++) {
+
+//         // Get the contact information
+//         var pt = contactManifold.getContactPoint(j);
+//         var ptA = pt.getPositionWorldOnA();
+//         var ptB = pt.getPositionWorldOnB();
+//         var ptdist = pt.getDistance();
+//         //console.log(ptdist)
+
+//         // Do whatever else you need with the information...
+//     }
+// }
+
+
+// for (name in this.data) {
+//     //console.log(this.data[name]);
+//     for (let i = 0; i < this.data[name].instances.length; i++) {
+//         //console.log(this.data[name].instances[i]);
+//         this.data[name].instances[i].update(this.data, this.delta_t, this.chamber_edge_length);
+//     }
+// }
+
+
+#
+floating_bar_chart {
+    transition: .3 s;
+    opacity: .5;
+    top: 20 vh;
+    left: 60 vw;
+}
+
+#
+floating_bar_chart: hover {
+    opacity: 1.0;
+}
+
+#
+floating_histogram {
+    z - index: 100;
+    top: 20 vh;
+    left: 60 vw;
+}
+
+#
+PercentVsTime {
+    z - index: 100;
+    top: 20 vh;
+    left: 60 vw;
+}
+
+#
+CountVsTime {
+    top: 20 vh;
+    left: 60 vw;
+}
+
+ul,
+li {
+    display: flex;
+    flex - direction: column;
+    list - style - type: none;
+}
+
+
+.menu-branch:hover>* {
+    display: flex;
+    transition: .3s;
+    opacity: 1.0;
+    background-color: var(--menu-color-selected);
+}
+.menu:hover>* {
+    display: flex;
+    transition: .3s;
+    opacity: 1.0;
+    background-color: var(--menu-color-selected);
+}
+
+.menu-root:hover>.menu-branch {
+    display: flex;
+    position: inherit;
+    opacity: 1.0;
+}
+.menu-branch:hover * {
+    display: flex;
+    position: inherit;
+    opacity: 1.0;
+}
+.menu:last-child {
+    margin: auto;
+}
+
+
+ul,
+li {
+    padding: 10 px;
+    margin: 10 px;
+    border: medium;
+    display: none;
+    flex - direction: column;
+}
+
+#
+Menu {
+    z - index: 50;
+    background - color: var (--menu - color - main);
+    position: inherit;
+    display: flex;
+    width: fit - content;
+    flex - direction: column;
+    text - align: center;
+    justify - content: center;
+    transition: .3 s;
+    opacity: .8;
+    list - style: none;
+}
+
+.menu {}
+
+.menu - root {
+    display: flex;
+}
+
+.menu - root: hover > * {
+    display: flex;
+}
+
+.branch: hover * {
+    display: flex;
+}
+
+#
+Menu: last - child {
+    margin: auto;
+}
+
+span: hover {
+    background - color: var (--menu - color - selected);
+}
+
+.leaf: hover {
+    background - color: var (--menu - color - selected);
+    z - index: 100;
+}
+
+.menu span:hover {
+    background-color: var(--menu-color-selected);
+}
+
+
+
+
+
+// document.querySelector('#Menu').addEventListener('mouseleave', () => {
+//     //toggle element visability
+//     //document.getElementById('Sub-Menu-Toggle').style.display = 'none';
+//     document.getElementById('Tabs').style.display = 'none';
+//     document.getElementById('Controls').style.display = 'none';
+//     document.getElementById('Development').style.display = 'none';
+// });
+
+// document.querySelector('#Visuals').addEventListener('mouseenter', () => {
+//     //toggle element visability
+//     document.getElementById('Sub-Menu-Toggle').style.display = 'none';
+//     document.getElementById('Tabs').style.display = 'none';
+//     document.getElementById('Controls').style.display = 'none';
+//     document.getElementById('Development').style.display = 'none';
+// });
+// document.querySelector('#tab-toggle').addEventListener('mouseover', () => {
+//     document.getElementById('Tabs').style.display = '';
+//     document.getElementById('Controls').style.display = 'none';
+//     document.getElementById('Development').style.display = 'none';
+// });
+// document.querySelector('#controls-toggle').addEventListener('mouseover', () => {
+//     document.getElementById('Tabs').style.display = 'none';
+//     document.getElementById('Controls').style.display = '';
+//     document.getElementById('Development').style.display = 'none';
+// });
+// document.querySelector('#dev-toggle').addEventListener('mouseover', () => {
+//     document.getElementById('Tabs').style.display = 'none';
+//     document.getElementById('Controls').style.display = 'none';
+//     document.getElementById('Development').style.display = '';
+// });
+
+// document.querySelector('#menu-toggle').addEventListener('click', () => {
+//     //toggle element visability
+//     // if (document.getElementById('Sub-Menu-Toggle').style.display == 'none') {
+//     //     document.getElementById('Sub-Menu-Toggle').style.display = '';
+//     // } else {
+//     //     document.getElementById('Sub-Menu-Toggle').style.display = 'none';
+//     // }
+
+//     if (document.getElementById('Menu').childNodes.style.display == 'none') {
+//         document.getElementById('Menu').childNodes.style.display = '';
+//     } else {
+//         document.getElementById('Menu').childNodes.style.display = 'none';
+//     }
+// });
+
+
+
+
+            // console.log('I need to add a molecule');
+
+            // for (let i = current_count - 1; i < this.data[name].count.slice(-1)[0]; i++) {
+            //     // Now add instances as needed
+            //     try {
+            //         this.add_molecule(name);
+            //     } catch (err) {
+            //         console.log(err);
+            //     }
+            // }
+
+
+            //remove extra instances
+            // for (let i = current_count; i < this.data[name].count.slice(-1)[0]; i++) {
+            //     try {
+            //         this.add_molecule(name);
+
+            //     } catch (err) {
+            //         console.log(err);
+            //     }
+            // }
