@@ -38,7 +38,7 @@ body {
     opacity: .5;
     margin: 1px;
     list-style: none;
-    /* font-size: 16em; */
+    font-size: 16em;
     text-align: right;
     vertical-align: center;
     transition: all 0.1s ease 0.1s;
