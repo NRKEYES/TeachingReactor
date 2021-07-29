@@ -38,7 +38,6 @@ body {
     opacity: .5;
     margin: 1px;
     list-style: none;
-    font-size: 16em;
     text-align: right;
     vertical-align: center;
     transition: all 0.1s ease 0.1s;
@@ -56,11 +55,13 @@ body {
     color: black;
     text-align: left;
     vertical-align: center;
+    width: 40vh;
 }
 
 .menu:hover>* {
     display: flex;
     vertical-align: center;
+    width: 40vh;
 }
 
 .menu li:hover {
@@ -97,7 +98,7 @@ body {
     top: 0vh;
     left: 0vw;
     height: var(--line-height)*3vh;
-    font-size: 4.25%;
+    font-size:large;
     width: 5vw;
     vertical-align: center;
     text-align: left;
