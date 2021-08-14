@@ -144,7 +144,8 @@ body {
     /* justify-content: flex-end; */
     height: 96vh;
     width: 22vw;
-    background-color: rgba(0, 0, 0, 0.0);
+    /* background-color: rgba(0, 0, 0, 0.0); */
+    background-color: rgba(161, 153, 153, .5);
     /* opacity: .9; */
 }
 
