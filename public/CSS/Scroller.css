@@ -16,13 +16,46 @@
     line-height: var(--line-height);
 }
 
+html{
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    margin:0;
+    padding: 0;
+    background-color: orange;
+    justify-content: center;
+    align-items: center;
+}
+
 body {
     width: var(--width);
     height: var(--height);
     background-color: var(--main-background-color);
-    position: fixed;
+    display:flex;
+    margin: 0;
+    padding: 0;
+    /* position: fixed; */
     justify-content: center;
     text-align: left;
+    align-items: center;
+}
+
+#Visuals {
+    /* position: absolute; */
+    width: 98vw;
+    height: 98vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#Visualization {
+    width: 98vw;
+    height: 98vh;
+    /* position: absolute; */
+    background-color: white;
+    justify-content: center;
+    align-items: center;
 }
 
 .menu {
@@ -158,16 +191,7 @@ body {
     cursor: pointer;
 }
 
-#Visuals {
-    position: fixed;
-}
 
-#Visualization {
-    width: var(--width);
-    height: var(--height);
-    position: inherit;
-    background-color: white;
-}
 
 .floating {
     position: fixed;
@@ -190,7 +214,7 @@ body {
     position: absolute;
     left: 80vw;
     /* right: 100vw; */
-    top: 1em;
+    top: 2vh;
     height: fit-content;
     width: 17vw;
     justify-content: right;
