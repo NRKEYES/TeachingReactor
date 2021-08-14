@@ -50,8 +50,8 @@ body {
 }
 
 #Visualization {
-    width: 98vw;
-    height: 98vh;
+    width: 96vw;
+    height: 96vh;
     /* position: absolute; */
     background-color: white;
     justify-content: center;
@@ -72,7 +72,7 @@ body {
     opacity: .5;
     list-style: none;
     text-align: right;
-    font-size: medium;
+    font-size: small;
     vertical-align: center;
     transition: all 0.1s ease 0.1s;
     background-color: rgba(0, 0, 0, 0.0);
@@ -115,14 +115,14 @@ body {
 }
 
 .menu-branch {
-    font-size: medium;
+    font-size: small;
     transition: all 0.3s ease 0.1s;
     height: fit-content;
     width: fit-content;
 }
 
 .menu-branch:hover {
-    transition: all 0.1s ease 0s;
+    transition: all 0.5s ease .5s;
     height: fit-content;
 }
 
@@ -135,12 +135,12 @@ body {
 .menu-root {
     /* transition: all 1.5s ease 4s; */
     /* justify-content: flex-end; */
-    opacity: .5;
+    opacity: 1.0;
     background-color: orange;
     position: absolute;
     display: flex;
-    top: 1vh;
-    left: 1vw;
+    top: 2vh;
+    left: 2vw;
     height: var(--line-height)*4vh;
     font-size:large;
     /* width: 4vw; */
@@ -152,8 +152,8 @@ body {
     /* justify-content: flex-end; */
     /* background-color: rgba(0, 0, 0, 0.0); */
     /* opacity: .9; */
-    height: 96vh;
-    width: 35vw;
+    height: fit-content;
+    width: fit-content;
     font-size: x-large;
     background-color: rgba(161, 153, 153, .5);
 }
