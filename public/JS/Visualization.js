@@ -1331,12 +1331,19 @@ class Visualization {
         }
     }
 
-    onWindowResize() {
+    onWindowResize(event) {
+        console.log("resized")
         this.height_for_3d = document.getElementById("Visualization").clientHeight;
         this.width_for_3d = document.getElementById("Visualization").clientWidth;
+        this.renderer.setSize(this.width_for_3d, this.height_for_3d);
+
         this.camera.aspect = this.width_for_3d / this.height_for_3d;
         this.camera.updateProjectionMatrix();
-        this.renderer.setSize(this.width_for_3d, this.height_for_3d);
+        
+        this.camera.position.x = 0 // -left to +right
+        this.camera.position.y = 0 // +top to -bottom
+        this.camera.position.z = this.chamber_edge_length * this.preferences.initial_camera_displacement_multiplier; // + towards, me - away
+        this.camera.lookAt(this.scene.position);
     }
 
     helper_view_mouse() {
