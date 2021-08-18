@@ -358,39 +358,28 @@ function update_all_sliders() {
 
 
     document.getElementById("initial_ratio").value = p_to_r_ratio * 100;
-    document.getElementById(
-        "initial_ratio"
-    ).parentElement.lastElementChild.innerHTML = p_to_r_ratio;
+    document.getElementById("initial_ratio").parentElement.lastElementChild.innerHTML = p_to_r_ratio;
 
     document.getElementById("edge_length").value = chamber_edge_length;
-    document.getElementById(
-        "edge_length"
-    ).parentElement.lastElementChild.innerHTML = chamber_edge_length;
+    document.getElementById("edge_length").parentElement.lastElementChild.innerHTML = chamber_edge_length;
 
     document.getElementById("forward_rate").value = k_fwd;
-    document.getElementById(
-        "forward_rate"
-    ).parentElement.lastElementChild.innerHTML = k_fwd;
+    document.getElementById("forward_rate").parentElement.lastElementChild.innerHTML = k_fwd;
 
     document.getElementById("equilibrium_constant").value = Keq;
-    document.getElementById(
-        "equilibrium_constant"
-    ).parentElement.lastElementChild.innerHTML = Keq;
+    document.getElementById("equilibrium_constant").parentElement.lastElementChild.innerHTML = Keq;
 
     document.getElementById("backward_rate").value = k_rev;
-    document.getElementById(
-        "backward_rate"
-    ).parentElement.lastElementChild.innerHTML = k_rev;
+    document.getElementById("backward_rate").parentElement.lastElementChild.innerHTML = k_rev;
 
     document.getElementById("time_step").value = t_step_target;
-    document.getElementById(
-        "time_step"
-    ).parentElement.lastElementChild.innerHTML = t_step_target;
+    document.getElementById("time_step").parentElement.lastElementChild.innerHTML = t_step_target;
 
     document.getElementById("amount_chaos").value = amount_chaos;
-    document.getElementById(
-        "amount_chaos"
-    ).parentElement.lastElementChild.innerHTML = amount_chaos;
+    document.getElementById("amount_chaos").parentElement.lastElementChild.innerHTML = amount_chaos;
+
+    document.getElementById("time_for_new_glow").value = visualizer.new_molecule_glow_time;
+    document.getElementById("time_for_new_glow").parentElement.lastElementChild.innerHTML = visualizer.new_molecule_glow_time;
 
     // TODO make more generic
     // let slides = document.getElementsByClassName('slidecontainer');
@@ -459,29 +448,40 @@ document.addEventListener(
     },
     false
 );
+
+document.addEventListener(
+    "keydown",
+    (event) => {
+        console.log(event)
+        return visualizer.onDocumentKeyDown(event);
+    },
+    false
+);
+
 document.querySelector("#Visualization").addEventListener(
     "dblclick",
     () => {
         return visualizer.selector();
     },
     false
-);
-
-document.querySelector("#Visualization").addEventListener(
-    "click",
-    () => {
-        return visualizer.resume_animate();
-    },
-    false
-);
+); 
 
 document.addEventListener(
-    "keydown",
-    () => {
-        return visualizer.onDocumentKeyDown();
+    "click",
+    () => { 
+        console.log(document.getElementById("menu").style.zIndex = 0.0 ); //.style.pointerEvents;
+
+        document.getElementById("menu").style.zIndex = 50.0;
+        //document.getElementById("menu").style.pointerEvents = "none"; 
+
+        return visualizer.resume_animate();
+
+        //document.getElementById("menu").style.pointerEvents = temp;
     },
     false
 );
+
+
 
 document.querySelector("#toggle_animate").addEventListener("click", () => {
     visualizer.toggle_animate();

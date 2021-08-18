@@ -1,0 +1,69 @@
+
+    <svg width="250" height="250">
+            <rect x="50" y="50"
+            width="20" height="20" 
+            fill=rgba(0,255,0,.5)
+            stroke="black" stroke-width="10"></rect>
+            <circle cx="100" cy="100"
+                r="30"
+                fill="green"></circle>
+        </svg>
+
+
+
+        <html>
+<head>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Old+Standard+TT" rel="stylesheet">
+
+    <title>Bar Chart Exploration!</title>
+
+    <style>
+        h1{
+            font-size: 8em;
+            font-family: 'Old Standard TT', serif;
+            color: #8EE181;
+        }
+
+        .chart div {
+            font: 10px 'Old Standard TT';
+            background-color: #244A74;
+            text-align: right;
+            padding: 3px;
+            margin: 1px;
+            color: #8EE181;
+        }
+        text{
+            font-size: 2em;
+            font-family: 'Old Standard TT', serif;
+        }
+    </style>
+
+</head>
+<body>
+    <h1>Chemistry!</h1>
+
+    <div class="chart"></div>
+</body>
+
+
+<script>
+d3.select("body").style("background-color", "09121C");
+
+var data = [2,4,6,8,10];
+
+var x = d3.scaleLinear().domain([0, d3.max(data)]).range([0, 420]);
+
+d3.select(".chart")
+  .selectAll("div")
+    .data(data)
+  .enter().append("div")
+    .style("width", function(d) { return x(d) + "px"; })
+    .text(function(d) { return d; });
+
+
+
+</script>
+
+</html>
+

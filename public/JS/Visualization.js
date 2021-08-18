@@ -163,6 +163,8 @@ class Visualization {
         this.mouse = new THREE.Vector2();
 
         this.new_molecule_glow_time = .5;
+        document.getElementById("time_for_new_glow").value = this.new_molecule_glow_time;
+        document.getElementById("time_for_new_glow").parentElement.lastElementChild.innerHTML = this.new_molecule_glow_time;
 
         this.rigidBodies = []; // for ammo
         this.selectedObjects = []; // for glows
@@ -1229,6 +1231,8 @@ class Visualization {
         }
     }
 
+    
+
     check_visibility(){
         console.log("Visibility was changed.")
 
@@ -1270,6 +1274,7 @@ class Visualization {
 
     set_new_molecule_glow_time(new_time) {
         this.new_molecule_glow_time = new_time;
+
     }
 
     onDocumentMouseMove(event) {
@@ -1319,14 +1324,15 @@ class Visualization {
 
     }
 
-    onDocumentKeyDown(event) {
-        if (event.key == " ") {
+    onDocumentKeyDown(e) {
+        console.log(e)
+        if (e.key == " ") {
             this.toggle_animate();
         }
-        if (event.key == "r") {
+        if (e.key == "r") {
             this.toggle_camera_auto_rotate();
         }
-        if (event.key == "g") {
+        if (e.key == "g") {
             this.toggle_grid_visability();
         }
     }
