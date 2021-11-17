@@ -363,20 +363,20 @@ function update_all_sliders() {
     document.getElementById("edge_length").value = chamber_edge_length;
     document.getElementById("edge_length").parentElement.lastElementChild.innerHTML = chamber_edge_length;
 
-    document.getElementById("forward_rate").value = k_fwd;
-    document.getElementById("forward_rate").parentElement.lastElementChild.innerHTML = k_fwd;
+    // document.getElementById("forward_rate").value = k_fwd;
+    // document.getElementById("forward_rate").parentElement.lastElementChild.innerHTML = k_fwd;
 
-    document.getElementById("equilibrium_constant").value = Keq;
-    document.getElementById("equilibrium_constant").parentElement.lastElementChild.innerHTML = Keq;
+    // document.getElementById("equilibrium_constant").value = Keq;
+    // document.getElementById("equilibrium_constant").parentElement.lastElementChild.innerHTML = Keq;
 
-    document.getElementById("backward_rate").value = k_rev;
-    document.getElementById("backward_rate").parentElement.lastElementChild.innerHTML = k_rev;
+    // document.getElementById("backward_rate").value = k_rev;
+    // document.getElementById("backward_rate").parentElement.lastElementChild.innerHTML = k_rev;
 
     document.getElementById("time_step").value = t_step_target;
     document.getElementById("time_step").parentElement.lastElementChild.innerHTML = t_step_target;
 
-    document.getElementById("amount_chaos").value = amount_chaos;
-    document.getElementById("amount_chaos").parentElement.lastElementChild.innerHTML = amount_chaos;
+    // document.getElementById("amount_chaos").value = amount_chaos;
+    // document.getElementById("amount_chaos").parentElement.lastElementChild.innerHTML = amount_chaos;
 
     document.getElementById("time_for_new_glow").value = visualizer.new_molecule_glow_time;
     document.getElementById("time_for_new_glow").parentElement.lastElementChild.innerHTML = visualizer.new_molecule_glow_time;
@@ -464,15 +464,15 @@ document.querySelector("#Visualization").addEventListener(
         return visualizer.selector();
     },
     false
-); 
+);
 
 document.addEventListener(
     "click",
-    () => { 
-        console.log(document.getElementById("menu").style.zIndex = 0.0 ); //.style.pointerEvents;
+    () => {
+        // console.log(document.getElementById("menu").style.zIndex = 0.0 ); //.style.pointerEvents;
 
-        document.getElementById("menu").style.zIndex = 50.0;
-        //document.getElementById("menu").style.pointerEvents = "none"; 
+        // document.getElementById("menu").style.zIndex = 50.0;
+        //document.getElementById("menu").style.pointerEvents = "none";
 
         return visualizer.resume_animate();
 
@@ -486,7 +486,7 @@ document.addEventListener(
 document.querySelector("#toggle_animate").addEventListener("click", () => {
     visualizer.toggle_animate();
 });
-document.addEventListener("visibilitychange", 
+document.addEventListener("visibilitychange",
     ()=> {
         return visualizer.check_visibility()
     },
@@ -542,38 +542,38 @@ document.querySelector("#clear_graphs").addEventListener("click", () => {
     count_v_time.init(species, t_step, steps);
     percent_v_time.init(species, t_step, steps);
 });
-document.querySelector("#barchart_button").addEventListener("click", () => {
-    //toggle element visability
-    if (document.getElementById("floating_bar_chart").style.zIndex == -1) {
-        document.getElementById("floating_bar_chart").style.zIndex = 100;
-    } else {
-        document.getElementById("floating_bar_chart").style.zIndex = -1;
-    }
-});
-document.querySelector("#histogram_button").addEventListener("click", () => {
-    //toggle element visability
-    if (document.getElementById("floating_histogram").style.zIndex == -1) {
-        document.getElementById("floating_histogram").style.zIndex = 100;
-    } else {
-        document.getElementById("floating_histogram").style.zIndex = -1;
-    }
-});
-document.querySelector("#pop_button").addEventListener("click", () => {
-    //toggle element visability
-    if (document.getElementById("CountVsTime").style.zIndex == -1) {
-        document.getElementById("CountVsTime").style.zIndex = 100;
-    } else {
-        document.getElementById("CountVsTime").style.zIndex = -1;
-    }
-});
-document.querySelector("#prop_button").addEventListener("click", () => {
-    //toggle element visability
-    if (document.getElementById("PercentVsTime").style.zIndex == -1) {
-        document.getElementById("PercentVsTime").style.zIndex = 100;
-    } else {
-        document.getElementById("PercentVsTime").style.zIndex = -1;
-    }
-});
+// document.querySelector("#barchart_button").addEventListener("click", () => {
+//     //toggle element visability
+//     if (document.getElementById("floating_bar_chart").style.zIndex == -1) {
+//         document.getElementById("floating_bar_chart").style.zIndex = 100;
+//     } else {
+//         document.getElementById("floating_bar_chart").style.zIndex = -1;
+//     }
+// });
+// document.querySelector("#histogram_button").addEventListener("click", () => {
+//     //toggle element visability
+//     if (document.getElementById("floating_histogram").style.zIndex == -1) {
+//         document.getElementById("floating_histogram").style.zIndex = 100;
+//     } else {
+//         document.getElementById("floating_histogram").style.zIndex = -1;
+//     }
+// });
+// document.querySelector("#pop_button").addEventListener("click", () => {
+//     //toggle element visability
+//     if (document.getElementById("CountVsTime").style.zIndex == -1) {
+//         document.getElementById("CountVsTime").style.zIndex = 100;
+//     } else {
+//         document.getElementById("CountVsTime").style.zIndex = -1;
+//     }
+// });
+// document.querySelector("#prop_button").addEventListener("click", () => {
+//     //toggle element visability
+//     if (document.getElementById("PercentVsTime").style.zIndex == -1) {
+//         document.getElementById("PercentVsTime").style.zIndex = 100;
+//     } else {
+//         document.getElementById("PercentVsTime").style.zIndex = -1;
+//     }
+// });
 document.querySelector("#toggle_grid").addEventListener("click", () => {
     //toggle element visability
     visualizer.toggle_grid_visability();

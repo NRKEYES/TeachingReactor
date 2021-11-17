@@ -30,155 +30,143 @@
     <div id="Visuals">
 
 
-    <nav class='menu menu-root' id='menu'>
+        <div id="controls">
+            <div class='menu-button' id="run_simulation">
+                <a type="button" class='button'>
+                    <span>Start Simulation</span>
+                </a>
+            </div>
 
-        <span>Menu</span>
+            <div class='menu-button' id="toggle_animate">
+                <a type="button" class='button'>
+                    <span>Pause</span>
+                </a>
+            </div>
 
-        <li class='menu menu-button' id="run_simulation">
-            <a type="button" class='button'>
-                <span>Start Simulation</span>
-            </a>
-        </li>
+            <div class='menu-button' id="show_simulation_info">
+                <a type="button" class='button'>
+                    <span>Show Simulation Info</span>
+                </a>
+            </div>
 
-        <li class='menu menu-button' id="toggle_animate">
-            <a type="button" class='button'>
-                <span>Pause</span>
-            </a>
-        </li>
-
-        <li class='menu menu-button' id="show_simulation_info">
-            <a type="button" class='button'>
-                <span>Show Simulation Info</span>
-            </a>
-        </li>
-
-
-
-        <ul class='menu menu-branch' id="Visual Options">
-            <span>Visability Options</span>
-            <li class='menu menu-button' id="toggle_grid">
+            <div class='menu-button' id="clear_graphs">
+                <a type="button" class='button'> Clear Graphs</a>
+            </div>
+            <div class='menu-button' id="toggle_grid">
                 <a type="button" class='button'>
                     <span>Toggle Grid Cube</span>
                 </a>
-            </li>
-            <li class='menu menu-button' id="toggle_axis">
+            </div>
+
+            <div class='menu-button' id="toggle_axis">
                 <a type="button" class='button'>
                     <span>Toggle Axis</span>
                 </a>
-            </li>
-            <li class='menu menu-button' id="toggle_camera">
+            </div>
+
+            <div class='menu-button' id="toggle_camera">
                 <a type="button" class='button'>
                     <span>Toggle Auto Rotate</span>
                 </a>
-            </li>
-            <li class='menu menu-button' id="toggle_column">
+            </div>
+
+            <div class='menu-button' id="toggle_column">
                 <a type="button" class='button'>
                     <span>Toggle Coulumn</span>
                 </a>
-            </li>
+            </div>
 
-        </ul>
-
-        <ul class='menu menu-branch' id='Graph Control'>
-            <span>Graph Controls</span>
-
-
-            <li class='menu menu-button' id="clear_graphs">
-                <a type="button" class='button'> Clear Graphs</a>
-            </li>
-
-
-        </ul>
-
-        <ul class='menu menu-branch' id="controls">
-            <span>Simulation Controls</span>
-
-            <li class='menu menu-slider'>
-                <span>Number of Particles (Exponent):</span>
+            <div class=' menu-slider'>
+                <span>&emsp; Number of starting particles:</span>
                 <input type="range" min="10" max="100" class="slider" id="orders_of_magnitude">
                 <text id="slider_value"> </text>
-            </li>
-            <li class='menu menu-slider'>
-                <span>Reactor Size (edge length in nm):</span>
+            </div>
+
+            <div class=' menu-slider'>
+                <span>&emsp; Reactor Size (edge length in nm):</span>
                 <input type="range" min="1" max="50" class="slider" id="edge_length">
                 <text id="slider_value"></text>
-            </li>
+            </div>
 
-            <li class='menu menu-slider'>
-                Initial Proportion of Product:
+            <div class=' menu-slider'>
+                &emsp; Initial proportion of product:
                 <input type="range" min="1" max="100" class="slider" id="initial_ratio">
                 <text id="slider_value"> </text>
 
-            </li>
-            <li class='menu menu-slider'>
-                <span>New-glow ToL:</span>
+            </div>
+
+            <div class=' menu-slider'>
+                <span>&emsp; New molecules glow for...(seconds):</span>
                 <input type="range" min="0" max="10" class="slider" id="time_for_new_glow">
                 <text id="slider_value"> </text>
-            </li>
-            <li class='menu menu-slider'>
-                <span>Time Step Equivalent (exponent):</span>
+            </div>
+
+            <div class=' menu-slider' style="display:none;">
+                <span>&emsp; Time Step Equivalent (exponent):</span>
                 <input type="range" min="0" max="100" class="slider" id="time_step">
                 <text id="slider_value"> </text>
-            </li>
-        </ul>
+            </div>
+        </div>
 
-        <ul class='menu menu-branch' id='Developmental'>
-            <span>Still in Development</span>
-            <li class='menu menu-button'>
-                <a type="button" class='button' id="barchart_button"> Display Barchart</a>
-            </li>
+            <!-- <div style="grid-area:overflow; overflow:hidden">
+                <span>Still in Development</span>
+                <li class='menu menu-button'>
+                    <a type="button" class='button' id="barchart_button"> Display Barchart</a>
+                </li>
 
-            <li class='menu menu-slider'>
-                Forward Reaction Rate (Exponent):
-                <div class="slidecontainer">
-                    <input type="range" min="0" max="20" class="slider" id="forward_rate">
-                    <text id="slider_value"> </text>
-                </div>
-            </li>
+                <li class='menu menu-slider'>
+                    Forward Reaction Rate (Exponent):
+                    <div class="slidecontainer">
+                        <input type="range" min="0" max="20" class="slider" id="forward_rate">
+                        <text id="slider_value"> </text>
+                    </div>
+                </li>
 
-            <li class='menu menu-slider'>
-                Equilibrium (K)onstant (Exponent):
-                <div class="slidecontainer">
-                    <input type="range" min="-10" max="10" class="slider" id="equilibrium_constant">
-                    <text id="slider_value"> </text>
-                </div>
-            </li>
+                <li class='menu menu-slider'>
+                    Equilibrium (K)onstant (Exponent):
+                    <div class="slidecontainer">
+                        <input type="range" min="-10" max="10" class="slider" id="equilibrium_constant">
+                        <text id="slider_value"> </text>
+                    </div>
+                </li>
 
-            <li class='menu menu-slider'>
-                Backwards Reaction Rate (Exponent):
-                <div class="slidecontainer">
-                    <input type="range" min="0" max="20" class="slider" id="backward_rate">
-                    <text id="slider_value"> </text>
-                </div>
-            </li>
+                <li class='menu menu-slider'>
+                    Backwards Reaction Rate (Exponent):
+                    <div class="slidecontainer">
+                        <input type="range" min="0" max="20" class="slider" id="backward_rate">
+                        <text id="slider_value"> </text>
+                    </div>
+                </li>
 
-            <li class='menu menu-slider'>
-                Amount Chaos:
-                <div class="slidecontainer">
-                    <input type="range" min="1" max="100" class="slider" id="amount_chaos">
-                    <text id="slider_value"></text>
-                </div>
-            </li>
+                <li class='menu menu-slider'>
+                    Amount Chaos:
+                    <div class="slidecontainer">
+                        <input type="range" min="1" max="100" class="slider" id="amount_chaos">
+                        <text id="slider_value"></text>
+                    </div>
+                </li>
+            </div>-->
 
-        </ul>
 
 
-    </nav>
+        </nav>
 
 
         <div id='Visualization' class='render'></div>
 
         <div id="graphs">
             <div id='floating_histogram' class='floating' ></div>
-            <div id='floating_bar_chart' class='floating' ></div>
+
             <div id='PercentVsTime' class='floating' ></div>
             <div id='CountVsTime' class='floating' ></div>
-            <div id='Barchart' class='floating' ></div>
-            <div id='SideView' class='floating' ></div>
-            <div id='info_box' class='floating' >
+            <div id='floating_bar_chart' class='floating' ></div>
+            <!-- <div id='Barchart' class='floating' ></div>
+            <div id='SideView' class='floating' ></div> -->
+            <div id='info_box_container' class='floating' >
                 <span id='info_box'></span>
             </div>
         </div>
+
     </div>
 
 
