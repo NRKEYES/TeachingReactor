@@ -14,6 +14,34 @@
     text-decoration: none;
     --line-height: 1.1;
     line-height: var(--line-height);
+
+
+
+    --background-0: rgba(0, 18, 25);
+    --background-1: rgba(0, 95, 115);
+    --background-2: rgba(10, 147, 150);
+    --background-3: rgba(148, 210, 189);
+    --background-4: rgba(233, 216, 166);
+    --focus-0:  rgba(238, 155, 0);
+    --unfocus-0: rgba(202, 103, 2);
+    
+    --contact: rgba(0,255,0,1);
+    --hud-rings: rgba(0,255,0,1);
+    
+    
+    --boundary-8: hsla(210, 17%, 98%, 1);
+    --boundary-7: hsla(210, 16%, 93%, 1);
+    --boundary-6: hsla(210, 14%, 89%, 1);
+    --boundary-5: hsla(210, 14%, 83%, 1);
+    --boundary-4: hsla(210, 11%, 71%, 1);
+    --boundary-3: hsla(208, 7%, 46%, 1);
+    --boundary-2: hsla(210, 9%, 31%, 1);
+    --boundary-1: hsla(210, 10%, 23%, 1);
+    --boundary-0: hsla(210, 11%, 15%, 1)
+    
+    
+    
+    
 }
 
 
@@ -21,45 +49,106 @@
 html{
     height: 100vh;
     width: 100vw;
-    display: flex;
-    margin:0;
-    padding: 0;
-    background-color: orange;
+    background-color:var(--background-1);
+    display: grid;
     justify-content: center;
-    align-items: center;
+    align-content: center;
 }
 
 body {
-    width: var(--width);
-    height: var(--height);
-    background-color: var(--main-background-color);
-    display:flex;
+    width: 99vw;
+    height: 99vh;
+    background-color: var(--background-2);
     margin: 0;
     padding: 0;
-    /* position: fixed; */
-    justify-content: center;
-    text-align: left;
-    align-items: center;
+    display:grid;
+
 }
 
 #Visuals {
-    /* position: absolute; */
     width: 98vw;
     height: 98vh;
-    display: flex;
-    justify-content: center;
+    position: relative;
+    display: grid;
+    grid-template-rows: 10px 100px 1fr 10px;  /* height limitation on second row */
+    grid-template-columns: 10px 4fr 40px 6fr 10px;
+    grid-template-areas: 
+    ". . . . ."
+    ". menu   . visualization ." 
+    ". graphs . visualization ."
+    ". . . . .";
+    justify-items: center;
+    text-align: left;
     align-items: center;
+    justify-content: center;
+    align-content: center;
 }
 
 #Visualization {
+    grid-area:visualization;
     z-index: 25;
-    width: 96vw;
-    height: 96vh;
-    /* position: absolute; */
+    width:100%;
+    height:100%;
+
+    position: absolute;
+    background-color: var(--boundary-8);
+
+    justify-self: center;
+    align-self: center;
+    border: 5px var(--boundary-6) solid;
+    border-radius:10px;
+    filter: drop-shadow(5px 5px 5px var(--boundary-3));
+}
+#visualization:hover{
+    filter: drop-shadow(10px 10px 10px var(--boundary-2));
+}
+
+#graphs{
+    grid-area: graphs;
+    background-color: var(--boundary-5);
+
+    width:100%;
+    height:100%;
+
+    display:block;
+    overflow:auto;
+    align-content:flex-start;
+    justify-content:right;
+
+
+}
+.floating {
+    position: relative;
+    justify-self:center;
+    margin: 10px;
+    border: 5px var(--boundary-6) solid;
+    border-radius:10px;
+    filter: drop-shadow(5px 5px 5px var(--boundary-3));
+    height:40%;
+    width:90%;
+  
     background-color: white;
     justify-content: center;
     align-items: center;
+
 }
+
+
+/* #floating_bar_chart{
+    z-index: 25;
+    width: 36vw;
+    height: 300px;
+    padding: 1%;
+    margin: 1%;
+
+    left:0vw;
+    position: absolute;
+    background-color: white;
+    justify-content: center;
+    align-items: center;
+    border: 5px var(--boundary-6) solid;
+} */
+
 
 .menu {
     border: none;
@@ -206,40 +295,7 @@ body {
 
 
 
-.floating {
-    position: fixed;
-    top: 48vh;
-    /* left: 1vw; */
-    transition: var(--transition-speed);
-    opacity: 1;
-    width: 70vw;
-    height: 40vh;
-}
 
-.floating:hover {
-    opacity: 1.0;
-    background-color: lightgray;
-}
-
-#info_box {
-    list-style: square;
-    font-size: .8em;
-    position: absolute;
-    left: 80vw;
-    /* right: 100vw; */
-    top: 2vh;
-    height: fit-content;
-    width: 17vw;
-    justify-content: right;
-    text-align: right;
-}
-
-#info_box:hover {
-    flex-direction: column;
-    list-style: square;
-    justify-content: right;
-    text-align: right;
-}
 
 .line {
     fill: none;
