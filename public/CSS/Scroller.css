@@ -80,13 +80,41 @@ body {
     ".  controls    .   visualization   ."
     ".  .           .   visualization   ."
     ".  graphs      .   visualization   ."
-    ".  overflow    .   .               .";
+    ".  .    .   .               .";
     justify-items: center;
     text-align: left;
     align-items: center;
     justify-content: center;
     align-content: center;
 }
+
+@media screen and (max-width: 1000px) {
+    #Visuals {
+        margin:auto;
+        width: 100%;
+        height: 98vh;
+        position: relative;
+        display: grid;
+        justify-items: center;
+        text-align: left;
+        align-items: center;
+        justify-content: center;
+        align-content: center;
+        grid-template-rows: 10px 400px 10px 400px 10px 400px 10px;  /* height limitation on second row */
+        grid-template-columns: 10px 1fr 10px;
+        grid-template-areas:
+        ". .                ."
+        ". controls         ."
+        ". .                ."
+        ". visualization    ."
+        ". .                ."
+        ". graphs           ."
+        ". .                .";
+    }
+  }
+
+
+
 
 #Visualization {
     grid-area:visualization;
@@ -139,8 +167,9 @@ body {
     border: 5px var(--boundary-6) solid;
     border-radius:10px;
     filter: drop-shadow(5px 5px 5px var(--boundary-2));
-    height:40%;
+    height:300px;
     width:95%;
+
 
     background-color: var(--boundary-8);
     justify-content: center;
