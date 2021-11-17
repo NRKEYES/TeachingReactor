@@ -77,34 +77,51 @@
             </div>
 
             <div class=' menu-slider'>
-                <span>&emsp; Number of starting particles:</span>
+                <div>
+                    <span>&emsp; Number of starting particles:</span>
+                </div>
                 <input type="range" min="10" max="100" class="slider" id="orders_of_magnitude">
+
                 <text id="slider_value"> </text>
+
             </div>
 
             <div class=' menu-slider'>
-                <span>&emsp; Reactor Size (edge length in nm):</span>
+                <div>
+                    <span>&emsp; Reactor Size (edges in nm):</span>
+                </div>
                 <input type="range" min="1" max="50" class="slider" id="edge_length">
+
                 <text id="slider_value"></text>
+
             </div>
 
+
             <div class=' menu-slider'>
-                &emsp; Initial proportion of product:
+                <div>
+                    &emsp; Initial proportion of product:
+                </div>
                 <input type="range" min="1" max="100" class="slider" id="initial_ratio">
-                <text id="slider_value"> </text>
+
+                    <text id="slider_value"> </text>
 
             </div>
 
             <div class=' menu-slider'>
-                <span>&emsp; New molecules glow for...(seconds):</span>
-                <input type="range" min="0" max="10" class="slider" id="time_for_new_glow">
+                <div>
+                    <span>&emsp; New molecules glow for...(seconds):</span>
+                </div>
+                    <input type="range" min="0" max="10" class="slider" id="time_for_new_glow">
+
                 <text id="slider_value"> </text>
             </div>
 
             <div class=' menu-slider' style="display:none;">
                 <span>&emsp; Time Step Equivalent (exponent):</span>
                 <input type="range" min="0" max="100" class="slider" id="time_step">
-                <text id="slider_value"> </text>
+                <div>
+                    <text id="slider_value"> </text>
+                </div>
             </div>
         </div>
 
