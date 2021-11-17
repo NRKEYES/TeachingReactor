@@ -24,11 +24,11 @@
     --background-4: rgba(233, 216, 166);
     --focus-0:  rgba(238, 155, 0);
     --unfocus-0: rgba(202, 103, 2);
-    
+
     --contact: rgba(0,255,0,1);
     --hud-rings: rgba(0,255,0,1);
-    
-    
+
+
     --boundary-8: hsla(210, 17%, 98%, 1);
     --boundary-7: hsla(210, 16%, 93%, 1);
     --boundary-6: hsla(210, 14%, 89%, 1);
@@ -38,10 +38,10 @@
     --boundary-2: hsla(210, 9%, 31%, 1);
     --boundary-1: hsla(210, 10%, 23%, 1);
     --boundary-0: hsla(210, 11%, 15%, 1)
-    
-    
-    
-    
+
+
+    margin: auto;
+
 }
 
 
@@ -49,34 +49,36 @@
 html{
     height: 100vh;
     width: 100vw;
-    background-color:var(--background-1);
+    background-color:var(--background-0);
     display: grid;
     justify-content: center;
     align-content: center;
+    margin:auto;
 }
 
 body {
     width: 99vw;
     height: 99vh;
-    background-color: var(--background-2);
+    margin:auto;
+    background-color: var(--background-1);
     border-radius:10px;
     filter: drop-shadow(5px 5px 5px var(--boundary-3));
-    margin: 0;
     padding: 0;
     display:grid;
 
 }
 
 #Visuals {
+    margin:auto;
     width: 98vw;
     height: 98vh;
     position: relative;
     display: grid;
     grid-template-rows: 10px 100px 1fr 10px;  /* height limitation on second row */
-    grid-template-columns: 10px 4fr 40px 6fr 10px;
-    grid-template-areas: 
+    grid-template-columns: 10px 4fr 20px 6fr 10px;
+    grid-template-areas:
     ". . . . ."
-    ". menu   . visualization ." 
+    ". menu   . visualization ."
     ". graphs . visualization ."
     ". . . . .";
     justify-items: center;
@@ -87,7 +89,9 @@ body {
 }
 
 #Visualization {
+
     grid-area:visualization;
+    margin: auto;
     z-index: 25;
     width:100%;
     height:100%;
@@ -97,17 +101,18 @@ body {
 
     justify-self: center;
     align-self: center;
-    border: 5px var(--boundary-6) solid;
+    border: 5px var(--boundary-2) solid;
     border-radius:10px;
     filter: drop-shadow(5px 5px 5px var(--boundary-3));
 }
 #visualization:hover{
-    filter: drop-shadow(10px 10px 10px var(--boundary-2));
+    filter: drop-shadow(5px 5px 10px var(--boundary-1));
 }
 
 #graphs{
     grid-area: graphs;
     background-color: var(--boundary-5);
+    border: 5px var(--boundary-2) solid;
     border-radius:10px;
     filter: drop-shadow(5px 5px 5px var(--boundary-3));
 
@@ -131,12 +136,13 @@ body {
     justify-self:center;
     margin: auto;
     margin-top: 10px;
+    margin-bottom: 10px;
     border: 5px var(--boundary-6) solid;
     border-radius:10px;
-    filter: drop-shadow(5px 5px 5px var(--boundary-3));
+    filter: drop-shadow(5px 5px 5px var(--boundary-2));
     height:40%;
-    width:90%;
-  
+    width:95%;
+
     background-color: white;
     justify-content: center;
     align-items: center;
@@ -145,124 +151,27 @@ body {
 
 .floating:hover{
     filter: drop-shadow(5px 5px 10px var(--boundary-1));
+    border-color: var(--boundary-2);
 }
 
 
-/* #floating_bar_chart{
-    z-index: 25;
-    width: 36vw;
-    height: 300px;
-    padding: 1%;
-    margin: 1%;
 
-    left:0vw;
-    position: absolute;
-    background-color: white;
-    justify-content: center;
-    align-items: center;
-    border: 5px var(--boundary-6) solid;
-} */
-
+#menu {
+    grid-area:menu;
+    background-color: green;
+    filter: drop-shadow(5px 5px 10px var(--boundary-1));
+    border-color: var(--boundary-2);
+    overflow:hidden;
+}
 
 .menu {
-    border: none;
-    /* padding: 1%; */
-    /* visibility: hidden; */
-    /* text-decoration: none; */
-    /* justify-content: center; */
-    /* margin: 1px; */
-    position: relative;
-    display: none;
-    flex-direction: column;
-    z-index: 50;
-    opacity: .5;
-    list-style: none;
-    text-align: right;
-    font-size: small;
-    vertical-align: center;
-    transition: all 0.1s ease 0.1s;
-    background-color: rgba(0, 0, 0, 0.0);
-    color: black;
-    height: fit-content;
-    width: fit-content;
+    grid-area:menu;
+    background-color: green;
+    filter: drop-shadow(5px 5px 10px var(--boundary-1));
+    border-color: var(--boundary-2);
+    overflow:hidden;
 }
 
-.menu:hover {
-    /* border: 3px dotted var(--highlight-color); */
-    transition: all 0.2s ease 0.1s;
-    opacity: 1.0;
-    display: flex;
-    color: black;
-    background-color: rgba(161, 153, 153, .5);
-    text-align: left;
-    vertical-align: center;
-    width: 35vw;
-}
-
-.menu:hover>* {
-    transition: all 0.2s ease 0.1s;
-    opacity: 1.0;
-    display: flex;
-    color: black;
-    /* background-color: rgba(161, 153, 153, .5); */
-    /* text-align: left; */
-    vertical-align: center;
-    /* width: 35vw; */
-}
-
-.menu li:hover {
-    background-color: orange;
-}
-
-.menu li:active {
-    background-color: rgba(161, 153, 153, .5);
-    text-align: right;
-    font-size: small;
-}
-
-.menu-branch {
-    font-size: small;
-    transition: all 0.3s ease 0.1s;
-    height: fit-content;
-    width: fit-content;
-}
-
-.menu-branch:hover {
-    transition: all 0.5s ease .5s;
-    height: fit-content;
-}
-
-.menu-slider {
-    /* text-align: left; */
-    /* background-color: var(--menu-color-main); */
-    height: fit-content;
-}
-
-.menu-root {
-    /* transition: all 1.5s ease 4s; */
-    /* justify-content: flex-end; */
-    opacity: 1.0;
-    background-color: orange;
-    position: absolute;
-    display: flex;
-    top: 2vh;
-    left: 2vw;
-    height: var(--line-height)*4vh;
-    font-size:large;
-    /* width: 4vw; */
-    vertical-align: center;
-    text-align: center;
-}
-
-.menu-root:hover {
-    /* justify-content: flex-end; */
-    /* background-color: rgba(0, 0, 0, 0.0); */
-    /* opacity: .9; */
-    height: fit-content;
-    width: fit-content;
-    font-size: x-large;
-    background-color: rgba(161, 153, 153, .5);
-}
 
 #Developmental {
     /* margin-top: auto; */
