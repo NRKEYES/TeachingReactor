@@ -446,17 +446,17 @@ class Visualization {
         envMap.mapping = THREE.SphericalReflectionMapping;
 
 
-        let glassMap = new THREE.TextureLoader().load("Images/glassbw.jpg");
-        let moonMap = new THREE.TextureLoader().load("Images/moon_1024.jpg");
+        // let glassMap = new THREE.TextureLoader().load("Images/glassbw.jpg");
+        // let moonMap = new THREE.TextureLoader().load("Images/moon_1024.jpg");
 
         // let envMap = new THREE.TextureLoader().load("Images/ice-hr.jpg");
         // let normMap = new THREE.TextureLoader().load("Images/ice-hr.jpg");
 
-        let ao = new THREE.TextureLoader().load("Images/Plastic_04_ambientocclusion.jpg");
+        // let ao = new THREE.TextureLoader().load("Images/Plastic_04_ambientocclusion.jpg");
         let basecolor = new THREE.TextureLoader().load("Images/Plastic_04_basecolor.jpg");
-        let normal = new THREE.TextureLoader().load("Images/Plastic_04_normalOgl.jpg");
-        let height = new THREE.TextureLoader().load("Images/Plastic_04_height.jpg");
-        let roughness = new THREE.TextureLoader().load("Images/Plastic_04_roughness.jpg");
+        // let normal = new THREE.TextureLoader().load("Images/Plastic_04_normalOgl.jpg");
+        // let height = new THREE.TextureLoader().load("Images/Plastic_04_height.jpg");
+        // let roughness = new THREE.TextureLoader().load("Images/Plastic_04_roughness.jpg");
 
 
 
@@ -1222,7 +1222,7 @@ class Visualization {
     }
 
     toggle_animate() {
-        
+
         this.should_animate = this.should_animate == false;
         if(this.should_animate){
             this.resume_animate();
@@ -1231,7 +1231,7 @@ class Visualization {
         }
     }
 
-    
+
 
     check_visibility(){
         console.log("Visibility was changed.")
@@ -1345,7 +1345,7 @@ class Visualization {
 
         this.camera.aspect = this.width_for_3d / this.height_for_3d;
         this.camera.updateProjectionMatrix();
-        
+
         // this.camera.position.x = 0 // -left to +right
         // this.camera.position.y = 0 // +top to -bottom
         // this.camera.position.z = this.chamber_edge_length * this.preferences.initial_camera_displacement_multiplier; // + towards, me - away

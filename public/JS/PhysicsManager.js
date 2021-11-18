@@ -18,7 +18,7 @@ let chamber_edge_length = 10; // this should be in nm
 let chamber_volume = Math.pow(chamber_edge_length, 3); // convert to nm3
 
 // molecule and species counts
-let p_to_r_ratio = 0.1;
+let p_to_r_ratio = 1.0;
 let r_to_p_ratio = 1 - p_to_r_ratio;
 
 let reactant_initial = parseInt(Math.trunc(total_molecules * r_to_p_ratio));

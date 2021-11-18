@@ -3,3 +3,6 @@
 public/CSS/Scroller.css
 .firebase/hosting.*
 firebase-debug.log
+*.cache
+*.log
+*.log

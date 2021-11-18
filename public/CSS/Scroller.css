@@ -73,7 +73,7 @@ body {
     height: 98vh;
     position: relative;
     display: grid;
-    grid-template-rows: 10px 400px 10px 1fr 10px;  /* height limitation on second row */
+    grid-template-rows: 10px 1fr 10px 2fr 10px;  /* height limitation on second row */
     grid-template-columns: 10px 4fr 20px 6fr 10px;
     grid-template-areas:
     ".  .           .   .               ."
